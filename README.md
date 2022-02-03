@@ -1,2 +1,92 @@
-# mbot-omni-app
+# MBot Omni App
+
 Web app for the MBot Omni robot.
+
+## Usage
+
+This app is meant to be run on Linux. The current version can be run locally
+without the robot (it has not been tested on the robot). It is meant to be run
+on the Raspberry Pi. These instructions are for Linux, so they should work on
+the robot, or in a Docker.
+
+### Front end
+
+The front end is currently a copy of the `nav-app` code (it won't do much, but
+it will load a map and let you click on it and move the robot around). There is
+one added function in the main component of the app, `anExamplePost()`, and an
+added button, which gives an example of how to send information back to Flask
+with HTTP requests.
+
+The setup for the React app is based off
+[this tutorial](https://medium.com/@JedaiSaboteur/creating-a-react-app-from-scratch-f3c693b84658).
+
+#### Installation
+
+The front end relies on NodeJS (to compile and run the JavaScript files), NPM (a
+package manager for NodeJS applications) and React, as well as some other
+packages used to build and serve the files. First, you will need to install
+NodeJS:
+```bash
+curl -fsSL https://deb.nodesource.com/setup_14.x | sudo -E bash -
+sudo apt-get install -y nodejs
+```
+Now you should have the `npm` command installed. In the root directory of this
+repository, run:
+```bash
+npm install
+```
+This will grab all the packages needed to run the React app.
+
+#### Running
+
+To run the React app, in the root directory of this repository, do:
+```bash
+npm start
+```
+This will start a development server and display the page `public/index.html`.
+The style file is in `public/css/main.css`, and the JavaScript being run is in
+`src/main.js` (note that it gets precompiled to a file called `bundle.js`,
+which is the script imported in the HTML).
+
+If you go to `http://localhost:8000` in your browser, you should see the
+webapp.
+
+### Back end
+
+The backend is build using Flask and Python 3. If
+working on a Linux computer, you probably want to run the code in a virtual
+environment (on the Raspberry Pi, you can install things directly if you want).
+To make a virtual environment and then activate it, do:
+```bash
+python3.8 -m venv ~/envs/mbot-omni-app
+source ~/envs/mbot-omni-app/bin/activate
+```
+It will probably work with versions of Python 3 other than 3.8, if you don't
+have it installed, but the current code was tested with Python 3.8. You can
+replace `~/envs/` with your preferred path if you would like. To get out of the
+virtual environment, type `deactivate`.
+
+The setup for the Flask + React app is based off
+[this tutorial](https://blog.miguelgrinberg.com/post/how-to-create-a-react--flask-project).
+
+#### Installation
+
+In the virtual environment (if applicable), do:
+```bash
+pip install --upgrade pip
+pip install -r requirements.txt
+```
+Note: Any other Python requirements should be added to `requirements.txt`.
+
+#### Running
+
+To run the Flask app, do:
+```bash
+npm run start-api
+```
+Traffic on `http://localhost:8000/app` will be forwarded to `http://localhost:5000/app`,
+where the Flask server is running.
+
+Now, when you press the "Test me" button in the webapp, you should see a log
+message printed in the terminal running the Flask app. You should also see a
+message in the browser console with the (empty) response.
