@@ -17,3 +17,10 @@ def motors_cmd():
         return {}, 200
 
     return {}, 200
+
+
+# TODO: Set up Flask SocketIO to send data/images
+#   - import and setup main functions.
+#   - Send a number that increments every 5 seconds. Make sure the socket is not closing.
+#   - Read an image from file, encode it and send it. 
+#   - Now we can setup LCM

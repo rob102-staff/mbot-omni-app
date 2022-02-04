@@ -454,6 +454,11 @@ class MBotApp extends React.Component {
     this.setState({ mapfile: event.target.files[0] });
   }
 
+  // TODO: Implement alternative function that reads image through WebSocket
+  //  - a good first step could be to establish a websocket connection of any sort.
+  //  - Keeping the socket open seems important so see if you can send a value that updates 
+  //      ever 5 seconds to display on the site. 
+  //  - Websockets are capable of transferring encoded data bytes. Decode images received and render them!
   onFileUpload() {
     if (this.state.mapfile === null) return;
 
