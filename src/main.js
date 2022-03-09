@@ -32,14 +32,14 @@ function StatusMessage(props) {
   );
 }
 
-function ConnectionStatus(props) {
+function ConnectionStatus(connection) {
   var msg = "Wait";
   var colour = "#ffd300";
-  if (props.status === WebSocket.OPEN) {
+  if (connection.status === true) {
     msg = "Connected";
     colour = "#00ff00";
   }
-  else if (props.status === WebSocket.CLOSED) {
+  else if (connection.status === false) {
     msg = "Not Connected";
     colour = "#ff0000";
   }
@@ -299,7 +299,7 @@ class MBotApp extends React.Component {
 
     // React state.
     this.state = {
-      connection: WebSocket.CLOSED,
+      connection: false,
       cells: [],
       width: 0,
       height: 0,
@@ -336,28 +336,29 @@ class MBotApp extends React.Component {
     // This is an example callback which triggers when pressing the "Test me"
     // button. It makes a POST request to the Flask server on the endpoint
     // /app/motor_cmd with some JSON data (in the "body" key).
-    fetch("/app/motor_cmd",  // The endpoint to send the message to.
-      {
-        // The message to send.
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({'fwd': 1.0,
-                              'rot': 0.5}),
-      })
-      .then((response) => {
-        if (!response.ok) throw Error(response.statusText);
-        return response.json();
-      })
-      .then((data) => {
-        // This code gets called when the server returns a message.
-        console.log("The server returned: ", data);
-      })
-      .catch((error) => {
-        // This code gets called in the event of an error in the request.
-        console.log(error)
-      });
+    // fetch("/app/motor_cmd",  // The endpoint to send the message to.
+    //   {
+    //     // The message to send.
+    //     method: 'POST',
+    //     headers: {
+    //       'Content-Type': 'application/json',
+    //     },
+    //     body: JSON.stringify({'fwd': 1.0,
+    //                           'rot': 0.5}),
+    //   })
+    //   .then((response) => {
+    //     if (!response.ok) throw Error(response.statusText);
+    //     return response.json();
+    //   })
+    //   .then((data) => {
+    //     // This code gets called when the server returns a message.
+    //     console.log("The server returned: ", data);
+    //   })
+    //   .catch((error) => {
+    //     // This code gets called in the event of an error in the request.
+    //     console.log(error)
+    //   });
+    this.ws.socket.emit("test", {'test_key': "test_value"})
   }
 
   posToPixels(x, y) {
@@ -386,6 +387,11 @@ class MBotApp extends React.Component {
   }
 
   handleMessage(msg) {
+    
+    console.log(msg)
+    return // TODO: Fix 
+
+
     var server_msg = JSON.parse(msg.data);
 
     if (server_msg.type == "robot_path")

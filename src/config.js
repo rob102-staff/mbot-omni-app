@@ -1,8 +1,8 @@
 var config = {
     // Connection info.
     HOST: "localhost",
-    PORT: 8080,
-    ENDPOINT: "mb",
+    PORT: 5000,
+    ENDPOINT: "",
     CONNECT_PERIOD: 5000,     // ms
 
     // Sim info
