@@ -358,11 +358,11 @@ class MBotApp extends React.Component {
     //     // This code gets called in the event of an error in the request.
     //     console.log(error)
     //   });
-    this.ws.socket.emit("test", {'test_key': "test_value"})
+    this.ws.socket.emit("test", {'test_key': "test_value"});
   }
 
   askForMap() {
-    this.ws.socket.emit("map", "Need map. Please give.")
+    this.ws.socket.emit("map", {'test_key': "Need map. Please give."});
   }
 
   posToPixels(x, y) {

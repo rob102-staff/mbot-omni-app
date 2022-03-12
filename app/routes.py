@@ -36,8 +36,18 @@ def test_message(data):
 
 @socket.on('map')
 def send_map(data):
-    if data=="Need Map. Please give.":
-        app.logger.info("Request for map has been received.")
-        fin = open("testing.map","r")
-        maplines = fin.readlines()
-        socket.emit("message", json.dumps({maplines}))
+    # if data=="Need Map. Please give.":
+    #     app.logger.info("Request for map has been received.")
+    #     fin = open("testing.map","r")
+    #     maplines = fin.readlines()
+    #     socket.emit("message", json.dumps({maplines}))
+
+    app.logger.info("Message received.")
+    app.logger.info(data)
+
+    try:
+        with open("testing.map","r") as fin:
+            maplines = fin.readlines()
+            socket.emit("message", json.dumps({'data':{'map': maplines}}))
+    except IOError:
+        app.logger.info("Error. Cannot open file.")
