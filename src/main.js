@@ -361,6 +361,10 @@ class MBotApp extends React.Component {
     this.ws.socket.emit("test", {'test_key': "test_value"})
   }
 
+  askForMap() {
+    this.ws.socket.emit("map", "Need map. Please give.")
+  }
+
   posToPixels(x, y) {
     var u = (x * this.state.cellSize);
     var v = (y * this.state.cellSize);
@@ -602,6 +606,7 @@ class MBotApp extends React.Component {
           <button className="button" onClick={() => this.onPlan()}>Plan!</button>
           {/* This button is an example (not part of the original webapp) which sends a POST to the Flask server. */}
           <button className="button" onClick={() => this.anExamplePost()}>Test me</button>
+          <button className="button" onClick={() => this.askForMap()}>Grab Map</button>
         </div>
 
         <div className="status-wrapper">

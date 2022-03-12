@@ -33,3 +33,11 @@ def test_message(data):
 #   - Send a number that increments every 5 seconds. Make sure the socket is not closing.
 #   - Read an image from file, encode it and send it. 
 #   - Now we can setup LCM
+
+@socket.on('map')
+def send_map(data):
+    if data=="Need Map. Please give.":
+        app.logger.info("Request for map has been received.")
+        fin = open("testing.map","r")
+        maplines = fin.readlines()
+        socket.emit("message", json.dumps({maplines}))
