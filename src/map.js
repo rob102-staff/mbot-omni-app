@@ -39,13 +39,12 @@ function parseMap(data) {
 }
 
 function reallyParseTheMap(data) {
-  const jdata=data
   var map = {};
   var datacells = [];
 
-  for (let line of jdata.split(" ")) {
+  for (let line of data.split(" ")) {
     if (line!="\n") {
-      datacells.push(line.replace("[", "").replace("]", "").replace('"', '').replace("\\n", ""));
+      datacells.push(parseInt(line.replace("[", "").replace("]", "").replace('"', '').replace("\\n", "")));
     }
   }
 
@@ -55,7 +54,7 @@ function reallyParseTheMap(data) {
   map.meters_per_cell = parseFloat(datacells.shift());
   map.num_cells = map.width * map.height;
 
-  map.cells = datacells;
+  map.cells = normalizeList(datacells);
 
   return map;
 }

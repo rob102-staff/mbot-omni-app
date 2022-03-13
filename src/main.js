@@ -395,16 +395,13 @@ class MBotApp extends React.Component {
   handleMap(mapmsg) {
     var map=reallyParseTheMap(mapmsg)
     console.log("Parsed map.")
-    
-    this.state.cells = map.cells;
-    this.state.width = map.width;
-    this.state.height = map.height;
-    this.state.num_cells = map.num_cells;
-    this.state.origin = map.origin;
-    this.state.metersPerCell = map.meters_per_cell;
-    this.state.mapLoaded=true;
-    
+    this.updateMap(map);
+    // this.visitGrid.drawCells(map, config.MAP_COLOUR_LOW, config.MAP_COLOUR_HIGH);
+
+    // this.visitGrid.render();
+    // this.handleCells(this.state.cells);
     console.log(this.state);
+    
 
   }
 
