@@ -46,8 +46,12 @@ def send_map(data):
     app.logger.info(data)
 
     try:
-        with open("testing.map","r") as fin:
+        with open("current.map","r") as fin:
             maplines = fin.readlines()
-            socket.emit("message", json.dumps({'data':{'map': maplines}}))
+            socket.emit("map", json.dumps(maplines))
     except IOError:
         app.logger.info("Error. Cannot open file.")
+
+    return maplines
+
+    # return json.dump({'map': [0, 0, 0, 0]}, 2)

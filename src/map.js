@@ -27,11 +27,35 @@ function parseMap(data) {
     }
   }
 
+  console.log(map)
+
   map.cells = normalizeList(map.cells);
 
   if (map.cells.length !== map.num_cells) {
     console.warn("Map has wrong number of cells:", map.cells.length, "!==", map.num_cells);
   }
+
+  return map;
+}
+
+function reallyParseTheMap(data) {
+  const jdata=data
+  var map = {};
+  var datacells = [];
+
+  for (let line of jdata.split(" ")) {
+    if (line!="\n") {
+      datacells.push(line.replace("[", "").replace("]", "").replace('"', '').replace("\\n", ""));
+    }
+  }
+
+  map.origin = [parseFloat(datacells.shift()), parseFloat(datacells.shift())];
+  map.width = parseFloat(datacells.shift());
+  map.height = parseFloat(datacells.shift());
+  map.meters_per_cell = parseFloat(datacells.shift());
+  map.num_cells = map.width * map.height;
+
+  map.cells = datacells;
 
   return map;
 }
@@ -59,4 +83,4 @@ function normalizeList(list) {
   return list;
 }
 
-export { parseMap, normalizeList };
+export { parseMap, reallyParseTheMap, normalizeList };

@@ -8,7 +8,7 @@ import Select from '@material-ui/core/Select';
 
 import config from "./config.js";
 import { WSHelper } from "./web.js";
-import { parseMap, normalizeList } from "./map.js";
+import { parseMap, reallyParseTheMap, normalizeList } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 
 /*******************
@@ -328,6 +328,7 @@ class MBotApp extends React.Component {
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
     this.ws.userHandleMessage = (evt) => { this.handleMessage(evt); };
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
+    this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
 
     this.visitGrid = new GridCellCanvas();
   }
@@ -363,6 +364,7 @@ class MBotApp extends React.Component {
 
   askForMap() {
     this.ws.socket.emit("map", {'test_key': "Need map. Please give."});
+    
   }
 
   posToPixels(x, y) {
@@ -390,10 +392,27 @@ class MBotApp extends React.Component {
     this.ws.attemptConnection();
   }
 
+  handleMap(mapmsg) {
+    var map=reallyParseTheMap(mapmsg)
+    console.log("Parsed map.")
+    
+    this.state.cells = map.cells;
+    this.state.width = map.width;
+    this.state.height = map.height;
+    this.state.num_cells = map.num_cells;
+    this.state.origin = map.origin;
+    this.state.metersPerCell = map.meters_per_cell;
+    this.state.mapLoaded=true;
+    
+    console.log(this.state);
+
+  }
+
   handleMessage(msg) {
     
     console.log(msg)
-    return // TODO: Fix 
+    return msg
+    // TODO: Fix 
 
 
     var server_msg = JSON.parse(msg.data);
