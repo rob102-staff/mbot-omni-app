@@ -865,8 +865,8 @@ document.addEventListener('keydown', (event) => {
   const p = new MBotApp();
   if (name == "a") p.turnLeft();
   if (name == "d") p.turnRight();
-  if (name == "s") p.goStraight();
-  if (name == "w") p.goBack();
+  if (name == "s") p.goBack();
+  if (name == "w") p.goStraight();
   if (name == "q") p.goStart();
   if (name == "e") p.goStop();
 }, false);
