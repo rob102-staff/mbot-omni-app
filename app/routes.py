@@ -46,7 +46,7 @@ def send_map(data):
     app.logger.info(data)
 
     try:
-        with open("current.map","r") as fin:
+        with open("cropped_map_10-20-21.map","r") as fin:
             maplines = fin.readlines()
             socket.emit("map", json.dumps(maplines))
     except IOError:

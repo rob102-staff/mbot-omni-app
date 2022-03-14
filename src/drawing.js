@@ -77,7 +77,11 @@ class GridCellCanvas {
   }
 
   drawCells(cells, colour_low, colour_high, alpha="ff") {
+    console.log("Drawing cells.")
+
     if (cells.length !== this.width * this.height) {
+      console.log(cells.length);
+      console.log(this.width*this.height);
       return;
     }
 

@@ -41,10 +41,12 @@ function parseMap(data) {
 function reallyParseTheMap(data) {
   var map = {};
   var datacells = [];
+  var count = 0;
 
   for (let line of data.split(" ")) {
     if (line!="\n") {
       datacells.push(parseFloat(line.replace("[", "").replace("]", "").replace('"', '').replace("\\n", "")));
+      count++;
     }
   }
 
@@ -55,6 +57,8 @@ function reallyParseTheMap(data) {
   map.num_cells = map.width * map.height;
 
   map.cells = normalizeList(datacells);
+
+  console.log("Cell Length: " + datacells.length);
 
   return map;
 }

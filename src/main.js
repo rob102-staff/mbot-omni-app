@@ -623,6 +623,7 @@ class MBotApp extends React.Component {
           <button className="button" onClick={() => this.anExamplePost()}>Test me</button>
           <button className="button" onClick={() => this.askForMap()}>Grab Map</button>
           <button className="button" onClick={() => console.log(this.state)}>Check State</button>
+          <button className="button" onClick={() => this.visitGrid.drawCells(this.state.cells, config.MAP_COLOUR_HIGH, config.MAP_COLOUR_LOW)}>Render</button>
         </div>
 
         <div className="status-wrapper">
