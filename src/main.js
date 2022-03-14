@@ -610,7 +610,8 @@ class MBotApp extends React.Component {
       console.log("hello");
       for (let index = 0; index < map_buttons.length; index++) {
         const element = map_buttons[index];
-        document.getElementById(element).style.visibility = "visible";
+        const e = document.getElementById(element);
+        e.classList.remove("vis");
       }
 
     }
@@ -618,11 +619,10 @@ class MBotApp extends React.Component {
     {
       for (let index = 0; index < map_buttons.length; index++) {
         const element = map_buttons[index];
-        document.getElementById(element).style.visibility = "hidden";
+        const e = document.getElementById(element);
+        e.classList.add("vis")
       }
     }
-
-    
     this.setState({showField: !this.state.showField});
   }
 
@@ -634,19 +634,20 @@ class MBotApp extends React.Component {
       console.log("hello");
       for (let index = 0; index < map_buttons.length; index++) {
         const element = map_buttons[index];
-        document.getElementById(element).style.visibility = "visible";
-      }
+        const e = document.getElementById(element);
+        e.classList.remove("vis");
+            }
 
     }
     else
     {
       for (let index = 0; index < map_buttons.length; index++) {
         const element = map_buttons[index];
-        document.getElementById(element).style.visibility = "hidden";
+        const e = document.getElementById(element);
+        e.classList.add("vis")
       }
     }
-
-    }
+  }
   
   onRange() {
     var slider = document.getElementById("myRange");
@@ -656,40 +657,101 @@ class MBotApp extends React.Component {
 
   turnLeft(){
     console.log("Left turn by 20 degrees");
+    const e = document.getElementById("drive4");
+    e.classList.add("change")
+    setTimeout(function(){
+      e.classList.remove("change");
+    }, 500)
   }
 
   turnRight(){
     console.log("Right turn by 20 degrees");
+    const e = document.getElementById("drive3");
+    e.classList.add("change")
+    setTimeout(function(){
+      e.classList.remove("change");
+    }, 500)
   }
 
   goStraight(){
     console.log("Go forwards");
+    const e = document.getElementById("drive2");
+    e.classList.add("change")
+    setTimeout(function(){
+      e.classList.remove("change");
+    }, 500)
   }
 
   goBack(){
     console.log("Go back");
+    const e = document.getElementById("drive1");
+    e.classList.add("change")
+    setTimeout(function(){
+      e.classList.remove("change");
+    }, 500)
   }
 
   goStart(){
     console.log("Start robot");
+    const e = document.getElementById("drive6");
+    e.classList.add("change1")
+    setTimeout(function(){
+      e.classList.remove("change1");
+    }, 1000)
   }
 
   goStop(){
     console.log("STOP robot it was about run into Popeye");
+    const e = document.getElementById("drive7");
+    e.classList.add("change2")
+    setTimeout(function(){
+      e.classList.remove("change2");
+    }, 1000)
   }
 
   darkMode(){
+
+    const map_buttons = ["drive1", "drive2", "drive3", "drive4"];
+
     var checkBox = document.getElementById("myDark");
-    var canvas = document.getElementById("canvas")
+    var canvas = document.getElementById("canvas");
     if (checkBox.checked == true){
       document.body.classList.add("new-background-color");
-      canvas.style.borderColor = "white";
+      canvas.classList.add("white-border")
+
+      for (let index = 0; index < map_buttons.length; index++) {
+        const element = map_buttons[index];
+        const e = document.getElementById(element);
+        e.classList.add("in");
+      }
     }else{
       document.body.classList.remove("new-background-color");
-      canvas.style.borderColor = "black";
+      canvas.classList.remove("white-border")
+      
+      for (let index = 0; index < map_buttons.length; index++) {
+        const element = map_buttons[index];
+        const e = document.getElementById(element);
+        e.classList.remove("in");      
+      }
     }
-
   }
+
+  startmap(){
+    console.log("Starting to map")
+  }
+
+  stopmap(){
+    console.log("Stopping map")
+  }
+
+  restartmap(){
+    console.log("Resetting map")
+  }
+
+  setpoint(){
+    console.log("Setting start point")
+  }
+
 
   render() {
     var canvasStyle = {
@@ -730,40 +792,34 @@ class MBotApp extends React.Component {
             </label>
           </div>
           
-          <button className="button" id= "map1" onClick={() => this.onGoalClear()}>Start Mapping</button>
-          <button className="button" id= "map2" onClick={() => this.onGoalClear()}>Stop Mapping</button>
-          <button className="button" id= "map3" onClick={() => this.onFileUpload()}>Restart Mapping</button>
-          <button className="button" id= "map5" onClick={() => this.onFileUpload()}>Start Point</button>
+          <button className="button vis start-color2" id= "map1" onClick={() => this.startmap()}>Start Mapping</button>
+          <button className="button vis stop-color2" id= "map2" onClick={() => this.stopmap()}>Stop Mapping</button>
+          <button className="button vis" id= "map3" onClick={() => this.restartmap()}>Restart Mapping</button>
+          <button className="button vis" id= "map5" onClick={() => this.setpoint()}>Start Point</button>
 
           {/* This button is an example (not part of the original webapp) which sends a POST to the Flask server. */}
-          <button className="button" id= "map4" onClick={() => this.anExamplePost()}>Send Map</button>
+          <button className="button vis" id= "map4" onClick={() => this.anExamplePost()}>Send Map</button>
         </div>
 
         <div className="top-and-bottom-space"></div>
 
-        <div className="button-wrapper" >
-          {/* <button className="button alternate-color" id= "drive1" onClick={() => this.goStraight()}>Drive Forward</button>
-          <button className="button alternate-color" id= "drive2" onClick={() => this.goBack()}>Drive Backward</button>
-          <button className="button alternate-color" id= "drive3" onClick={() => this.turnRight()}>Turn Right</button>
-          <button className="button alternate-color" id= "drive4" onClick={() => this.turnLeft()}>Turn Left</button> */}
-        </div>
 
         <div className="flex-container">
-          <div className="button-wrapper flex-child" id = "drive5">
+          <div className="button-wrapper flex-child vis" id = "drive5">
             <p id="">Current speed: <span id="demo">50</span></p>
             <input type="range" min="1" max="100" value="50" id="myRange" onInput={() => this.onRange()}></input>
           </div>
           <div className="button-wrapper flex-child top-spacing s">
-            <button className="button start-color " id= "drive6" onClick={() => this.goStart()}>Start</button>
-            <button className="button stop-color" id= "drive7" onClick={() => this.goStop()}>Stop</button>
+            <button className="button start-color vis" id= "drive6" onClick={() => this.goStart()}>Start</button>
+            <button className="button stop-color vis" id= "drive7" onClick={() => this.goStop()}>Stop</button>
           </div>
           <div className="button-wrapper flex-child">
-            <button className="button alternate-color button_image" id= "drive1" onClick={() => this.goStraight()}></button>
+            <button className="button button_image vis" id= "drive1" onClick={() => this.goStraight()}></button>
             <div className="" >
-              <button className="button alternate-color" id= "drive4" onClick={() => this.turnLeft()}></button>
-              <button className="button alternate-color" id= "drive3" onClick={() => this.turnRight()}></button>
+              <button className="button  vis" id= "drive4" onClick={() => this.turnLeft()}></button>
+              <button className="button vis" id= "drive3" onClick={() => this.turnRight()}></button>
             </div>
-            <button className="button alternate-color" id= "drive2" onClick={() => this.goBack()}></button>
+            <button className="button  vis" id= "drive2" onClick={() => this.goBack()}></button>
           </div>
         </div>
 
@@ -781,7 +837,7 @@ class MBotApp extends React.Component {
           <ConnectionStatus status={this.state.connection}/>
         </div>
 
-        <div className="canvas-container" style={canvasStyle}>
+        <div className="canvas-container" id = "canvas" style={canvasStyle}>
           <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
           <DrawField field={this.state.field} showField={this.state.showField}
                      width={this.state.width} height={this.state.height} />
@@ -803,6 +859,17 @@ class MBotApp extends React.Component {
     );
   }
 }
+
+document.addEventListener('keydown', (event) => {
+  var name = event.key;
+  const p = new MBotApp();
+  if (name == "a") p.turnLeft();
+  if (name == "d") p.turnRight();
+  if (name == "s") p.goStraight();
+  if (name == "w") p.goBack();
+  if (name == "q") p.goStart();
+  if (name == "e") p.goStop();
+}, false);
 
 ReactDOM.render(
   <MBotApp />,

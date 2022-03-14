@@ -31,13 +31,13 @@ a:hover {
 
 .canvas-container {
   border: 1px solid #000000;
-  /* margin-left: auto;
-  margin-right: auto; */
+  margin-left: auto;
+  margin-right: auto;
   margin-top: 0.5em;
   margin-bottom: 1em;
   position: relative;
-  /*height: 100%;*/
-  /*width: 100%;*/
+  height: 100%;
+  width: 100%;
 }
 
 canvas {
@@ -214,13 +214,13 @@ input:checked + .slider:before {
 }
 
 /* Lots of repeat code, will be fixed later on */
-#map1, #map2, #map3, #map4, #map5{
+/* #map1, #map2, #map3, #map4, #map5{
   visibility: hidden;
-}
+} */
 
-#drive1, #drive2, #drive3, #drive4, #drive5, #myrange, #drive6, #drive7{
+/* #drive1, #drive2, #drive3, #drive4, #drive5, #myrange, #drive6, #drive7{
   visibility: hidden;
-}
+} */
 
 .left-space{
   padding-left: 15px;
@@ -238,10 +238,10 @@ input:checked + .slider:before {
   padding-bottom: 10px;
 }
 
-/* .alternate-color
+.alternate-color
 {
-  background-color:#90920e;
-} */
+  background-color:#7e8018;
+}
 
 .stop-color
 {
@@ -249,8 +249,18 @@ input:checked + .slider:before {
 }
 
 .start-color{
-  background-color: #0c8f2c;
+  background-color: #1a8d37;
 }
+
+.stop-color2
+{
+  background-color:#9b3e38;
+}
+
+.start-color2{
+  background-color: #167541;
+}
+
 
 .new-background-color{
   background: #021f3a;
@@ -291,7 +301,7 @@ input:checked + .slider:before {
 #drive4{
   transform: rotate(180deg);
   margin-left: 13%;
-  margin-right: 18%;
+  margin-right: 19%;
 }
 
 .flex-container {
@@ -309,4 +319,68 @@ input:checked + .slider:before {
 
 .s{
   margin-top: 20px;
+}
+
+.in{
+  -webkit-filter: invert(1);
+  filter: invert(1);
+}
+
+.vis{
+  visibility: hidden;
+}
+
+.white-border{
+  border-color: #F5F5F5;
+}
+
+.change {
+  animation:myfirst 0.5s 1;
+  -webkit-animation:myfirst 0.5s 1; /* Safari and Chrome */
+}
+
+.change1 {
+  animation:myfirst2 1s 1;
+  -webkit-animation:myfirst2 0.5s 1; /* Safari and Chrome */
+}
+
+.change2 {
+  animation:myfirst3 1s 1;
+  -webkit-animation:myfirst3 0.5s 1; /* Safari and Chrome */
+}
+
+@keyframes myfirst
+{
+  0%      {background-color:rgba(123, 131, 18, 0.6);}
+  100%    {background-color:rgba(25, 113, 129)}
+}
+
+@-webkit-keyframes myfirst /* Safari and Chrome */
+{
+  0%      {background-color:rgba(123, 131, 18, 0.6);}
+  100%    {background-color:rgba(25, 113, 129)}
+}
+
+@keyframes myfirst2
+{
+  0%      {background-color:rgba(9, 138, 63, 0.6);}
+  100%    {background-color:rgb(10, 77, 15)}
+}
+
+@-webkit-keyframes myfirst2 /* Safari and Chrome */
+{
+  0%      {background-color:rgba(9, 138, 63, 0.6);}
+  100%    {background-color:rgb(10, 77, 15)}
+}
+
+@keyframes myfirst3
+{
+  0%      {background-color:rgba(156, 48, 21, 0.6);}
+  100%    {background-color:rgb(102, 21, 15)}
+}
+
+@-webkit-keyframes myfirst3 /* Safari and Chrome */
+{
+  0%      {background-color:rgba(156, 48, 21, 0.6);}
+  100%    {background-color:rgb(102, 21, 15)}
 }
