@@ -6,13 +6,13 @@ Light grey for backgrounds: #F5F5F5;
 */
 
 body {
-  margin:40px auto;
+  margin:20px auto;
   max-width:800px;
   line-height:1.6;
   font-size:18px;
   color:#444;
   padding:0 10px;
-  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  font-family: 'Montserrat', sans-serif;
 }
 
 h1,h2,h3 {
@@ -31,8 +31,8 @@ a:hover {
 
 .canvas-container {
   border: 1px solid #000000;
-  margin-left: auto;
-  margin-right: auto;
+  /* margin-left: auto;
+  margin-right: auto; */
   margin-top: 0.5em;
   margin-bottom: 1em;
   position: relative;
@@ -70,7 +70,7 @@ canvas {
   background-color: #2F65A7;
   border: none;
   color: white;
-  padding: 10px 32px;
+  padding: 10px 20px;
   border-radius: 10px;
   text-align: center;
   text-decoration: none;
@@ -211,4 +211,102 @@ input:checked + .slider:before {
 
 .slider.round:before {
   border-radius: 50%;
+}
+
+/* Lots of repeat code, will be fixed later on */
+#map1, #map2, #map3, #map4, #map5{
+  visibility: hidden;
+}
+
+#drive1, #drive2, #drive3, #drive4, #drive5, #myrange, #drive6, #drive7{
+  visibility: hidden;
+}
+
+.left-space{
+  padding-left: 15px;
+}
+
+.top-spacing{
+  padding: 20px 0px;
+}
+
+.left-margin{
+  margin-left: 100px;
+}
+
+.top-and-bottom-space{
+  padding-bottom: 10px;
+}
+
+/* .alternate-color
+{
+  background-color:#90920e;
+} */
+
+.stop-color
+{
+  background-color:#a12118;
+}
+
+.start-color{
+  background-color: #0c8f2c;
+}
+
+.new-background-color{
+  background: #021f3a;
+  color:#ccc;
+}
+
+#drive1, #drive2, #drive3, #drive4{
+  /* margin: 10px 0px 10px 20px; */
+  background-image: url("https://cdn4.iconfinder.com/data/icons/arrow-part-2-line-pixel-art/48/51-play_player_arrow_game_application_mobile_up_down_left_right-512.png");
+  background-size: cover;
+  background-color: transparent;
+  color:none;
+  width: 10px;
+  height: 10px;
+  font-size: 2rem;
+  padding: 20px 20px;
+}
+
+#drive1{
+  transform: rotate(270deg);
+  margin-left: 30%;
+}
+
+#drive1:hover, #drive2:hover, #drive3:hover, #drive4:hover{
+  background-color:#bdcf58;
+}
+
+#drive2{
+  transform: rotate(90deg);
+  margin-left: 30%;
+}
+
+
+#drive3{
+  margin-right: 20%;
+}
+
+#drive4{
+  transform: rotate(180deg);
+  margin-left: 13%;
+  margin-right: 18%;
+}
+
+.flex-container {
+  display: flex;
+  margin: 10px;
+}
+
+.flex-child {
+  flex: 1;
+}  
+
+.flex-child:first-child {
+  margin-right: 10px;
+} 
+
+.s{
+  margin-top: 20px;
 }

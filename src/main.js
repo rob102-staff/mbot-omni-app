@@ -602,6 +602,95 @@ class MBotApp extends React.Component {
     this.setState({algo: event.target.value});
   }
 
+  onMapCheck() {
+    const map_buttons = ["map1", "map2", "map3", "map4", "map5"];
+
+    var checkBox = document.getElementById("myCheck");
+    if (checkBox.checked == true){
+      console.log("hello");
+      for (let index = 0; index < map_buttons.length; index++) {
+        const element = map_buttons[index];
+        document.getElementById(element).style.visibility = "visible";
+      }
+
+    }
+    else
+    {
+      for (let index = 0; index < map_buttons.length; index++) {
+        const element = map_buttons[index];
+        document.getElementById(element).style.visibility = "hidden";
+      }
+    }
+
+    
+    this.setState({showField: !this.state.showField});
+  }
+
+  onDriveCheck() {
+    const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive5", "drive6", "drive7"];
+
+    var checkBox = document.getElementById("myDrive");
+    if (checkBox.checked == true){
+      console.log("hello");
+      for (let index = 0; index < map_buttons.length; index++) {
+        const element = map_buttons[index];
+        document.getElementById(element).style.visibility = "visible";
+      }
+
+    }
+    else
+    {
+      for (let index = 0; index < map_buttons.length; index++) {
+        const element = map_buttons[index];
+        document.getElementById(element).style.visibility = "hidden";
+      }
+    }
+
+    }
+  
+  onRange() {
+    var slider = document.getElementById("myRange");
+    var output = document.getElementById("demo");
+    output.innerHTML = slider.value;
+  }
+
+  turnLeft(){
+    console.log("Left turn by 20 degrees");
+  }
+
+  turnRight(){
+    console.log("Right turn by 20 degrees");
+  }
+
+  goStraight(){
+    console.log("Go forwards");
+  }
+
+  goBack(){
+    console.log("Go back");
+  }
+
+  goStart(){
+    console.log("Start robot");
+  }
+
+  goStop(){
+    console.log("STOP robot it was about run into Popeye");
+  }
+
+  darkMode(){
+    var checkBox = document.getElementById("myDark");
+    var canvas = document.getElementById("canvas")
+    if (checkBox.checked == true){
+      document.body.classList.add("new-background-color");
+      canvas.style.borderColor = "white";
+    }else{
+      document.body.classList.remove("new-background-color");
+      canvas.style.borderColor = "black";
+    }
+
+  }
+
   render() {
     var canvasStyle = {
       width: config.MAP_DISPLAY_WIDTH + "px",
@@ -610,20 +699,74 @@ class MBotApp extends React.Component {
 
     return (
       <div>
-        <div className="select-wrapper">
+        {/* <div className="select-wrapper">
           <MapFileSelect onChange={(event) => this.onFileChange(event)}/>
           <AlgoForm onChange={(event) => this.handleAlgoSelect(event)} value={this.state.algo}/>
-        </div>
+        </div> */}
 
         <div className="button-wrapper">
-          <button className="button" onClick={() => this.onFileUpload()}>Upload Map</button>
-          <button className="button" onClick={() => this.onGoalClear()}>Clear Goal</button>
-          <button className="button" onClick={() => this.onPlan()}>Plan!</button>
           {/* This button is an example (not part of the original webapp) which sends a POST to the Flask server. */}
           {/* <button className="button" onClick={() => this.anExamplePost()}>Test me</button> */}
           <button className="button" onClick={() => this.askForMap()}>Grab Map</button>
           <button className="button" onClick={() => console.log(this.state)}>Check State</button>
         </div>
+
+        <div className="button-wrapper top-spacing">
+          <div className="field-toggle-wrapper top-spacing">
+          <span>Dark Mode</span>
+            <label className="switch">
+              <input type="checkbox" id="myDark" onClick={() => this.darkMode()}/>
+              <span className="slider round"></span>
+            </label>
+            <span className = "left-space">Mapping Mode</span>
+            <label className="switch">
+              <input type="checkbox" id="myCheck" onClick={() => this.onMapCheck()}/>
+              <span className="slider round"></span>
+            </label>
+            <span className = "left-space">Drive Mode</span>
+            <label className="switch">
+              <input type="checkbox" id="myDrive" onClick={() => this.onDriveCheck()}/>
+              <span className="slider round"></span>
+            </label>
+          </div>
+          
+          <button className="button" id= "map1" onClick={() => this.onGoalClear()}>Start Mapping</button>
+          <button className="button" id= "map2" onClick={() => this.onGoalClear()}>Stop Mapping</button>
+          <button className="button" id= "map3" onClick={() => this.onFileUpload()}>Restart Mapping</button>
+          <button className="button" id= "map5" onClick={() => this.onFileUpload()}>Start Point</button>
+
+          {/* This button is an example (not part of the original webapp) which sends a POST to the Flask server. */}
+          <button className="button" id= "map4" onClick={() => this.anExamplePost()}>Send Map</button>
+        </div>
+
+        <div className="top-and-bottom-space"></div>
+
+        <div className="button-wrapper" >
+          {/* <button className="button alternate-color" id= "drive1" onClick={() => this.goStraight()}>Drive Forward</button>
+          <button className="button alternate-color" id= "drive2" onClick={() => this.goBack()}>Drive Backward</button>
+          <button className="button alternate-color" id= "drive3" onClick={() => this.turnRight()}>Turn Right</button>
+          <button className="button alternate-color" id= "drive4" onClick={() => this.turnLeft()}>Turn Left</button> */}
+        </div>
+
+        <div className="flex-container">
+          <div className="button-wrapper flex-child" id = "drive5">
+            <p id="">Current speed: <span id="demo">50</span></p>
+            <input type="range" min="1" max="100" value="50" id="myRange" onInput={() => this.onRange()}></input>
+          </div>
+          <div className="button-wrapper flex-child top-spacing s">
+            <button className="button start-color " id= "drive6" onClick={() => this.goStart()}>Start</button>
+            <button className="button stop-color" id= "drive7" onClick={() => this.goStop()}>Stop</button>
+          </div>
+          <div className="button-wrapper flex-child">
+            <button className="button alternate-color button_image" id= "drive1" onClick={() => this.goStraight()}></button>
+            <div className="" >
+              <button className="button alternate-color" id= "drive4" onClick={() => this.turnLeft()}></button>
+              <button className="button alternate-color" id= "drive3" onClick={() => this.turnRight()}></button>
+            </div>
+            <button className="button alternate-color" id= "drive2" onClick={() => this.goBack()}></button>
+          </div>
+        </div>
+
 
         <div className="status-wrapper">
           <div className="field-toggle-wrapper">
