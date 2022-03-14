@@ -58,7 +58,9 @@ function reallyParseTheMap(data) {
 
   map.cells = normalizeList(datacells);
 
-  console.log("Cell Length: " + datacells.length);
+  if (map.cells.length!=map.width*map.height) {
+
+  }
 
   return map;
 }
