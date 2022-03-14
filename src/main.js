@@ -675,7 +675,7 @@ class MBotApp extends React.Component {
 
   goStraight(){
     console.log("Go forwards");
-    const e = document.getElementById("drive2");
+    const e = document.getElementById("drive1");
     e.classList.add("change")
     setTimeout(function(){
       e.classList.remove("change");
@@ -684,7 +684,7 @@ class MBotApp extends React.Component {
 
   goBack(){
     console.log("Go back");
-    const e = document.getElementById("drive1");
+    const e = document.getElementById("drive2");
     e.classList.add("change")
     setTimeout(function(){
       e.classList.remove("change");
