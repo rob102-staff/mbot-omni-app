@@ -44,7 +44,7 @@ function reallyParseTheMap(data) {
 
   for (let line of data.split(" ")) {
     if (line!="\n") {
-      datacells.push(parseInt(line.replace("[", "").replace("]", "").replace('"', '').replace("\\n", "")));
+      datacells.push(parseFloat(line.replace("[", "").replace("]", "").replace('"', '').replace("\\n", "")));
     }
   }
 

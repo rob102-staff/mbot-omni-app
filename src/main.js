@@ -400,7 +400,6 @@ class MBotApp extends React.Component {
 
     // this.visitGrid.render();
     // this.handleCells(this.state.cells);
-    console.log(this.state);
     
 
   }
@@ -623,6 +622,7 @@ class MBotApp extends React.Component {
           {/* This button is an example (not part of the original webapp) which sends a POST to the Flask server. */}
           <button className="button" onClick={() => this.anExamplePost()}>Test me</button>
           <button className="button" onClick={() => this.askForMap()}>Grab Map</button>
+          <button className="button" onClick={() => console.log(this.state)}>Check State</button>
         </div>
 
         <div className="status-wrapper">
