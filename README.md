@@ -37,6 +37,31 @@ npm install
 ```
 This will grab all the packages needed to run the React app.
 
+### Installation on the Raspberry Pi
+
+Download the binaries for the ARM v71 processor. 
+
+`wget https://nodejs.org/dist/v16.14.2/node-v16.14.2-linux-armv7l.tar.xz`
+
+Decompress the binaries. 
+
+`tar -xsf node-v16.14.2-linux-armv7l.tar.xz node-v16.14.2-linux-armv7l/`
+
+Navigate to the files.
+
+`cd node-v16.14.2-linux-armv7l/`
+
+Copy the files to the proper directory. 
+
+`sudo cp -R * /usr/local`
+
+To confirm that Nodejs is installed, run the commands below:
+
+`node -v`
+
+`npm -v`
+
+
 #### Running
 
 To run the React app, in the root directory of this repository, do:
