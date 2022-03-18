@@ -334,32 +334,8 @@ class MBotApp extends React.Component {
   }
 
   anExamplePost() {
-    // This is an example callback which triggers when pressing the "Test me"
-    // button. It makes a POST request to the Flask server on the endpoint
-    // /app/motor_cmd with some JSON data (in the "body" key).
-    // fetch("/app/motor_cmd",  // The endpoint to send the message to.
-    //   {
-    //     // The message to send.
-    //     method: 'POST',
-    //     headers: {
-    //       'Content-Type': 'application/json',
-    //     },
-    //     body: JSON.stringify({'fwd': 1.0,
-    //                           'rot': 0.5}),
-    //   })
-    //   .then((response) => {
-    //     if (!response.ok) throw Error(response.statusText);
-    //     return response.json();
-    //   })
-    //   .then((data) => {
-    //     // This code gets called when the server returns a message.
-    //     console.log("The server returned: ", data);
-    //   })
-    //   .catch((error) => {
-    //     // This code gets called in the event of an error in the request.
-    //     console.log(error)
-    //   });
     this.ws.socket.emit("test", {'test_key': "test_value"});
+    
   }
 
   askForMap() {
@@ -396,39 +372,13 @@ class MBotApp extends React.Component {
     var map=parseMapFromSocket(mapmsg)
     console.log("Parsed map.")
     this.updateMap(map);
-    // this.visitGrid.drawCells(map, config.MAP_COLOUR_LOW, config.MAP_COLOUR_HIGH);
-
-    // this.visitGrid.render();
-    // this.handleCells(this.state.cells);
     
 
   }
 
   handleMessage(msg) {
-    
     console.log(msg)
     return msg
-    // TODO: Fix 
-
-
-    var server_msg = JSON.parse(msg.data);
-
-    if (server_msg.type == "robot_path")
-    {
-      this.handlePath(server_msg.data);
-    }
-    else if (server_msg.type == "visited_cell")
-    {
-      this.handleCells(server_msg.data);
-    }
-    else if (server_msg.type == "field")
-    {
-      this.handleField(server_msg.data);
-    }
-    else
-    {
-      console.log("Unrecognized type", server_msg.type);
-    }
   }
 
   handleWindowChange(evt) {
@@ -479,11 +429,6 @@ class MBotApp extends React.Component {
     this.setState({ mapfile: event.target.files[0] });
   }
 
-  // TODO: Implement alternative function that reads image through WebSocket
-  //  - a good first step could be to establish a websocket connection of any sort.
-  //  - Keeping the socket open seems important so see if you can send a value that updates 
-  //      ever 5 seconds to display on the site. 
-  //  - Websockets are capable of transferring encoded data bytes. Decode images received and render them!
   onFileUpload() {
     if (this.state.mapfile === null) return;
 
@@ -761,14 +706,8 @@ class MBotApp extends React.Component {
 
     return (
       <div>
-        {/* <div className="select-wrapper">
-          <MapFileSelect onChange={(event) => this.onFileChange(event)}/>
-          <AlgoForm onChange={(event) => this.handleAlgoSelect(event)} value={this.state.algo}/>
-        </div> */}
-
         <div className="button-wrapper">
           {/* This button is an example (not part of the original webapp) which sends a POST to the Flask server. */}
-          {/* <button className="button" onClick={() => this.anExamplePost()}>Test me</button> */}
           <button className="button" onClick={() => this.askForMap()}>Grab Map</button>
           <button className="button" onClick={() => console.log(this.state)}>Check State</button>
         </div>
@@ -797,7 +736,6 @@ class MBotApp extends React.Component {
           <button className="button vis" id= "map3" onClick={() => this.restartmap()}>Restart Mapping</button>
           <button className="button vis" id= "map5" onClick={() => this.setpoint()}>Start Point</button>
 
-          {/* This button is an example (not part of the original webapp) which sends a POST to the Flask server. */}
           <button className="button vis" id= "map4" onClick={() => this.anExamplePost()}>Send Map</button>
         </div>
 
