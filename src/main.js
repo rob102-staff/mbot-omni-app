@@ -8,7 +8,7 @@ import Select from '@material-ui/core/Select';
 
 import config from "./config.js";
 import { WSHelper } from "./web.js";
-import { parseMap, reallyParseTheMap, normalizeList } from "./map.js";
+import { parseMapFromSocket, normalizeList } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 
 /*******************
@@ -393,7 +393,7 @@ class MBotApp extends React.Component {
   }
 
   handleMap(mapmsg) {
-    var map=reallyParseTheMap(mapmsg)
+    var map=parseMapFromSocket(mapmsg)
     console.log("Parsed map.")
     this.updateMap(map);
     // this.visitGrid.drawCells(map, config.MAP_COLOUR_LOW, config.MAP_COLOUR_HIGH);
