@@ -335,12 +335,10 @@ class MBotApp extends React.Component {
 
   anExamplePost() {
     this.ws.socket.emit("test", {'test_key': "test_value"});
-    
   }
 
   askForMap() {
     this.ws.socket.emit("map", {'test_key': "Need map. Please give."});
-    
   }
 
   posToPixels(x, y) {
@@ -572,7 +570,7 @@ class MBotApp extends React.Component {
   }
 
   onDriveCheck() {
-    const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive5", "drive6", "drive7"];
+    const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive5", "drive6", "drive7", "drive8", "drive9"];
 
     var checkBox = document.getElementById("myDrive");
     if (checkBox.checked == true){
@@ -601,7 +599,8 @@ class MBotApp extends React.Component {
   }
 
   turnLeft(){
-    console.log("Left turn by 20 degrees");
+    console.log("Going left");
+    this.ws.socket.emit("test", {'test_key': "test_value"});
     const e = document.getElementById("drive4");
     e.classList.add("change")
     setTimeout(function(){
@@ -610,8 +609,29 @@ class MBotApp extends React.Component {
   }
 
   turnRight(){
-    console.log("Right turn by 20 degrees");
+    console.log("Going right");
+    this.ws.socket.emit("test", {'test_key': "test_value"});
     const e = document.getElementById("drive3");
+    e.classList.add("change")
+    setTimeout(function(){
+      e.classList.remove("change");
+    }, 500)
+  }
+
+  angleLeft(){
+    console.log("Left turn by 20 degrees");
+    this.ws.socket.emit("test", {'test_key': "test_value"});
+    const e = document.getElementById("drive8");
+    e.classList.add("change")
+    setTimeout(function(){
+      e.classList.remove("change");
+    }, 500)
+  }
+
+  angleRight(){
+    console.log("Right turn by 20 degrees");
+    this.ws.socket.emit("test", {'test_key': "test_value"});
+    const e = document.getElementById("drive9");
     e.classList.add("change")
     setTimeout(function(){
       e.classList.remove("change");
@@ -620,6 +640,7 @@ class MBotApp extends React.Component {
 
   goStraight(){
     console.log("Go forwards");
+    this.ws.socket.emit("test", {'test_key': "test_value"});
     const e = document.getElementById("drive1");
     e.classList.add("change")
     setTimeout(function(){
@@ -629,6 +650,7 @@ class MBotApp extends React.Component {
 
   goBack(){
     console.log("Go back");
+    this.ws.socket.emit("test", {'test_key': "test_value"});
     const e = document.getElementById("drive2");
     e.classList.add("change")
     setTimeout(function(){
@@ -638,6 +660,7 @@ class MBotApp extends React.Component {
 
   goStart(){
     console.log("Start robot");
+    this.ws.socket.emit("test", {'test_key': "test_value"});
     const e = document.getElementById("drive6");
     e.classList.add("change1")
     setTimeout(function(){
@@ -647,6 +670,7 @@ class MBotApp extends React.Component {
 
   goStop(){
     console.log("STOP robot it was about run into Popeye");
+    this.ws.socket.emit("test", {'test_key': "test_value"});
     const e = document.getElementById("drive7");
     e.classList.add("change2")
     setTimeout(function(){
@@ -656,7 +680,7 @@ class MBotApp extends React.Component {
 
   darkMode(){
 
-    const map_buttons = ["drive1", "drive2", "drive3", "drive4"];
+    const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive8", "drive9"];
 
     var checkBox = document.getElementById("myDark");
     var canvas = document.getElementById("canvas");
@@ -752,7 +776,9 @@ class MBotApp extends React.Component {
             <button className="button stop-color vis" id= "drive7" onClick={() => this.goStop()}>Stop</button>
           </div>
           <div className="button-wrapper flex-child">
-            <button className="button button_image vis" id= "drive1" onClick={() => this.goStraight()}></button>
+          <button className="button vis" id= "drive8" onClick={() => this.angleLeft()}></button>
+            <button className="button vis" id= "drive1" onClick={() => this.goStraight()}></button>
+            <button className="button vis" id= "drive9" onClick={() => this.angleRight()}></button>
             <div className="" >
               <button className="button  vis" id= "drive4" onClick={() => this.turnLeft()}></button>
               <button className="button vis" id= "drive3" onClick={() => this.turnRight()}></button>
@@ -805,8 +831,10 @@ document.addEventListener('keydown', (event) => {
   if (name == "d") p.turnRight();
   if (name == "s") p.goBack();
   if (name == "w") p.goStraight();
-  if (name == "q") p.goStart();
-  if (name == "e") p.goStop();
+  if (name == "q") p.angleLeft();
+  if (name == "e") p.angleRight();
+  if (name == "z") p.goStart();
+  if (name == "x") p.goStop();
 }, false);
 
 ReactDOM.render(

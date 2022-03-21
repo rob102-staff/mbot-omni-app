@@ -279,29 +279,50 @@ input:checked + .slider:before {
   padding: 20px 20px;
 }
 
-#drive1{
-  transform: rotate(270deg);
-  margin-left: 30%;
+#drive8, #drive9{
+  background-image: url("https://cdn2.iconfinder.com/data/icons/game-center-mixed-icons/512/arrow1.png");
+  background-size: cover;
+  background-color: transparent;
+  color:none;
+  width: 10px;
+  height: 10px;
+  font-size: 2rem;
+  padding: 20px 20px;
 }
 
-#drive1:hover, #drive2:hover, #drive3:hover, #drive4:hover{
+#drive1{
+  transform: rotate(270deg);
+  margin-left: 4%;
+  margin-bottom: 5px;
+}
+
+#drive1:hover, #drive2:hover, #drive3:hover, #drive4:hover, #drive8:hover, #drive9:hover{
   background-color:#bdcf58;
 }
 
 #drive2{
   transform: rotate(90deg);
-  margin-left: 30%;
+  margin-left: 27%;
+  margin-top: 5px;
 }
 
-
 #drive3{
-  margin-right: 20%;
+  margin-right: 2%;
 }
 
 #drive4{
   transform: rotate(180deg);
-  margin-left: 13%;
-  margin-right: 19%;
+  margin-left: 8%;
+  margin-right: 22%;
+}
+
+#drive9{
+  margin-left: 1%;
+  transform: rotate(45deg);
+}
+
+#drive8{
+  transform: scaleX(-1) rotate(60deg);
 }
 
 .flex-container {
@@ -327,7 +348,7 @@ input:checked + .slider:before {
 }
 
 .vis{
-  visibility: hidden;
+  /* visibility: hidden; */
 }
 
 .white-border{
