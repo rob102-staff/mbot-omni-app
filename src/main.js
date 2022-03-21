@@ -828,6 +828,7 @@ class MBotApp extends React.Component {
   }
 }
 
+// TODO: Discuss what other modes will enable drive control. Currently the key presses active only when the drive toggle is toggled on.
 document.addEventListener('keydown', (event) => {
   var name = event.key;
   const p = new MBotApp;
