@@ -11,6 +11,9 @@ import { WSHelper } from "./web.js";
 import { parseMapFromSocket, normalizeList } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 
+// Global Variables
+let drive_check = 0;
+
 /*******************
  *     BUTTONS
  *******************/
@@ -335,12 +338,10 @@ class MBotApp extends React.Component {
 
   anExamplePost() {
     this.ws.socket.emit("test", {'test_key': "test_value"});
-    
   }
 
   askForMap() {
     this.ws.socket.emit("map", {'test_key': "Need map. Please give."});
-    
   }
 
   posToPixels(x, y) {
@@ -572,7 +573,7 @@ class MBotApp extends React.Component {
   }
 
   onDriveCheck() {
-    const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive5", "drive6", "drive7"];
+    const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive5", "drive6", "drive7", "drive8", "drive9"];
 
     var checkBox = document.getElementById("myDrive");
     if (checkBox.checked == true){
@@ -581,8 +582,8 @@ class MBotApp extends React.Component {
         const element = map_buttons[index];
         const e = document.getElementById(element);
         e.classList.remove("vis");
-            }
-
+        }
+      drive_check = 1;
     }
     else
     {
@@ -591,6 +592,7 @@ class MBotApp extends React.Component {
         const e = document.getElementById(element);
         e.classList.add("vis")
       }
+      drive_check = 0;
     }
   }
   
@@ -601,62 +603,88 @@ class MBotApp extends React.Component {
   }
 
   turnLeft(){
-    console.log("Left turn by 20 degrees");
+    console.log("Going left");
     const e = document.getElementById("drive4");
-    e.classList.add("change")
+    e.classList.add("dbutton-animation")
     setTimeout(function(){
-      e.classList.remove("change");
+      e.classList.remove("dbutton-animation");
     }, 500)
+    // this.ws.socket.emit("test", {'test_key': "test_value"});
   }
 
   turnRight(){
-    console.log("Right turn by 20 degrees");
+    console.log("Going right");
     const e = document.getElementById("drive3");
-    e.classList.add("change")
+    e.classList.add("dbutton-animation")
     setTimeout(function(){
-      e.classList.remove("change");
+      e.classList.remove("dbutton-animation");
     }, 500)
+    //this.ws.socket.emit("test", {'test_key': "test_value"});
+  }
+
+  angleLeft(){
+    console.log("Left turn by 20 degrees");
+    const e = document.getElementById("drive8");
+    e.classList.add("dbutton-animation")
+    setTimeout(function(){
+      e.classList.remove("dbutton-animation");
+    }, 500)
+    // this.ws.socket.emit("test", {'test_key': "test_value"});
+  }
+
+  angleRight(){
+    console.log("Right turn by 20 degrees");
+    const e = document.getElementById("drive9");
+    e.classList.add("dbutton-animation")
+    setTimeout(function(){
+      e.classList.remove("dbutton-animation");
+    }, 500)
+    // this.ws.socket.emit("test", {'test_key': "test_value"});
   }
 
   goStraight(){
     console.log("Go forwards");
     const e = document.getElementById("drive1");
-    e.classList.add("change")
+    e.classList.add("dbutton-animation")
     setTimeout(function(){
-      e.classList.remove("change");
+      e.classList.remove("dbutton-animation");
     }, 500)
+    // this.ws.socket.emit("test", {'test_key': "test_value"});
   }
 
   goBack(){
     console.log("Go back");
     const e = document.getElementById("drive2");
-    e.classList.add("change")
+    e.classList.add("dbutton-animation")
     setTimeout(function(){
-      e.classList.remove("change");
+      e.classList.remove("dbutton-animation");
     }, 500)
+    // this.ws.socket.emit("test", {'test_key': "test_value"});
   }
 
   goStart(){
     console.log("Start robot");
     const e = document.getElementById("drive6");
-    e.classList.add("change1")
+    e.classList.add("startbtn-animation")
     setTimeout(function(){
-      e.classList.remove("change1");
+      e.classList.remove("startbtn-animation");
     }, 1000)
+    // this.ws.socket.emit("test", {'test_key': "test_value"});
   }
 
   goStop(){
     console.log("STOP robot it was about run into Popeye");
     const e = document.getElementById("drive7");
-    e.classList.add("change2")
+    e.classList.add("stopbtn-animation")
     setTimeout(function(){
-      e.classList.remove("change2");
+      e.classList.remove("stopbtn-animation");
     }, 1000)
+    // this.ws.socket.emit("test", {'test_key': "test_value"});
   }
 
   darkMode(){
 
-    const map_buttons = ["drive1", "drive2", "drive3", "drive4"];
+    const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive8", "drive9"];
 
     var checkBox = document.getElementById("myDark");
     var canvas = document.getElementById("canvas");
@@ -667,7 +695,7 @@ class MBotApp extends React.Component {
       for (let index = 0; index < map_buttons.length; index++) {
         const element = map_buttons[index];
         const e = document.getElementById(element);
-        e.classList.add("in");
+        e.classList.add("invert");
       }
     }else{
       document.body.classList.remove("new-background-color");
@@ -676,7 +704,7 @@ class MBotApp extends React.Component {
       for (let index = 0; index < map_buttons.length; index++) {
         const element = map_buttons[index];
         const e = document.getElementById(element);
-        e.classList.remove("in");      
+        e.classList.remove("invert");      
       }
     }
   }
@@ -752,7 +780,9 @@ class MBotApp extends React.Component {
             <button className="button stop-color vis" id= "drive7" onClick={() => this.goStop()}>Stop</button>
           </div>
           <div className="button-wrapper flex-child">
-            <button className="button button_image vis" id= "drive1" onClick={() => this.goStraight()}></button>
+          <button className="button vis" id= "drive8" onClick={() => this.angleLeft()}></button>
+            <button className="button vis" id= "drive1" onClick={() => this.goStraight()}></button>
+            <button className="button vis" id= "drive9" onClick={() => this.angleRight()}></button>
             <div className="" >
               <button className="button  vis" id= "drive4" onClick={() => this.turnLeft()}></button>
               <button className="button vis" id= "drive3" onClick={() => this.turnRight()}></button>
@@ -798,15 +828,20 @@ class MBotApp extends React.Component {
   }
 }
 
+// TODO: Discuss what other modes will enable drive control. Currently the key presses active only when the drive toggle is toggled on.
 document.addEventListener('keydown', (event) => {
   var name = event.key;
-  const p = new MBotApp();
-  if (name == "a") p.turnLeft();
-  if (name == "d") p.turnRight();
-  if (name == "s") p.goBack();
-  if (name == "w") p.goStraight();
-  if (name == "q") p.goStart();
-  if (name == "e") p.goStop();
+  const p = new MBotApp;
+  if(drive_check == 1){
+    if (name == "a") p.turnLeft();
+    if (name == "d") p.turnRight();
+    if (name == "s") p.goBack();
+    if (name == "w") p.goStraight();
+    if (name == "q") p.angleLeft();
+    if (name == "e") p.angleRight();
+    if (name == "z") p.goStart();
+    if (name == "x") p.goStop();
+  }
 }, false);
 
 ReactDOM.render(

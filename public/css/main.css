@@ -213,15 +213,6 @@ input:checked + .slider:before {
   border-radius: 50%;
 }
 
-/* Lots of repeat code, will be fixed later on */
-/* #map1, #map2, #map3, #map4, #map5{
-  visibility: hidden;
-} */
-
-/* #drive1, #drive2, #drive3, #drive4, #drive5, #myrange, #drive6, #drive7{
-  visibility: hidden;
-} */
-
 .left-space{
   padding-left: 15px;
 }
@@ -238,13 +229,11 @@ input:checked + .slider:before {
   padding-bottom: 10px;
 }
 
-.alternate-color
-{
+.alternate-color{
   background-color:#7e8018;
 }
 
-.stop-color
-{
+.stop-color{
   background-color:#a12118;
 }
 
@@ -252,8 +241,7 @@ input:checked + .slider:before {
   background-color: #1a8d37;
 }
 
-.stop-color2
-{
+.stop-color2{
   background-color:#9b3e38;
 }
 
@@ -261,14 +249,13 @@ input:checked + .slider:before {
   background-color: #167541;
 }
 
-
 .new-background-color{
   background: #021f3a;
   color:#ccc;
 }
 
+/* This is for the drive buttons up, down, left, and right */
 #drive1, #drive2, #drive3, #drive4{
-  /* margin: 10px 0px 10px 20px; */
   background-image: url("https://cdn4.iconfinder.com/data/icons/arrow-part-2-line-pixel-art/48/51-play_player_arrow_game_application_mobile_up_down_left_right-512.png");
   background-size: cover;
   background-color: transparent;
@@ -279,31 +266,60 @@ input:checked + .slider:before {
   padding: 20px 20px;
 }
 
-#drive1{
-  transform: rotate(270deg);
-  margin-left: 30%;
+/* This is for the turn buttons to turn around the robot */
+#drive8, #drive9{
+  background-image: url("https://cdn2.iconfinder.com/data/icons/game-center-mixed-icons/512/arrow1.png");
+  background-size: cover;
+  background-color: transparent;
+  color:none;
+  width: 10px;
+  height: 10px;
+  /* font-size: 2rem;
+  padding: 20px 20px; */
 }
 
-#drive1:hover, #drive2:hover, #drive3:hover, #drive4:hover{
+/* Drive forward robot */
+#drive1{
+  transform: rotate(270deg);
+  margin-left: 4%;
+  margin-bottom: 5px;
+}
+
+#drive1:hover, #drive2:hover, #drive3:hover, #drive4:hover, #drive8:hover, #drive9:hover{
   background-color:#bdcf58;
 }
 
+/* Drive back robot */
 #drive2{
   transform: rotate(90deg);
-  margin-left: 30%;
+  margin-left: 27%;
+  margin-top: 5px;
 }
 
-
+/* Drive to the right */
 #drive3{
-  margin-right: 20%;
+  margin-right: 2%;
 }
 
+/* Drive to the left */
 #drive4{
   transform: rotate(180deg);
-  margin-left: 13%;
-  margin-right: 19%;
+  margin-left: 8%;
+  margin-right: 22%;
 }
 
+/* Turn robot to the left */
+#drive8{
+  transform: scaleX(-1) rotate(60deg);
+}
+
+/* Turn robot to the left */
+#drive9{
+  margin-left: 3%;
+  transform: rotate(63deg);
+}
+
+/* Container to organize drive features */
 .flex-container {
   display: flex;
   margin: 10px;
@@ -317,11 +333,13 @@ input:checked + .slider:before {
   margin-right: 10px;
 } 
 
+/* Spacing up top, used for start, stop buttons */
 .s{
   margin-top: 20px;
 }
 
-.in{
+/* Inverts colors*/
+.invert{
   -webkit-filter: invert(1);
   filter: invert(1);
 }
@@ -334,53 +352,31 @@ input:checked + .slider:before {
   border-color: #F5F5F5;
 }
 
-.change {
-  animation:myfirst 0.5s 1;
-  -webkit-animation:myfirst 0.5s 1; /* Safari and Chrome */
+.dbutton-animation{ 
+  animation:drive_buttons 0.5s 1;
 }
 
-.change1 {
-  animation:myfirst2 1s 1;
-  -webkit-animation:myfirst2 0.5s 1; /* Safari and Chrome */
+.startbtn-animation {
+  animation:start_button 1s 1;
 }
 
-.change2 {
-  animation:myfirst3 1s 1;
-  -webkit-animation:myfirst3 0.5s 1; /* Safari and Chrome */
+.stopbtn-animation {
+  animation:stop_button 1s 1;
 }
 
-@keyframes myfirst
-{
+/* Reminder: Add @-webkit-keyframes if animation doesn't appear on some devices */
+
+@keyframes drive_buttons{
   0%      {background-color:rgba(123, 131, 18, 0.6);}
   100%    {background-color:rgba(25, 113, 129)}
 }
 
-@-webkit-keyframes myfirst /* Safari and Chrome */
-{
-  0%      {background-color:rgba(123, 131, 18, 0.6);}
-  100%    {background-color:rgba(25, 113, 129)}
-}
-
-@keyframes myfirst2
-{
+@keyframes start_button{
   0%      {background-color:rgba(9, 138, 63, 0.6);}
   100%    {background-color:rgb(10, 77, 15)}
 }
 
-@-webkit-keyframes myfirst2 /* Safari and Chrome */
-{
-  0%      {background-color:rgba(9, 138, 63, 0.6);}
-  100%    {background-color:rgb(10, 77, 15)}
-}
-
-@keyframes myfirst3
-{
-  0%      {background-color:rgba(156, 48, 21, 0.6);}
-  100%    {background-color:rgb(102, 21, 15)}
-}
-
-@-webkit-keyframes myfirst3 /* Safari and Chrome */
-{
+@keyframes stop_button{
   0%      {background-color:rgba(156, 48, 21, 0.6);}
   100%    {background-color:rgb(102, 21, 15)}
 }
