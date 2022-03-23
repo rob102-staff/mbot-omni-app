@@ -708,7 +708,7 @@ class MBotApp extends React.Component {
       }
     }
   }
-
+  //TODO: emit message to backend when the running mode is changed.
   startmap(){
     console.log("Starting to map")
   }
