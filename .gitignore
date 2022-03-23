@@ -11,3 +11,6 @@ __pycache__/
 
 # Map files
 *.map
+
+# Other
+.DS_Store
