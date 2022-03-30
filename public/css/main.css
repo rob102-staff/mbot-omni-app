@@ -6,13 +6,13 @@ Light grey for backgrounds: #F5F5F5;
 */
 
 body {
-  margin:40px auto;
+  margin:20px auto;
   max-width:800px;
   line-height:1.6;
   font-size:18px;
   color:#444;
   padding:0 10px;
-  font-family: "Roboto", "Helvetica", "Arial", sans-serif;
+  font-family: 'Montserrat', sans-serif;
 }
 
 h1,h2,h3 {
@@ -36,8 +36,8 @@ a:hover {
   margin-top: 0.5em;
   margin-bottom: 1em;
   position: relative;
-  /*height: 100%;*/
-  /*width: 100%;*/
+  height: 100%;
+  width: 100%;
 }
 
 canvas {
@@ -70,7 +70,7 @@ canvas {
   background-color: #2F65A7;
   border: none;
   color: white;
-  padding: 10px 32px;
+  padding: 10px 20px;
   border-radius: 10px;
   text-align: center;
   text-decoration: none;
@@ -211,4 +211,172 @@ input:checked + .slider:before {
 
 .slider.round:before {
   border-radius: 50%;
+}
+
+.left-space{
+  padding-left: 15px;
+}
+
+.top-spacing{
+  padding: 20px 0px;
+}
+
+.left-margin{
+  margin-left: 100px;
+}
+
+.top-and-bottom-space{
+  padding-bottom: 10px;
+}
+
+.alternate-color{
+  background-color:#7e8018;
+}
+
+.stop-color{
+  background-color:#a12118;
+}
+
+.start-color{
+  background-color: #1a8d37;
+}
+
+.stop-color2{
+  background-color:#9b3e38;
+}
+
+.start-color2{
+  background-color: #167541;
+}
+
+.new-background-color{
+  background: #021f3a;
+  color:#ccc;
+}
+
+/* This is for the drive buttons up, down, left, and right */
+#drive1, #drive2, #drive3, #drive4{
+  background-image: url("https://cdn4.iconfinder.com/data/icons/arrow-part-2-line-pixel-art/48/51-play_player_arrow_game_application_mobile_up_down_left_right-512.png");
+  background-size: cover;
+  background-color: transparent;
+  color:none;
+  width: 10px;
+  height: 10px;
+  font-size: 2rem;
+  padding: 20px 20px;
+}
+
+/* This is for the turn buttons to turn around the robot */
+#drive8, #drive9{
+  background-image: url("https://cdn2.iconfinder.com/data/icons/game-center-mixed-icons/512/arrow1.png");
+  background-size: cover;
+  background-color: transparent;
+  color:none;
+  width: 10px;
+  height: 10px;
+  /* font-size: 2rem;
+  padding: 20px 20px; */
+}
+
+/* Drive forward robot */
+#drive1{
+  transform: rotate(270deg);
+  margin-left: 4%;
+  margin-bottom: 5px;
+}
+
+#drive1:hover, #drive2:hover, #drive3:hover, #drive4:hover, #drive8:hover, #drive9:hover{
+  background-color:#bdcf58;
+}
+
+/* Drive back robot */
+#drive2{
+  transform: rotate(90deg);
+  margin-left: 27%;
+  margin-top: 5px;
+}
+
+/* Drive to the right */
+#drive3{
+  margin-right: 2%;
+}
+
+/* Drive to the left */
+#drive4{
+  transform: rotate(180deg);
+  margin-left: 8%;
+  margin-right: 22%;
+}
+
+/* Turn robot to the left */
+#drive8{
+  transform: scaleX(-1) rotate(60deg);
+}
+
+/* Turn robot to the left */
+#drive9{
+  margin-left: 3%;
+  transform: rotate(63deg);
+}
+
+/* Container to organize drive features */
+.flex-container {
+  display: flex;
+  margin: 10px;
+}
+
+.flex-child {
+  flex: 1;
+}  
+
+.flex-child:first-child {
+  margin-right: 10px;
+} 
+
+/* Spacing up top, used for start, stop buttons */
+.s{
+  margin-top: 20px;
+}
+
+/* Inverts colors*/
+.invert{
+  -webkit-filter: invert(1);
+  filter: invert(1);
+}
+
+.vis{
+  visibility: hidden;
+}
+
+.white-border{
+  border-color: #F5F5F5;
+}
+
+.dbutton-animation{ 
+  animation:drive_buttons 0.5s 1;
+}
+
+.startbtn-animation {
+  animation:start_button 1s 1;
+}
+
+.stopbtn-animation {
+  animation:stop_button 1s 1;
+}
+
+/* Reminder: Add @-webkit-keyframes if animation doesn't appear on some devices */
+
+@keyframes drive_buttons{
+  0%      {background-color:rgba(123, 131, 18, 0.6);}
+  100%    {background-color:rgba(25, 113, 129)}
+}
+
+@keyframes start_button{
+  0%      {background-color:rgba(9, 138, 63, 0.6);}
+  100%    {background-color:rgb(10, 77, 15)}
+}
+
+@keyframes stop_button{
+  0%      {background-color:rgba(156, 48, 21, 0.6);}
+  100%    {background-color:rgb(102, 21, 15)}
 }

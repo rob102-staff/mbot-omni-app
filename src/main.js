@@ -8,8 +8,11 @@ import Select from '@material-ui/core/Select';
 
 import config from "./config.js";
 import { WSHelper } from "./web.js";
-import { parseMap, normalizeList } from "./map.js";
+import { parseMapFromSocket, normalizeList } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
+
+// Global Variables
+let drive_check = 0;
 
 /*******************
  *     BUTTONS
@@ -32,14 +35,14 @@ function StatusMessage(props) {
   );
 }
 
-function ConnectionStatus(props) {
+function ConnectionStatus(connection) {
   var msg = "Wait";
   var colour = "#ffd300";
-  if (props.status === WebSocket.OPEN) {
+  if (connection.status === true) {
     msg = "Connected";
     colour = "#00ff00";
   }
-  else if (props.status === WebSocket.CLOSED) {
+  else if (connection.status === false) {
     msg = "Not Connected";
     colour = "#ff0000";
   }
@@ -299,7 +302,7 @@ class MBotApp extends React.Component {
 
     // React state.
     this.state = {
-      connection: WebSocket.CLOSED,
+      connection: false,
       cells: [],
       width: 0,
       height: 0,
@@ -328,36 +331,17 @@ class MBotApp extends React.Component {
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
     this.ws.userHandleMessage = (evt) => { this.handleMessage(evt); };
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
+    this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
 
     this.visitGrid = new GridCellCanvas();
   }
 
   anExamplePost() {
-    // This is an example callback which triggers when pressing the "Test me"
-    // button. It makes a POST request to the Flask server on the endpoint
-    // /app/motor_cmd with some JSON data (in the "body" key).
-    fetch("/app/motor_cmd",  // The endpoint to send the message to.
-      {
-        // The message to send.
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({'fwd': 1.0,
-                              'rot': 0.5}),
-      })
-      .then((response) => {
-        if (!response.ok) throw Error(response.statusText);
-        return response.json();
-      })
-      .then((data) => {
-        // This code gets called when the server returns a message.
-        console.log("The server returned: ", data);
-      })
-      .catch((error) => {
-        // This code gets called in the event of an error in the request.
-        console.log(error)
-      });
+    this.ws.socket.emit("test", {'test_key': "test_value"});
+  }
+
+  askForMap() {
+    this.ws.socket.emit("map", {'test_key': "Need map. Please give."});
   }
 
   posToPixels(x, y) {
@@ -385,25 +369,17 @@ class MBotApp extends React.Component {
     this.ws.attemptConnection();
   }
 
-  handleMessage(msg) {
-    var server_msg = JSON.parse(msg.data);
+  handleMap(mapmsg) {
+    var map=parseMapFromSocket(mapmsg)
+    console.log("Parsed map.")
+    this.updateMap(map);
+    
 
-    if (server_msg.type == "robot_path")
-    {
-      this.handlePath(server_msg.data);
-    }
-    else if (server_msg.type == "visited_cell")
-    {
-      this.handleCells(server_msg.data);
-    }
-    else if (server_msg.type == "field")
-    {
-      this.handleField(server_msg.data);
-    }
-    else
-    {
-      console.log("Unrecognized type", server_msg.type);
-    }
+  }
+
+  handleMessage(msg) {
+    console.log(msg)
+    return msg
   }
 
   handleWindowChange(evt) {
@@ -572,6 +548,184 @@ class MBotApp extends React.Component {
     this.setState({algo: event.target.value});
   }
 
+  onMapCheck() {
+    const map_buttons = ["map1", "map2", "map3", "map4", "map5"];
+
+    var checkBox = document.getElementById("myCheck");
+    if (checkBox.checked == true){
+      console.log("hello");
+      for (let index = 0; index < map_buttons.length; index++) {
+        const element = map_buttons[index];
+        const e = document.getElementById(element);
+        e.classList.remove("vis");
+      }
+
+    }
+    else
+    {
+      for (let index = 0; index < map_buttons.length; index++) {
+        const element = map_buttons[index];
+        const e = document.getElementById(element);
+        e.classList.add("vis")
+      }
+    }
+    this.setState({showField: !this.state.showField});
+  }
+
+  onDriveCheck() {
+    const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive5", "drive6", "drive7", "drive8", "drive9"];
+
+    var checkBox = document.getElementById("myDrive");
+    if (checkBox.checked == true){
+      console.log("hello");
+      for (let index = 0; index < map_buttons.length; index++) {
+        const element = map_buttons[index];
+        const e = document.getElementById(element);
+        e.classList.remove("vis");
+        }
+      drive_check = 1;
+    }
+    else
+    {
+      for (let index = 0; index < map_buttons.length; index++) {
+        const element = map_buttons[index];
+        const e = document.getElementById(element);
+        e.classList.add("vis")
+      }
+      drive_check = 0;
+    }
+  }
+  
+  onRange() {
+    var slider = document.getElementById("myRange");
+    var output = document.getElementById("demo");
+    output.innerHTML = slider.value;
+  }
+
+  turnLeft(){
+    console.log("Going left");
+    const e = document.getElementById("drive4");
+    e.classList.add("dbutton-animation")
+    setTimeout(function(){
+      e.classList.remove("dbutton-animation");
+    }, 500)
+    // this.ws.socket.emit("test", {'test_key': "test_value"});
+  }
+
+  turnRight(){
+    console.log("Going right");
+    const e = document.getElementById("drive3");
+    e.classList.add("dbutton-animation")
+    setTimeout(function(){
+      e.classList.remove("dbutton-animation");
+    }, 500)
+    //this.ws.socket.emit("test", {'test_key': "test_value"});
+  }
+
+  angleLeft(){
+    console.log("Left turn by 20 degrees");
+    const e = document.getElementById("drive8");
+    e.classList.add("dbutton-animation")
+    setTimeout(function(){
+      e.classList.remove("dbutton-animation");
+    }, 500)
+    // this.ws.socket.emit("test", {'test_key': "test_value"});
+  }
+
+  angleRight(){
+    console.log("Right turn by 20 degrees");
+    const e = document.getElementById("drive9");
+    e.classList.add("dbutton-animation")
+    setTimeout(function(){
+      e.classList.remove("dbutton-animation");
+    }, 500)
+    // this.ws.socket.emit("test", {'test_key': "test_value"});
+  }
+
+  goStraight(){
+    console.log("Go forwards");
+    const e = document.getElementById("drive1");
+    e.classList.add("dbutton-animation")
+    setTimeout(function(){
+      e.classList.remove("dbutton-animation");
+    }, 500)
+    // this.ws.socket.emit("test", {'test_key': "test_value"});
+  }
+
+  goBack(){
+    console.log("Go back");
+    const e = document.getElementById("drive2");
+    e.classList.add("dbutton-animation")
+    setTimeout(function(){
+      e.classList.remove("dbutton-animation");
+    }, 500)
+    // this.ws.socket.emit("test", {'test_key': "test_value"});
+  }
+
+  goStart(){
+    console.log("Start robot");
+    const e = document.getElementById("drive6");
+    e.classList.add("startbtn-animation")
+    setTimeout(function(){
+      e.classList.remove("startbtn-animation");
+    }, 1000)
+    // this.ws.socket.emit("test", {'test_key': "test_value"});
+  }
+
+  goStop(){
+    console.log("STOP robot it was about run into Popeye");
+    const e = document.getElementById("drive7");
+    e.classList.add("stopbtn-animation")
+    setTimeout(function(){
+      e.classList.remove("stopbtn-animation");
+    }, 1000)
+    // this.ws.socket.emit("test", {'test_key': "test_value"});
+  }
+
+  darkMode(){
+
+    const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive8", "drive9"];
+
+    var checkBox = document.getElementById("myDark");
+    var canvas = document.getElementById("canvas");
+    if (checkBox.checked == true){
+      document.body.classList.add("new-background-color");
+      canvas.classList.add("white-border")
+
+      for (let index = 0; index < map_buttons.length; index++) {
+        const element = map_buttons[index];
+        const e = document.getElementById(element);
+        e.classList.add("invert");
+      }
+    }else{
+      document.body.classList.remove("new-background-color");
+      canvas.classList.remove("white-border")
+      
+      for (let index = 0; index < map_buttons.length; index++) {
+        const element = map_buttons[index];
+        const e = document.getElementById(element);
+        e.classList.remove("invert");      
+      }
+    }
+  }
+  //TODO: emit message to backend when the running mode is changed.
+  startmap(){
+    console.log("Starting to map")
+  }
+
+  stopmap(){
+    console.log("Stopping map")
+  }
+
+  restartmap(){
+    console.log("Resetting map")
+  }
+
+  setpoint(){
+    console.log("Setting start point")
+  }
+
+
   render() {
     var canvasStyle = {
       width: config.MAP_DISPLAY_WIDTH + "px",
@@ -580,18 +734,63 @@ class MBotApp extends React.Component {
 
     return (
       <div>
-        <div className="select-wrapper">
-          <MapFileSelect onChange={(event) => this.onFileChange(event)}/>
-          <AlgoForm onChange={(event) => this.handleAlgoSelect(event)} value={this.state.algo}/>
+        <div className="button-wrapper">
+          {/* This button is an example (not part of the original webapp) which sends a POST to the Flask server. */}
+          <button className="button" onClick={() => this.askForMap()}>Grab Map</button>
+          <button className="button" onClick={() => console.log(this.state)}>Check State</button>
         </div>
 
-        <div className="button-wrapper">
-          <button className="button" onClick={() => this.onFileUpload()}>Upload Map</button>
-          <button className="button" onClick={() => this.onGoalClear()}>Clear Goal</button>
-          <button className="button" onClick={() => this.onPlan()}>Plan!</button>
-          {/* This button is an example (not part of the original webapp) which sends a POST to the Flask server. */}
-          <button className="button" onClick={() => this.anExamplePost()}>Test me</button>
+        <div className="button-wrapper top-spacing">
+          <div className="field-toggle-wrapper top-spacing">
+          <span>Dark Mode</span>
+            <label className="switch">
+              <input type="checkbox" id="myDark" onClick={() => this.darkMode()}/>
+              <span className="slider round"></span>
+            </label>
+            <span className = "left-space">Mapping Mode</span>
+            <label className="switch">
+              <input type="checkbox" id="myCheck" onClick={() => this.onMapCheck()}/>
+              <span className="slider round"></span>
+            </label>
+            <span className = "left-space">Drive Mode</span>
+            <label className="switch">
+              <input type="checkbox" id="myDrive" onClick={() => this.onDriveCheck()}/>
+              <span className="slider round"></span>
+            </label>
+          </div>
+          
+          <button className="button vis start-color2" id= "map1" onClick={() => this.startmap()}>Start Mapping</button>
+          <button className="button vis stop-color2" id= "map2" onClick={() => this.stopmap()}>Stop Mapping</button>
+          <button className="button vis" id= "map3" onClick={() => this.restartmap()}>Restart Mapping</button>
+          <button className="button vis" id= "map5" onClick={() => this.setpoint()}>Start Point</button>
+
+          <button className="button vis" id= "map4" onClick={() => this.anExamplePost()}>Send Map</button>
         </div>
+
+        <div className="top-and-bottom-space"></div>
+
+
+        <div className="flex-container">
+          <div className="button-wrapper flex-child vis" id = "drive5">
+            <p id="">Current speed: <span id="demo">50</span></p>
+            <input type="range" min="1" max="100" value="50" id="myRange" onInput={() => this.onRange()}></input>
+          </div>
+          <div className="button-wrapper flex-child top-spacing s">
+            <button className="button start-color vis" id= "drive6" onClick={() => this.goStart()}>Start</button>
+            <button className="button stop-color vis" id= "drive7" onClick={() => this.goStop()}>Stop</button>
+          </div>
+          <div className="button-wrapper flex-child">
+          <button className="button vis" id= "drive8" onClick={() => this.angleLeft()}></button>
+            <button className="button vis" id= "drive1" onClick={() => this.goStraight()}></button>
+            <button className="button vis" id= "drive9" onClick={() => this.angleRight()}></button>
+            <div className="" >
+              <button className="button  vis" id= "drive4" onClick={() => this.turnLeft()}></button>
+              <button className="button vis" id= "drive3" onClick={() => this.turnRight()}></button>
+            </div>
+            <button className="button  vis" id= "drive2" onClick={() => this.goBack()}></button>
+          </div>
+        </div>
+
 
         <div className="status-wrapper">
           <div className="field-toggle-wrapper">
@@ -606,7 +805,7 @@ class MBotApp extends React.Component {
           <ConnectionStatus status={this.state.connection}/>
         </div>
 
-        <div className="canvas-container" style={canvasStyle}>
+        <div className="canvas-container" id = "canvas" style={canvasStyle}>
           <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
           <DrawField field={this.state.field} showField={this.state.showField}
                      width={this.state.width} height={this.state.height} />
@@ -628,6 +827,22 @@ class MBotApp extends React.Component {
     );
   }
 }
+
+// TODO: Discuss what other modes will enable drive control. Currently the key presses active only when the drive toggle is toggled on.
+document.addEventListener('keydown', (event) => {
+  var name = event.key;
+  const p = new MBotApp;
+  if(drive_check == 1){
+    if (name == "a") p.turnLeft();
+    if (name == "d") p.turnRight();
+    if (name == "s") p.goBack();
+    if (name == "w") p.goStraight();
+    if (name == "q") p.angleLeft();
+    if (name == "e") p.angleRight();
+    if (name == "z") p.goStart();
+    if (name == "x") p.goStop();
+  }
+}, false);
 
 ReactDOM.render(
   <MBotApp />,

@@ -1,38 +1,47 @@
+import { io } from "socket.io-client";
+
 /********************
  * WEBSOCKET HELPERS
  ********************/
 
 class WSHelper {
   constructor(host, port, endpoint, reconnect_delay = 5000) {
-    this.ws = null;
-    this.ws_uri = "ws://" + host + ":" + port + "/" + endpoint;
+    this.socket = null;
+    this.uri = "http://" + host + ":" + port + "/" + endpoint;
     this.attempting_connection = false;
     this.connectInterval = null;
     this.connect_period = reconnect_delay;
-    this.userHandleMessage = (evt) => {};
-    this.statusCallback = (status) => {};
+    this.userHandleMessage = (evt) => {console.warn("userHandleMessage is not yet set up.")};
+    this.statusCallback = (status) => {console.warn("statusCallback is not yet set up.")};
+    this.userHandleMap = (evt) => {console.warm("userHandleMap is not yet set up.")};
   }
 
   connect() {
-    if (this.ws !== null) {
-      if (this.ws.readyState === WebSocket.OPEN) return true;
+    if (this.socket !== null) {
+      if (this.socket.connected === true){
+        return true
+      } 
     }
 
-    this.ws = new WebSocket(this.ws_uri);
-    this.ws.onmessage = (evt) => this.userHandleMessage(evt);
-    this.ws.onopen = (evt) => this.handleOpen(evt);
-    this.ws.onclose = (evt) => this.attemptConnection();
-    // ws.onerror = (evt) => this.updateSocketStatus();
-    this.ws.addEventListener('error', (evt) => { this.statusCallback(this.status()); });
+    this.socket = io(this.uri);
 
-    return this.ws.readyState === WebSocket.OPEN;
+    this.socket.on("message", (evt) => this.userHandleMessage(evt));
+    this.socket.on("connect", (evt) => this.handleOpen(evt));
+    this.socket.on("close", (evt) => this.attemptConnection());
+    this.socket.on('error', (evt) => { this.statusCallback(this.status()); });
+    this.socket.on('map', (evt) => this.userHandleMap(evt));
+
+    console.log("Connection status: ", this.status())
+    return this.status();
   }
 
   attemptConnection() {
+    console.log("Attempting to connect socket...")
     // If we aren't already trying to connect, try now.
     if (!this.attempting_connection) {
       // Try to connect. If we fail, start an interval to keep trying.
       if (!this.connect()) {
+        console.log("Failed to connect!")
         this.connectInterval = setInterval(() => {
           this.connect();
         }, this.connect_period);
@@ -45,7 +54,7 @@ class WSHelper {
   }
 
   handleOpen(evt) {
-    console.log("WebSocket connection open to:", this.ws_uri);
+    console.log("Socket connection open to:", this.uri);
 
     if (this.connectInterval !== null) {
       clearInterval(this.connectInterval);
@@ -56,13 +65,13 @@ class WSHelper {
   }
 
   status() {
-    if (this.ws === null) return WebSocket.CLOSED;
-    return this.ws.readyState;
+    if (this.socket === null) return false;
+    return this.socket.connected;
   }
 
   send(data) {
-    if (this.status() !== WebSocket.OPEN) return;
-    this.ws.send(JSON.stringify(data));
+    if (this.status() !== true) return;
+    this.socket.send(JSON.stringify(data));
   }
 }
 

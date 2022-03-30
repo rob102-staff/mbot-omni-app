@@ -8,3 +8,10 @@ dist/
 # Python
 __pycache__/
 *.pyc
+
+# Map files
+*.map
+
+# Other
+.DS_Store
+lcmtypes/*.py

@@ -1,0 +1,9 @@
+struct omni_motor_command_t
+{
+
+    int64_t utime;
+
+    float vx; // in m/s
+    float vy; // in m/s
+    float wz; // in rad/s
+}

@@ -2,35 +2,28 @@
  * MAP HELPERS
  *******************/
 
-function parseMap(data) {
+function parseMapFromSocket(data) {
   var map = {};
+  var datacells = [];
+  var count = 0;
 
-  var lines = data.trim().split('\n');
-  var header = lines.shift();
-  header = header.split(/\s+/);
-
-  map.origin = [parseFloat(header[0]), parseFloat(header[1])];
-  map.width = parseFloat(header[2]);
-  map.height = parseFloat(header[3]);
-  map.meters_per_cell = parseFloat(header[4]);
-  map.num_cells = map.width * map.height;
-
-  map.cells = [];
-
-  for (let line of lines) {
-    line = line.trim().split(/\s+/);
-
-    if (line.length == 1) continue;
-
-    for (let ele of line) {
-      map.cells.push(parseInt(ele));
+  for (let line of data.split(" ")) {
+    if (line!="\n") {
+      datacells.push(parseFloat(line.replace("[", "").replace("]", "").replace('"', '').replace("\\n", "")));
+      count++;
     }
   }
 
-  map.cells = normalizeList(map.cells);
+  map.origin = [parseFloat(datacells.shift()), parseFloat(datacells.shift())];
+  map.width = parseFloat(datacells.shift());
+  map.height = parseFloat(datacells.shift());
+  map.meters_per_cell = parseFloat(datacells.shift());
+  map.num_cells = map.width * map.height;
 
-  if (map.cells.length !== map.num_cells) {
-    console.warn("Map has wrong number of cells:", map.cells.length, "!==", map.num_cells);
+  map.cells = normalizeList(datacells);
+
+  if (map.cells.length!=map.width*map.height) {
+
   }
 
   return map;
@@ -59,4 +52,4 @@ function normalizeList(list) {
   return list;
 }
 
-export { parseMap, normalizeList };
+export { parseMapFromSocket, normalizeList };

@@ -1,19 +1,28 @@
 import flask
-from app import app
+from app import app, socket
+import json
 
-"""The routes module stores all the callback functions associated with each
-endpoint that is exposed by the frontend. Add more here as needed (they must
-start with '/app/'). For example, you might want to have a different endpoint
-for drive commands, mapping commands, etc."""
+@socket.on('connect')
+def setup_connection():
+    app.logger.info("Successfully connected!")
 
+@socket.on('test')
+def test_message(data):
+    app.logger.info("The test message is received!!!")
+    app.logger.info(data)
+    socket.emit("message", json.dumps({'data':{'type':'server_test', 'server_test_key':'server_test_val'}}))
 
-@app.route("/app/motor_cmd", methods=['POST'])
-def motors_cmd():
-    # This is a dictionary containing the JSON data sent from the frontend.
-    form_data = flask.request.get_json(force=True)
+@socket.on('map')
+def send_map(data):
+    app.logger.info("Message received.")
+    app.logger.info(data)
 
-    if flask.request.method == 'POST':
-        app.logger.info("Got message:", form_data)
-        return {}, 200
+    try:
+        with open("cropped_map_10-20-21.map","r") as fin:
+            maplines = fin.readlines()
+            socket.emit("map", json.dumps(maplines))
+    except IOError:
+        app.logger.info("Error. Cannot open file.")
 
-    return {}, 200
+    return maplines
+
