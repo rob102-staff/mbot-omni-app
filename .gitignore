@@ -14,4 +14,4 @@ __pycache__/
 
 # Other
 .DS_Store
-*.lcm
+lcmtypes/*.py
