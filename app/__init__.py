@@ -6,7 +6,8 @@ from flask_cors import CORS
 # stored in the "src" folder.
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'development key'  # TODO: Verify necessity of this key
-socket = SocketIO(app, cors_allowed_origins='*')
-CORS(app)  # TODO: Verify necessity of CORS while using localhost
+socket = SocketIO(app , cors_allowed_origins='*')
+# CORS(app)  # TODO: Verify necessity of CORS while using localhost
+app.start()
 
 from app import routes
