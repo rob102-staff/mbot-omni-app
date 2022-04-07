@@ -7,7 +7,7 @@ import { io } from "socket.io-client";
 class WSHelper {
   constructor(host, port, endpoint, reconnect_delay = 5000) {
     this.socket = null;
-    this.uri = "http://" + host + ":" + port + "/" + endpoint;
+    this.uri = "http://" + "" + ":" + port + "/" + endpoint;
     this.attempting_connection = false;
     this.connectInterval = null;
     this.connect_period = reconnect_delay;
