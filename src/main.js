@@ -603,23 +603,25 @@ class MBotApp extends React.Component {
   }
 
   turnLeft(){
-    console.log("Going left");
+    console.log("Go left");
     const e = document.getElementById("drive4");
     e.classList.add("dbutton-animation")
     setTimeout(function(){
       e.classList.remove("dbutton-animation");
     }, 500)
-    // this.ws.socket.emit("test", {'test_key': "test_value"});
+    //this.ws.socket.emit("test", {'test_key': "test_value"});
+    this.ws.socket.emit("move", {'left': document.getElementById("myRange").value});
   }
 
   turnRight(){
-    console.log("Going right");
+    console.log("Go right");
     const e = document.getElementById("drive3");
     e.classList.add("dbutton-animation")
     setTimeout(function(){
       e.classList.remove("dbutton-animation");
     }, 500)
     //this.ws.socket.emit("test", {'test_key': "test_value"});
+    this.ws.socket.emit("move", {'right': document.getElementById("myRange").value});
   }
 
   angleLeft(){
@@ -649,7 +651,7 @@ class MBotApp extends React.Component {
     setTimeout(function(){
       e.classList.remove("dbutton-animation");
     }, 500)
-    // this.ws.socket.emit("test", {'test_key': "test_value"});
+    this.ws.socket.emit("move", {'forwards': document.getElementById("myRange").value});
   }
 
   goBack(){
@@ -660,6 +662,7 @@ class MBotApp extends React.Component {
       e.classList.remove("dbutton-animation");
     }, 500)
     // this.ws.socket.emit("test", {'test_key': "test_value"});
+    this.ws.socket.emit("move", {'backwards': document.getElementById("myRange").value});
   }
 
   goStart(){

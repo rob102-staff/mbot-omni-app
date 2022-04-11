@@ -26,3 +26,9 @@ def send_map(data):
 
     return maplines
 
+@socket.on('move')
+def test_message(data):
+    app.logger.info("The test MOVEEEEE message is received!!!")
+    app.logger.info(data)
+    #socket.emit("message", json.dumps({'data':{'type':'server_test', 'server_test_key':'server_test_val'}}))
+
