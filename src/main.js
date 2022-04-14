@@ -8,7 +8,7 @@ import Select from '@material-ui/core/Select';
 
 import config from "./config.js";
 import { WSHelper } from "./web.js";
-import { parseMapFromSocket, normalizeList } from "./map.js";
+import { parseMapFromSocket, parseMapFromLcm, normalizeList } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 
 // Global Variables
@@ -370,7 +370,11 @@ class MBotApp extends React.Component {
   }
 
   handleMap(mapmsg) {
-    var map=parseMapFromSocket(mapmsg)
+    console.log(mapmsg)
+    map = mapmsg
+    
+    // var map=parseMapFromSocket(mapmsg)
+    var map=parseMapFromLcm(mapmsg)
     console.log("Parsed map.")
     this.updateMap(map);
     

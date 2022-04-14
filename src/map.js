@@ -29,6 +29,18 @@ function parseMapFromSocket(data) {
   return map;
 }
 
+function parseMapFromLcm(msg){
+  var map = {};
+  map.origin = msg["origin"]
+  map.width = msg["width"]
+  map.height = msg["height"]
+  map.meters_per_cell = msg["meters_per_cell"]
+  map.num_cells = msg["num_cells"]
+  map.cells = normalizeList(msg["cells"])
+  return map
+}
+
+
 function normalizeList(list) {
   if (list.length < 1) return list;
   if (list.length === 1) return [1];
@@ -52,4 +64,4 @@ function normalizeList(list) {
   return list;
 }
 
-export { parseMapFromSocket, normalizeList };
+export { parseMapFromSocket, parseMapFromLcm, normalizeList };

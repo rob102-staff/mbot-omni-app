@@ -1,5 +1,5 @@
 import flask
-from app import app, socket
+from app import app, socket, lcm_manager
 import json
 
 @socket.on('connect')
