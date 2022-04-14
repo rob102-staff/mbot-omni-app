@@ -69,7 +69,7 @@ class LcmCommunicationManager:
         decoded_data=pose_xyt_t.decode(data)
         if channel in self._callback_dict.keys(): 
             self._callback_dict[channel](decoded_data)
-        print("Received pose!")  # TODO: remove
+        #print("Received pose!")  # TODO: remove
 
     def exploration_status_listener(self, channel, data): 
         decoded_data=exploration_status_t.decode(data)

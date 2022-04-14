@@ -610,7 +610,7 @@ class MBotApp extends React.Component {
       e.classList.remove("dbutton-animation");
     }, 500)
     //this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("move", {'left': document.getElementById("myRange").value});
+    this.ws.socket.emit("move", {'direction': "W"});
   }
 
   turnRight(){
@@ -621,7 +621,7 @@ class MBotApp extends React.Component {
       e.classList.remove("dbutton-animation");
     }, 500)
     //this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("move", {'right': document.getElementById("myRange").value});
+    this.ws.socket.emit("move", {'direction': "E"});
   }
 
   angleLeft(){
@@ -632,6 +632,7 @@ class MBotApp extends React.Component {
       e.classList.remove("dbutton-animation");
     }, 500)
     // this.ws.socket.emit("test", {'test_key': "test_value"});
+    this.ws.socket.emit("move", {'direction': "spinleft"});
   }
 
   angleRight(){
@@ -642,6 +643,7 @@ class MBotApp extends React.Component {
       e.classList.remove("dbutton-animation");
     }, 500)
     // this.ws.socket.emit("test", {'test_key': "test_value"});
+    this.ws.socket.emit("move", {'direction': "spinright"});
   }
 
   goStraight(){
@@ -651,7 +653,7 @@ class MBotApp extends React.Component {
     setTimeout(function(){
       e.classList.remove("dbutton-animation");
     }, 500)
-    this.ws.socket.emit("move", {'forwards': document.getElementById("myRange").value});
+    this.ws.socket.emit("move", {'direction': "N"});
   }
 
   goBack(){
@@ -662,7 +664,7 @@ class MBotApp extends React.Component {
       e.classList.remove("dbutton-animation");
     }, 500)
     // this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("move", {'backwards': document.getElementById("myRange").value});
+    this.ws.socket.emit("move", {'direction': "S"});
   }
 
   goStart(){
@@ -683,6 +685,7 @@ class MBotApp extends React.Component {
       e.classList.remove("stopbtn-animation");
     }, 1000)
     // this.ws.socket.emit("test", {'test_key': "test_value"});
+    this.ws.socket.emit("stop", {'stop cmd': document.getElementById("myRange").value});
   }
 
   darkMode(){
