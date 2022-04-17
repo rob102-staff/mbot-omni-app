@@ -10,6 +10,7 @@ import config from "./config.js";
 import { WSHelper } from "./web.js";
 import { parseMapFromSocket, normalizeList } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
+import { MOVE } from "./move.js";
 
 // Global Variables
 let drive_check = 0;
@@ -333,6 +334,8 @@ class MBotApp extends React.Component {
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
 
+    this.move = new MOVE(this.ws);
+
     this.visitGrid = new GridCellCanvas();
   }
 
@@ -602,91 +605,88 @@ class MBotApp extends React.Component {
     output.innerHTML = slider.value;
   }
 
-  turnLeft(){
-    console.log("Go left");
-    const e = document.getElementById("drive4");
-    e.classList.add("dbutton-animation")
-    setTimeout(function(){
-      e.classList.remove("dbutton-animation");
-    }, 500)
-    //this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("move", {'direction': "W"});
-  }
+  // turnLeft(){
+  //   console.log("Moving left...");
+  //   const e = document.getElementById("drive4");
+  //   e.classList.add("dbutton-animation")
+  //   setTimeout(function(){
+  //     e.classList.remove("dbutton-animation");
+  //   }, 500)
+  //   this.ws.socket.emit("move", {'direction': "W"});
+  // }
 
-  turnRight(){
-    console.log("Go right");
-    const e = document.getElementById("drive3");
-    e.classList.add("dbutton-animation")
-    setTimeout(function(){
-      e.classList.remove("dbutton-animation");
-    }, 500)
-    //this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("move", {'direction': "E"});
-  }
+  // turnRight(){
+  //   console.log("Turning right...");
+  //   const e = document.getElementById("drive3");
+  //   e.classList.add("dbutton-animation")
+  //   setTimeout(function(){
+  //     e.classList.remove("dbutton-animation");
+  //   }, 500)
+  //   this.ws.socket.emit("move", {'direction': "E"});
+  // }
 
-  angleLeft(){
-    console.log("Left turn by 20 degrees");
-    const e = document.getElementById("drive8");
-    e.classList.add("dbutton-animation")
-    setTimeout(function(){
-      e.classList.remove("dbutton-animation");
-    }, 500)
-    // this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("move", {'direction': "spinleft"});
-  }
+  // angleLeft(){
+  //   console.log("Turning left...");
+  //   const e = document.getElementById("drive8");
+  //   e.classList.add("dbutton-animation")
+  //   setTimeout(function(){
+  //     e.classList.remove("dbutton-animation");
+  //   }, 500)
+  //   // this.ws.socket.emit("test", {'test_key': "test_value"});
+  //   this.ws.socket.emit("move", {'direction': "spinleft"});
+  // }
 
-  angleRight(){
-    console.log("Right turn by 20 degrees");
-    const e = document.getElementById("drive9");
-    e.classList.add("dbutton-animation")
-    setTimeout(function(){
-      e.classList.remove("dbutton-animation");
-    }, 500)
-    // this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("move", {'direction': "spinright"});
-  }
+  // angleRight(){
+  //   console.log("Turning right...");
+  //   const e = document.getElementById("drive9");
+  //   e.classList.add("dbutton-animation")
+  //   setTimeout(function(){
+  //     e.classList.remove("dbutton-animation");
+  //   }, 500)
+  //   // this.ws.socket.emit("test", {'test_key': "test_value"});
+  //   this.ws.socket.emit("move", {'direction': "spinright"});
+  // }
 
-  goStraight(){
-    console.log("Go forwards");
-    const e = document.getElementById("drive1");
-    e.classList.add("dbutton-animation")
-    setTimeout(function(){
-      e.classList.remove("dbutton-animation");
-    }, 500)
-    this.ws.socket.emit("move", {'direction': "N"});
-  }
+  // goStraight(){
+  //   console.log("Moiving forwards...");
+  //   const e = document.getElementById("drive1");
+  //   e.classList.add("dbutton-animation")
+  //   setTimeout(function(){
+  //     e.classList.remove("dbutton-animation");
+  //   }, 500)
+  //   this.ws.socket.emit("move", {'direction': "N"});
+  // }
 
-  goBack(){
-    console.log("Go back");
-    const e = document.getElementById("drive2");
-    e.classList.add("dbutton-animation")
-    setTimeout(function(){
-      e.classList.remove("dbutton-animation");
-    }, 500)
-    // this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("move", {'direction': "S"});
-  }
+  // goBack(){
+  //   console.log("Moving backwards...");
+  //   const e = document.getElementById("drive2");
+  //   e.classList.add("dbutton-animation")
+  //   setTimeout(function(){
+  //     e.classList.remove("dbutton-animation");
+  //   }, 500)
+  //   this.ws.socket.emit("move", {'direction': "S"});
+  // }
 
-  goStart(){
-    console.log("Start robot");
-    const e = document.getElementById("drive6");
-    e.classList.add("startbtn-animation")
-    setTimeout(function(){
-      e.classList.remove("startbtn-animation");
-    }, 1000)
-    // this.ws.socket.emit("test", {'test_key': "test_value"});
-  }
+  // goStart(){
+  //   console.log("Start robot");
+  //   const e = document.getElementById("drive6");
+  //   e.classList.add("startbtn-animation")
+  //   setTimeout(function(){
+  //     e.classList.remove("startbtn-animation");
+  //   }, 1000)
+  //   // this.ws.socket.emit("test", {'test_key': "test_value"});
+  // }
 
-  goStop(){
-    console.log("STOP robot it was about run into Popeye");
-    const e = document.getElementById("drive7");
-    e.classList.add("stopbtn-animation")
-    setTimeout(function(){
-      e.classList.remove("stopbtn-animation");
-    }, 1000)
-    // this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("stop", {'stop cmd': document.getElementById("myRange").value});
-  }
+  // goStop(){
+  //   console.log("STOP robot it was about run into Popeye");
+  //   const e = document.getElementById("drive7");
+  //   e.classList.add("stopbtn-animation")
+  //   setTimeout(function(){
+  //     e.classList.remove("stopbtn-animation");
+  //   }, 1000)
+  //   // this.ws.socket.emit("test", {'test_key': "test_value"});
+  //   this.ws.socket.emit("stop", {'stop cmd': document.getElementById("myRange").value});
+  // }
 
   darkMode(){
 
@@ -783,17 +783,17 @@ class MBotApp extends React.Component {
           </div>
           <div className="button-wrapper flex-child top-spacing s">
             <button className="button start-color vis" id= "drive6" onClick={() => this.goStart()}>Start</button>
-            <button className="button stop-color vis" id= "drive7" onClick={() => this.goStop()}>Stop</button>
+            <button className="button stop-color vis" id= "drive7" onClick={() => this.move.goStop()}>Stop</button>
           </div>
           <div className="button-wrapper flex-child">
-          <button className="button vis" id= "drive8" onClick={() => this.angleLeft()}></button>
-            <button className="button vis" id= "drive1" onClick={() => this.goStraight()}></button>
-            <button className="button vis" id= "drive9" onClick={() => this.angleRight()}></button>
+          <button className="button vis" id= "drive8" onClick={() => this.move.angleLeft()}></button>
+            <button className="button vis" id= "drive1" onClick={() => this.move.goStraight()}></button>
+            <button className="button vis" id= "drive9" onClick={() => this.move.angleRight()}></button>
             <div className="" >
-              <button className="button  vis" id= "drive4" onClick={() => this.turnLeft()}></button>
-              <button className="button vis" id= "drive3" onClick={() => this.turnRight()}></button>
+              <button className="button  vis" id= "drive4" onClick={() => this.move.turnLeft()}></button>
+              <button className="button vis" id= "drive3" onClick={() => this.move.turnRight()}></button>
             </div>
-            <button className="button  vis" id= "drive2" onClick={() => this.goBack()}></button>
+            <button className="button  vis" id= "drive2" onClick={() => this.move.goBack()}></button>
           </div>
         </div>
 
