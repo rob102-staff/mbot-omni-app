@@ -14,6 +14,8 @@ import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 // Global Variables
 let drive_check = 0;
 
+
+
 /*******************
  *     BUTTONS
  *******************/
@@ -48,7 +50,7 @@ function ConnectionStatus(connection) {
   }
 
   return (
-    <div className="status" style={{backgroundColor: colour}}>
+    <div className="status col-5" style={{backgroundColor: colour}}>
       {msg}
     </div>
   );
@@ -80,6 +82,8 @@ function AlgoForm(props) {
     </FormControl>
   );
 }
+
+
 
 /*******************
  *     ROBOT
@@ -299,6 +303,8 @@ function MapFileSelect(props) {
 class MBotApp extends React.Component {
   constructor(props) {
     super(props);
+
+    // this.set_buttons();
 
     // React state.
     this.state = {
@@ -603,25 +609,23 @@ class MBotApp extends React.Component {
   }
 
   turnLeft(){
-    console.log("Go left");
+    console.log("Going left");
     const e = document.getElementById("drive4");
     e.classList.add("dbutton-animation")
     setTimeout(function(){
       e.classList.remove("dbutton-animation");
     }, 500)
-    //this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("move", {'direction': "W"});
+    // this.ws.socket.emit("test", {'test_key': "test_value"});
   }
 
   turnRight(){
-    console.log("Go right");
+    console.log("Going right");
     const e = document.getElementById("drive3");
     e.classList.add("dbutton-animation")
     setTimeout(function(){
       e.classList.remove("dbutton-animation");
     }, 500)
     //this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("move", {'direction': "E"});
   }
 
   angleLeft(){
@@ -632,7 +636,6 @@ class MBotApp extends React.Component {
       e.classList.remove("dbutton-animation");
     }, 500)
     // this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("move", {'direction': "spinleft"});
   }
 
   angleRight(){
@@ -643,7 +646,6 @@ class MBotApp extends React.Component {
       e.classList.remove("dbutton-animation");
     }, 500)
     // this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("move", {'direction': "spinright"});
   }
 
   goStraight(){
@@ -653,7 +655,7 @@ class MBotApp extends React.Component {
     setTimeout(function(){
       e.classList.remove("dbutton-animation");
     }, 500)
-    this.ws.socket.emit("move", {'direction': "N"});
+    // this.ws.socket.emit("test", {'test_key': "test_value"});
   }
 
   goBack(){
@@ -664,7 +666,6 @@ class MBotApp extends React.Component {
       e.classList.remove("dbutton-animation");
     }, 500)
     // this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("move", {'direction': "S"});
   }
 
   goStart(){
@@ -685,7 +686,6 @@ class MBotApp extends React.Component {
       e.classList.remove("stopbtn-animation");
     }, 1000)
     // this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("stop", {'stop cmd': document.getElementById("myRange").value});
   }
 
   darkMode(){
@@ -714,6 +714,28 @@ class MBotApp extends React.Component {
       }
     }
   }
+
+  // set_buttons(){
+  //   var m = document.getElementById("menu2");
+  //   m.innerHTML = '<div className="field-toggle-wrapper top-spacing">'
+  //               + '<span>Dark Mode</span>'
+  //               + '<label className="switch">'
+  //               + '<input type="checkbox" id="myDark" onClick={() => this.darkMode()}/>'
+  //               + '<span className="slider round"></span>'
+  //               + '</label>'
+  //               + '<span className = "left-space">Mapping Mode</span>'
+  //               + '<label className="switch">'
+  //               + '<input type="checkbox" id="myCheck" onClick={() => this.onMapCheck()}/>'
+  //               + '<span className="slider round"></span>'
+  //               + '</label>'
+  //               + '<span className = "left-space">Drive Mode</span>'
+  //               + '<label className="switch">'
+  //               + '<input type="checkbox" id="myDrive" onClick={() => this.onDriveCheck()}/>'
+  //               + '<span className="slider round"></span>'
+  //               + '</label>'
+  //               + '</div>';
+  // }
+
   //TODO: emit message to backend when the running mode is changed.
   startmap(){
     console.log("Starting to map")
@@ -731,6 +753,21 @@ class MBotApp extends React.Component {
     console.log("Setting start point")
   }
 
+  forgot() {
+    document.getElementById("forgot").style.display = "visible";
+    document.getElementById("forgot2").style.display = "visible";
+    console.log("Hello");
+  }
+
+  forgotoff() {
+      document.getElementById("forgot").style.display = "none";
+      forgotoff2()
+  }
+
+  forgotoff2() {
+      document.getElementById("forgot2").style.display = "none"
+      forgotoff()
+  }
 
   render() {
     var canvasStyle = {
@@ -740,99 +777,128 @@ class MBotApp extends React.Component {
 
     return (
       <div>
-        <div className="button-wrapper">
+
+        <div className="button-wrapper mt-4">
           {/* This button is an example (not part of the original webapp) which sends a POST to the Flask server. */}
           <button className="button" onClick={() => this.askForMap()}>Grab Map</button>
-          <button className="button" onClick={() => console.log(this.state)}>Check State</button>
+          <button className="button mx-5" onClick={() => console.log(this.state)}>Check State</button>
         </div>
 
-        <div className="button-wrapper top-spacing">
-          <div className="field-toggle-wrapper top-spacing">
-          <span>Dark Mode</span>
-            <label className="switch">
-              <input type="checkbox" id="myDark" onClick={() => this.darkMode()}/>
-              <span className="slider round"></span>
-            </label>
-            <span className = "left-space">Mapping Mode</span>
-            <label className="switch">
-              <input type="checkbox" id="myCheck" onClick={() => this.onMapCheck()}/>
-              <span className="slider round"></span>
-            </label>
-            <span className = "left-space">Drive Mode</span>
-            <label className="switch">
-              <input type="checkbox" id="myDrive" onClick={() => this.onDriveCheck()}/>
-              <span className="slider round"></span>
-            </label>
-          </div>
-          
-          <button className="button vis start-color2" id= "map1" onClick={() => this.startmap()}>Start Mapping</button>
-          <button className="button vis stop-color2" id= "map2" onClick={() => this.stopmap()}>Stop Mapping</button>
-          <button className="button vis" id= "map3" onClick={() => this.restartmap()}>Restart Mapping</button>
-          <button className="button vis" id= "map5" onClick={() => this.setpoint()}>Start Point</button>
 
-          <button className="button vis" id= "map4" onClick={() => this.anExamplePost()}>Send Map</button>
-        </div>
+        <div className="container-flex">
+          <div className="row">
+            <div className="col-5">
+              <div className="button-wrapper top-spacing">
+              <div className="field-toggle-wrapper top-spacing">
+                <span>Dark Mode</span>
+                  <label className="switch">
+                    <input type="checkbox" id="myDark" onClick={() => this.darkMode()}/>
+                    <span className="slider round"></span>
+                  </label>
+                  <span className = "left-space">Mapping Mode</span>
+                  <label className="switch">
+                    <input type="checkbox" id="myCheck" onClick={() => this.onMapCheck()}/>
+                    <span className="slider round"></span>
+                  </label>
+                  <span className = "left-space">Drive Mode</span>
+                  <label className="switch">
+                    <input type="checkbox" id="myDrive" onClick={() => this.onDriveCheck()}/>
+                    <span className="slider round"></span>
+                  </label>
+                </div>
+                
+                  <div className="row text-center mt-4">
+                    <div className="col-6">
+                      <button className="button btn vis start-color2 " id= "map1" onClick={() => this.startmap()}>Start Mapping</button>
+                    </div>
+                    <div className="col-6">
+                      <button className="button btn vis stop-color2" id= "map2" onClick={() => this.stopmap()}>Stop Mapping</button>
+                    </div>
+                  </div>
+                  <div className="row text-center mt-5">
+                    <div className="col-4">
+                      <button className="button vis" id= "map3" onClick={() => this.restartmap()}>Restart Mapping</button>
+                    </div>
+                    <div className="col-4">
+                      <button className="button vis" id= "map5" onClick={() => this.setpoint()}>Start Point</button>
+                    </div>
+                    <div className="col-4">
+                      <button className="button vis" id= "map4" onClick={() => this.anExamplePost()}>Send Map</button>
+                    </div>
+                  </div>
+              </div>
 
-        <div className="top-and-bottom-space"></div>
+              <div className="top-and-bottom-space"></div>
 
 
-        <div className="flex-container">
-          <div className="button-wrapper flex-child vis" id = "drive5">
-            <p id="">Current speed: <span id="demo">50</span></p>
-            <input type="range" min="1" max="100" value="50" id="myRange" onInput={() => this.onRange()}></input>
-          </div>
-          <div className="button-wrapper flex-child top-spacing s">
-            <button className="button start-color vis" id= "drive6" onClick={() => this.goStart()}>Start</button>
-            <button className="button stop-color vis" id= "drive7" onClick={() => this.goStop()}>Stop</button>
-          </div>
-          <div className="button-wrapper flex-child">
-          <button className="button vis" id= "drive8" onClick={() => this.angleLeft()}></button>
-            <button className="button vis" id= "drive1" onClick={() => this.goStraight()}></button>
-            <button className="button vis" id= "drive9" onClick={() => this.angleRight()}></button>
-            <div className="" >
-              <button className="button  vis" id= "drive4" onClick={() => this.turnLeft()}></button>
-              <button className="button vis" id= "drive3" onClick={() => this.turnRight()}></button>
+              <div className="flex-container">
+                <div className="flex-child">
+                <div className="button-wrapper flex-child vis" id = "drive5">
+                  <p id="">Current speed: <span id="demo">50</span></p>
+                  <input type="range" min="1" max="100" value="50" id="myRange" onInput={() => this.onRange()}></input>
+                </div>
+                <div className="button-wrapper flex-child top-spacing s">
+                  <button className="button start-color vis" id= "drive6" onClick={() => this.goStart()}>Start</button>
+                  <button className="button stop-color vis" id= "drive7" onClick={() => this.goStop()}>Stop</button>
+                </div>
+                </div>
+                <div className="button-wrapper flex-child">
+                <button className="button vis" id= "drive8" onClick={() => this.angleLeft()}></button>
+                  <button className="button vis" id= "drive1" onClick={() => this.goStraight()}></button>
+                  <button className="button vis" id= "drive9" onClick={() => this.angleRight()}></button>
+                  <div className="" >
+                    <button className="button  vis" id= "drive4" onClick={() => this.turnLeft()}></button>
+                    <button className="button vis" id= "drive3" onClick={() => this.turnRight()}></button>
+                  </div>
+                  <button className="button  vis" id= "drive2" onClick={() => this.goBack()}></button>
+                </div>
+              </div>
             </div>
-            <button className="button  vis" id= "drive2" onClick={() => this.goBack()}></button>
+
+
+          <div className="col-7">
+            <div className="status-wrapper">
+              <div className="col-6 ml-5">
+                <div className="field-toggle-wrapper">
+                  <span>Show Field:</span>
+                  <label className="switch">
+                    <input type="checkbox" onClick={() => this.onFieldCheck()}/>
+                    <span className="slider round"></span>
+                  </label>
+                </div>
+              </div>
+              <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} clickedCell={this.state.clickedCell}
+                            showField={this.state.showField} fieldVal={this.state.fieldHoverVal}/>
+              <ConnectionStatus status={this.state.connection}/>
+              <div className="col-1"></div>
+            </div>
+
+            <div className="canvas-container" id = "canvas" style={canvasStyle}>
+              <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
+              <DrawField field={this.state.field} showField={this.state.showField}
+                        width={this.state.width} height={this.state.height} />
+              <canvas ref="visitCellsCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
+              </canvas>
+              <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
+                        goalCell={this.state.goalCell} goalValid={this.state.goalValid}
+                        cellSize={this.state.cellSize} />
+              <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
+                        loaded={this.state.mapLoaded} pixelsPerMeter={this.state.pixelsPerMeter}
+                        posToPixels={(x, y) => this.posToPixels(x, y)} />
+              <canvas ref="clickCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
+                      onMouseDown={(e) => this.handleMouseDown(e)}
+                      onMouseMove={(e) => this.handleMouseMove(e)}
+                      onMouseUp={() => this.handleMouseUp()}>
+              </canvas>
+            </div>
           </div>
         </div>
-
-
-        <div className="status-wrapper">
-          <div className="field-toggle-wrapper">
-            <span>Show Field:</span>
-            <label className="switch">
-              <input type="checkbox" onClick={() => this.onFieldCheck()}/>
-              <span className="slider round"></span>
-            </label>
-          </div>
-          <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} clickedCell={this.state.clickedCell}
-                         showField={this.state.showField} fieldVal={this.state.fieldHoverVal}/>
-          <ConnectionStatus status={this.state.connection}/>
-        </div>
-
-        <div className="canvas-container" id = "canvas" style={canvasStyle}>
-          <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
-          <DrawField field={this.state.field} showField={this.state.showField}
-                     width={this.state.width} height={this.state.height} />
-          <canvas ref="visitCellsCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
-          </canvas>
-          <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
-                     goalCell={this.state.goalCell} goalValid={this.state.goalValid}
-                     cellSize={this.state.cellSize} />
-          <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
-                     loaded={this.state.mapLoaded} pixelsPerMeter={this.state.pixelsPerMeter}
-                     posToPixels={(x, y) => this.posToPixels(x, y)} />
-          <canvas ref="clickCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
-                  onMouseDown={(e) => this.handleMouseDown(e)}
-                  onMouseMove={(e) => this.handleMouseMove(e)}
-                  onMouseUp={() => this.handleMouseUp()}>
-          </canvas>
         </div>
       </div>
     );
   }
 }
+
 
 // TODO: Discuss what other modes will enable drive control. Currently the key presses active only when the drive toggle is toggled on.
 document.addEventListener('keydown', (event) => {
