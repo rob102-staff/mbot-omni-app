@@ -37,13 +37,38 @@ a:hover {
   margin-bottom: 1em; 
   position: relative; 
   height: 100%;       
-  width: 100%;        
+  width: 100%;
+}
+
+.canvas-color{
+  background-color: #22476a;
 }
 
 canvas {
   position: absolute;
   display: block;
 }
+
+/* .slider-color{
+  -webkit-appearance: none;
+  width: 50%;
+  height: 5%;
+  background: #22476a;
+  opacity: 1;
+  -webkit-transition: .2s;
+  transition: opacity .2s;
+  border-radius: 50px;
+}
+
+.slider-color::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 25px;
+  height: 25px;
+  border-radius: 50%; 
+  background: #04AA6D;
+  cursor: pointer;
+} */
 
 .roboticon {
   position: absolute;

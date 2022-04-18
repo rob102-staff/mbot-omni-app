@@ -695,6 +695,7 @@ class MBotApp extends React.Component {
     if (checkBox.checked == true){
       document.body.classList.add("new-background-color");
       canvas.classList.add("white-border")
+      canvas.classList.add("canvas-color")
 
       for (let index = 0; index < map_buttons.length; index++) {
         const element = map_buttons[index];
@@ -710,6 +711,7 @@ class MBotApp extends React.Component {
         const e = document.getElementById(element);
         e.classList.remove("invert");      
       }
+      canvas.classList.remove("canvas-color")
     }
   }
   //TODO: emit message to backend when the running mode is changed.
@@ -810,7 +812,7 @@ class MBotApp extends React.Component {
                 <div className="flex-child right-spacing">
                 <div className="button-wrapper flex-child vis" id = "drive5">
                   <p id="">Current speed: <span id="demo">50</span></p>
-                  <input type="range" min="1" max="100" value="50" id="myRange" onInput={() => this.onRange()}></input>
+                  <input className = "" type="range" min="1" max="100" value="50" id="myRange" onInput={() => this.onRange()}></input>
                 </div>
                 <div className="button-wrapper flex-child top-spacing s">
                   <button className="button start-color vis right-spacing" id= "drive6" onClick={() => this.goStart()}>Start</button>
@@ -834,7 +836,10 @@ class MBotApp extends React.Component {
                     <div className="col-3">
                       <button className="button  vis" id= "drive4" onClick={() => this.turnLeft()}></button>
                     </div>
-                    <div className="col-3"></div>
+                    <div className="col-3">
+                    {/* <div className="col-3 d-flex flex-column justify-content-center align-content-center"> */}
+                      {/* <div className="button btn-danger"></div> */}
+                    </div>
                     <div className="col-3">
                       <button className="button vis" id= "drive3" onClick={() => this.turnRight()}></button>
                     </div>
