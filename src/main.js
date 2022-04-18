@@ -760,14 +760,14 @@ document.addEventListener('keydown', (event) => {
   var name = event.key;
   const p = new MBotApp;
   if(drive_check == 1){
-    if (name == "a") p.moveLeft();
-    if (name == "d") p.moveRight();
-    if (name == "s") p.goBack();
-    if (name == "w") p.goStraight();
-    if (name == "q") p.rotateLeft();
-    if (name == "e") p.rotateRight();
-    if (name == "z") p.start();
-    if (name == "x") p.stop();
+    if (name == "a") p.drive_controls.moveLeft();
+    if (name == "d") p.drive_controls.moveRight();
+    if (name == "s") p.drive_controls.goBack();
+    if (name == "w") p.drive_controls.goStraight();
+    if (name == "q") p.drive_controls.rotateLeft();
+    if (name == "e") p.drive_controls.rotateRight();
+    if (name == "z") p.drive_controls.start();
+    if (name == "x") p.drive_controls.stop();
   }
 }, false);
 
