@@ -304,8 +304,6 @@ class MBotApp extends React.Component {
   constructor(props) {
     super(props);
 
-    // this.set_buttons();
-
     // React state.
     this.state = {
       connection: false,
@@ -714,28 +712,6 @@ class MBotApp extends React.Component {
       }
     }
   }
-
-  // set_buttons(){
-  //   var m = document.getElementById("menu2");
-  //   m.innerHTML = '<div className="field-toggle-wrapper top-spacing">'
-  //               + '<span>Dark Mode</span>'
-  //               + '<label className="switch">'
-  //               + '<input type="checkbox" id="myDark" onClick={() => this.darkMode()}/>'
-  //               + '<span className="slider round"></span>'
-  //               + '</label>'
-  //               + '<span className = "left-space">Mapping Mode</span>'
-  //               + '<label className="switch">'
-  //               + '<input type="checkbox" id="myCheck" onClick={() => this.onMapCheck()}/>'
-  //               + '<span className="slider round"></span>'
-  //               + '</label>'
-  //               + '<span className = "left-space">Drive Mode</span>'
-  //               + '<label className="switch">'
-  //               + '<input type="checkbox" id="myDrive" onClick={() => this.onDriveCheck()}/>'
-  //               + '<span className="slider round"></span>'
-  //               + '</label>'
-  //               + '</div>';
-  // }
-
   //TODO: emit message to backend when the running mode is changed.
   startmap(){
     console.log("Starting to map")
@@ -777,7 +753,6 @@ class MBotApp extends React.Component {
 
     return (
       <div>
-
         <div className="button-wrapper mt-4">
           {/* This button is an example (not part of the original webapp) which sends a POST to the Flask server. */}
           <button className="button" onClick={() => this.askForMap()}>Grab Map</button>
@@ -787,9 +762,9 @@ class MBotApp extends React.Component {
 
         <div className="container-flex">
           <div className="row">
-            <div className="col-5">
-              <div className="button-wrapper top-spacing">
-              <div className="field-toggle-wrapper top-spacing">
+            <div className="col-5 mt-5">
+              <div className="button-wrapper top-spacing mb-5">
+                <div className="field-toggle-wrapper top-spacing">
                 <span>Dark Mode</span>
                   <label className="switch">
                     <input type="checkbox" id="myDark" onClick={() => this.darkMode()}/>
@@ -807,7 +782,7 @@ class MBotApp extends React.Component {
                   </label>
                 </div>
                 
-                  <div className="row text-center mt-4">
+                  <div className="row text-center mt-5">
                     <div className="col-6">
                       <button className="button btn vis start-color2 " id= "map1" onClick={() => this.startmap()}>Start Mapping</button>
                     </div>
@@ -831,32 +806,53 @@ class MBotApp extends React.Component {
               <div className="top-and-bottom-space"></div>
 
 
-              <div className="flex-container">
-                <div className="flex-child">
+              <div className="flex-container mt-5">
+                <div className="flex-child right-spacing">
                 <div className="button-wrapper flex-child vis" id = "drive5">
                   <p id="">Current speed: <span id="demo">50</span></p>
                   <input type="range" min="1" max="100" value="50" id="myRange" onInput={() => this.onRange()}></input>
                 </div>
                 <div className="button-wrapper flex-child top-spacing s">
-                  <button className="button start-color vis" id= "drive6" onClick={() => this.goStart()}>Start</button>
-                  <button className="button stop-color vis" id= "drive7" onClick={() => this.goStop()}>Stop</button>
+                  <button className="button start-color vis right-spacing" id= "drive6" onClick={() => this.goStart()}>Start</button>
+                  <button className="button stop-color vis ml-5" id= "drive7" onClick={() => this.goStop()}>Stop</button>
                 </div>
                 </div>
                 <div className="button-wrapper flex-child">
-                <button className="button vis" id= "drive8" onClick={() => this.angleLeft()}></button>
-                  <button className="button vis" id= "drive1" onClick={() => this.goStraight()}></button>
-                  <button className="button vis" id= "drive9" onClick={() => this.angleRight()}></button>
-                  <div className="" >
-                    <button className="button  vis" id= "drive4" onClick={() => this.turnLeft()}></button>
-                    <button className="button vis" id= "drive3" onClick={() => this.turnRight()}></button>
+                  <div className="row">
+                    <div className="col-3">
+                      <button className="button vis" id= "drive8" onClick={() => this.angleLeft()}></button>
+                    </div>
+                    <div className="col-3">
+                      <button className="button vis" id= "drive1" onClick={() => this.goStraight()}></button>
+                    </div>
+                    <div className="col-3">
+                      <button className="button vis" id= "drive9" onClick={() => this.angleRight()}></button>
+                    </div>
+                    <div className="col-3"></div>
                   </div>
-                  <button className="button  vis" id= "drive2" onClick={() => this.goBack()}></button>
+                  <div className="row mt-3">
+                    <div className="col-3">
+                      <button className="button  vis" id= "drive4" onClick={() => this.turnLeft()}></button>
+                    </div>
+                    <div className="col-3"></div>
+                    <div className="col-3">
+                      <button className="button vis" id= "drive3" onClick={() => this.turnRight()}></button>
+                    </div>
+                    <div className="col-3"></div>
+                  </div>
+                  <div className="row mt-3">
+                    <div className="col-3"></div>
+                    <div className="col-3">
+                      <button className="button  vis" id= "drive2" onClick={() => this.goBack()}></button>
+                    </div>
+                    <div className="col-6"></div>
+                  </div>
                 </div>
               </div>
             </div>
 
-
-          <div className="col-7">
+        <div className="col-1"></div>
+          <div className="col-6">
             <div className="status-wrapper">
               <div className="col-6 ml-5">
                 <div className="field-toggle-wrapper">

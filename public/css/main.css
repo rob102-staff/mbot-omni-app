@@ -7,7 +7,7 @@ Light grey for backgrounds: #F5F5F5;
 
 body {
   margin:50px auto;
-  max-width:80%;
+  max-width:93%;
   line-height:1.6;
   font-size:20px;
   color:#444;
@@ -259,10 +259,10 @@ input:checked + .slider:before {
   background-size: cover;
   background-color: transparent;
   color:none;
-  width: 15px;
-  height: 15px;
+  width: 20px;
+  height: 20px;
   font-size: 2rem;
-  padding: 20px 20px;
+  padding: 26px 26px;
 }
 
 /* This is for the turn buttons to turn around the robot */
@@ -280,8 +280,8 @@ input:checked + .slider:before {
 /* Drive forward robot */
 #drive1{
   transform: rotate(270deg);
-  margin-left: 4%;
-  margin-bottom: 5px;
+  /* margin-left: 4%;
+  margin-bottom: 5px; */
 }
 
 #drive1:hover, #drive2:hover, #drive3:hover, #drive4:hover, #drive8:hover, #drive9:hover{
@@ -291,20 +291,20 @@ input:checked + .slider:before {
 /* Drive back robot */
 #drive2{
   transform: rotate(90deg);
-  margin-left: 27%;
-  margin-top: 5px;
+  /* margin-left: 27%;
+  margin-top: 5px; */
 }
 
 /* Drive to the right */
 #drive3{
-  margin-right: 2%;
+  /* margin-right: 2%; */
 }
 
 /* Drive to the left */
 #drive4{
   transform: rotate(180deg);
-  margin-left: 8%;
-  margin-right: 22%;
+  /* margin-left: 8%;
+  margin-right: 22%; */
 }
 
 /* Turn robot to the left */
@@ -314,8 +314,16 @@ input:checked + .slider:before {
 
 /* Turn robot to the left */
 #drive9{
-  margin-left: 3%;
+  /* margin-left: 3%; */
   transform: rotate(63deg);
+}
+
+.right-spacing{
+  margin-right: 20px;
+}
+
+.lots-right{
+  margin-right: 50px;
 }
 
 /* Container to organize drive features */
