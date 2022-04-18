@@ -10,7 +10,7 @@ import config from "./config.js";
 import { WSHelper } from "./web.js";
 import { parseMapFromSocket, normalizeList } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
-import { MOVE } from "./move.js";
+import { DRIVE_CONTROLS } from "./drive-controls.js";
 
 // Global Variables
 let drive_check = 0;
@@ -334,7 +334,7 @@ class MBotApp extends React.Component {
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
 
-    this.move = new MOVE(this.ws);
+    this.drive_controls = new DRIVE_CONTROLS(this.ws);
 
     this.visitGrid = new GridCellCanvas();
   }
@@ -699,18 +699,18 @@ class MBotApp extends React.Component {
             <input type="range" min="1" max="100" value="50" id="myRange" onInput={() => this.onRange()}></input>
           </div>
           <div className="button-wrapper flex-child top-spacing s">
-            <button className="button start-color vis" id= "drive6" onClick={() => this.goStart()}>Start</button>
-            <button className="button stop-color vis" id= "drive7" onClick={() => this.move.goStop()}>Stop</button>
+            <button className="button start-color vis" id= "drive6" onClick={() => this.drive_controls.start()}>Start</button>
+            <button className="button stop-color vis" id= "drive7" onClick={() => this.drive_controls.stop()}>Stop</button>
           </div>
           <div className="button-wrapper flex-child">
-          <button className="button vis" id= "drive8" onClick={() => this.move.angleLeft()}></button>
-            <button className="button vis" id= "drive1" onClick={() => this.move.goStraight()}></button>
-            <button className="button vis" id= "drive9" onClick={() => this.move.angleRight()}></button>
+          <button className="button vis" id= "drive8" onClick={() => this.drive_controls.rotateLeft()}></button>
+            <button className="button vis" id= "drive1" onClick={() => this.drive_controls.goStraight()}></button>
+            <button className="button vis" id= "drive9" onClick={() => this.drive_controls.rotateRight()}></button>
             <div className="" >
-              <button className="button  vis" id= "drive4" onClick={() => this.move.turnLeft()}></button>
-              <button className="button vis" id= "drive3" onClick={() => this.move.turnRight()}></button>
+              <button className="button  vis" id= "drive4" onClick={() => this.drive_controls.moveLeft()}></button>
+              <button className="button vis" id= "drive3" onClick={() => this.drive_controls.moveRight()}></button>
             </div>
-            <button className="button  vis" id= "drive2" onClick={() => this.move.goBack()}></button>
+            <button className="button  vis" id= "drive2" onClick={() => this.drive_controls.goBack()}></button>
           </div>
         </div>
 
@@ -756,14 +756,14 @@ document.addEventListener('keydown', (event) => {
   var name = event.key;
   const p = new MBotApp;
   if(drive_check == 1){
-    if (name == "a") p.turnLeft();
-    if (name == "d") p.turnRight();
+    if (name == "a") p.moveLeft();
+    if (name == "d") p.moveRight();
     if (name == "s") p.goBack();
     if (name == "w") p.goStraight();
-    if (name == "q") p.angleLeft();
-    if (name == "e") p.angleRight();
-    if (name == "z") p.goStart();
-    if (name == "x") p.goStop();
+    if (name == "q") p.rotateLeft();
+    if (name == "e") p.rotateRight();
+    if (name == "z") p.start();
+    if (name == "x") p.stop();
   }
 }, false);
 
