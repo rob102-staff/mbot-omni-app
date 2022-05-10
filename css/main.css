@@ -256,9 +256,9 @@ input:checked + .slider:before {
 
 /* This is for the drive buttons up, down, left, and right */
 #drive1, #drive2, #drive3, #drive4{
-  /* background-image: url("https://cdn4.iconfinder.com/data/icons/arrow-part-2-line-pixel-art/48/51-play_player_arrow_game_application_mobile_up_down_left_right-512.png"); */
+  background-image: url("https://cdn4.iconfinder.com/data/icons/arrow-part-2-line-pixel-art/48/51-play_player_arrow_game_application_mobile_up_down_left_right-512.png");
   background-size: cover;
-  background-color: #00274C;
+  background-color: #b4cfe9;
   color:none;
   width: 10px;
   height: 10px;
@@ -270,7 +270,7 @@ input:checked + .slider:before {
 #drive8, #drive9{
   background-image: url("https://cdn2.iconfinder.com/data/icons/game-center-mixed-icons/512/arrow1.png");
   background-size: cover;
-  background-color: #00274C;
+  background-color: #c5e8ee;
   color:none;
   width: 10px;
   height: 10px;

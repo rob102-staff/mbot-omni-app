@@ -595,47 +595,21 @@ class MBotApp extends React.Component {
 
   onDriveCheck() {
     const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive5", "drive6", "drive7", "drive8", "drive9"];
-
+    this.right();
     var checkBox = document.getElementById("myDrive");
     if (checkBox.checked == true){
       console.log("hello");
-      for (let index = 0; index < map_buttons.length; index++) {
-        const element = map_buttons[index];
-        const e = document.getElementById(element);
-        e.classList.remove("vis");
-        }
       drive_check = 1;
-    }
-    else
-    {
+      const p = new MBotApp;
       for (let index = 0; index < map_buttons.length; index++) {
         const element = map_buttons[index];
         const e = document.getElementById(element);
-        e.classList.add("vis")
-      }
-      drive_check = 0;
-    }
-  }
-
-<<<<<<< HEAD:src/main.js
-  onDriveCheck() {
-    const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive5", "drive6", "drive7", "drive8", "drive9"];
-    // this.right();
-    var checkBox = document.getElementById("myDrive");
-    if (checkBox.checked == true){
-      // console.log("hello");
-      // const p = new MBotApp;
-      drive_check = 1;
-      for (let index = 0; index < map_buttons.length; index++) {
-        const element = map_buttons[index];
-        const e = document.getElementById(element);
-        // this.right();
-        e.addEventListener("keypress", (event)=>{
-          console.log("hallo im alive");
+        console.log("hallo im alive");
+        e.addEventListener("keydown", (event) => {
           var name = event.key;
           if(drive_check == 1){
             if (name == "a") this.drive_controls.moveLeft();
-            if (name == "d") console.log("pzsdfg");
+            if (name == "d") this.drive_controls.moveRight();
             if (name == "s") this.drive_controls.goBack();
             if (name == "w") this.drive_controls.goStraight();
             if (name == "q") this.drive_controls.rotateLeft();
@@ -644,8 +618,12 @@ class MBotApp extends React.Component {
             if (name == "x") this.drive_controls.stop();
           }
         });
+
+        e.addEventListener("keyup", (event) => {
+          this.drive_controls.stop();
+        })
         e.classList.remove("vis");
-      }
+        }
     }
     else
     {
@@ -657,9 +635,7 @@ class MBotApp extends React.Component {
       drive_check = 0;
     }
   }
-  
-=======
->>>>>>> f0407649d006b8954ebe9cce6445339b07c5026c:src/app.jsx
+
   onRange() {
     var slider = document.getElementById("myRange");
     var output = document.getElementById("demo");
