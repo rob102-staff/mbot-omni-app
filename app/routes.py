@@ -21,10 +21,10 @@ def send_map(data):
         with open("cropped_map_10-20-21.map","r") as fin:
             maplines = fin.readlines()
             socket.emit("map", json.dumps(maplines))
+        return maplines
     except IOError:
         app.logger.info("Error. Cannot open file.")
 
-    return maplines
 
 @socket.on('move')
 def test_message(data):
