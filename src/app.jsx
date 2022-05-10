@@ -8,6 +8,7 @@ import Select from '@mui/material/Select';
 
 import config from "./config.js";
 import { WSHelper } from "./web.js";
+import { DrawRobot } from "./robot";
 import { parseMapFromSocket, parseMapFromLcm, normalizeList } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControls } from "./driveControls.js";
@@ -53,71 +54,6 @@ function ConnectionStatus(connection) {
 }
 
 /*******************
- *     ROBOT
- *******************/
-
-class DrawRobot extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.robotCanvas = null;
-    this.robotCtx = null;
-
-    this.robotPos = [config.MAP_DISPLAY_WIDTH / 2, config.MAP_DISPLAY_WIDTH / 2];
-    this.robotSize = config.ROBOT_DEFAULT_SIZE;
-    this.robotAngle = 0;
-
-    this.robotImage = new Image(config.ROBOT_DEFAULT_SIZE, config.ROBOT_DEFAULT_SIZE);
-    this.robotImage.src = '/assets/mbot.png';
-  }
-
-  componentDidMount() {
-    this.robotCanvas = this.refs.robotCanvas;
-
-    this.robotCtx = this.robotCanvas.getContext('2d');
-    this.robotCtx.transform(1, 0, 0, -1, 0, 0);
-    this.robotCtx.transform(1, 0, 0, 1, 0, -this.robotCanvas.width);
-
-    // Apply the current transform since it will be cleared when first drawn.
-    this.robotCtx.translate(this.robotPos[0], this.robotPos[1]);
-    this.robotCtx.rotate(this.robotAngle);
-  }
-
-  drawRobot() {
-    // Clear the robot position.
-    this.robotCtx.clearRect(-this.robotSize / 2, -this.robotSize / 2, this.robotSize, this.robotSize);
-
-    // Reset the canvas since the last draw.
-    this.robotCtx.rotate(-this.robotAngle);
-    this.robotCtx.translate(-this.robotPos[0], -this.robotPos[1]);
-
-    if (this.props.loaded) {
-      // this updates position
-      this.robotPos = [this.props.x, this.props.y];
-      this.robotSize = config.ROBOT_SIZE * this.props.pixelsPerMeter;
-      this.robotAngle = this.props.theta;
-    }
-
-    this.robotCtx.translate(this.robotPos[0], this.robotPos[1]);
-    this.robotCtx.rotate(this.robotAngle);
-
-    // TODO: Scale the image once instead of every time.
-    this.robotCtx.drawImage(this.robotImage, -this.robotSize / 2, -this.robotSize / 2, this.robotSize, this.robotSize);
-  }
-
-  componentDidUpdate() {
-    this.drawRobot();
-  }
-
-  render() {
-    return (
-      <canvas ref="robotCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
-      </canvas>
-    );
-  }
-}
-
-/*******************
  *     CANVAS
  *******************/
 
@@ -144,39 +80,6 @@ class DrawMap extends React.Component {
   render() {
     return (
       <canvas ref="mapCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
-      </canvas>
-    );
-  }
-}
-
-class DrawField extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.fieldGrid = new GridCellCanvas();
-  }
-
-  componentDidMount() {
-    this.fieldGrid.init(this.refs.fieldCanvas);
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return nextProps.field !== this.props.field || nextProps.showField !== this.props.showField;
-  }
-
-  componentDidUpdate() {
-    if (this.props.showField) {
-      this.fieldGrid.setSize(this.props.width, this.props.height);
-      this.fieldGrid.drawCells(this.props.field, config.FIELD_COLOUR_LOW, config.FIELD_COLOUR_HIGH, config.FIELD_ALPHA);
-    }
-    else {
-      this.fieldGrid.clear();
-    }
-  }
-
-  render() {
-    return (
-      <canvas ref="fieldCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
       </canvas>
     );
   }
@@ -283,9 +186,6 @@ class MBotApp extends React.Component {
       pixelsPerMeter: 0,
       cellSize: 0,
       mapLoaded: false,
-      x: config.MAP_DISPLAY_WIDTH / 2,
-      y: config.MAP_DISPLAY_WIDTH / 2,
-      theta: 0,
       mapfile: null,
       path: [],
       clickedCell: [],
@@ -295,6 +195,10 @@ class MBotApp extends React.Component {
       darkMode: false,
       mappingMode: false,
       drivingMode: false,
+      // Robot parameters.
+      x: config.MAP_DISPLAY_WIDTH / 2,
+      y: config.MAP_DISPLAY_WIDTH / 2,
+      theta: 0,
       isRobotClicked: false
     };
 
@@ -304,7 +208,6 @@ class MBotApp extends React.Component {
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
 
     this.driveControls = new DriveControls(this.ws);
-
     this.visitGrid = new GridCellCanvas();
   }
 
@@ -469,7 +372,7 @@ class MBotApp extends React.Component {
    ********************/
 
   handleMap(mapmsg) {
-    var map = parseMapFromSocket(mapmsg)
+    var map = parseMapFromLcm(mapmsg)
     console.log("Parsed map.")
     this.updateMap(map);
   }
@@ -483,6 +386,14 @@ class MBotApp extends React.Component {
     if (this.state.connection !== status) {
       this.setState({connection: status});
     }
+  }
+
+  /**********************
+   *   STATE SETTERS
+   **********************/
+
+  setRobotPos(x, y) {
+    this.setState({x: x, y: y});
   }
 
   /**********************
@@ -505,24 +416,6 @@ class MBotApp extends React.Component {
                    clickedCell: [],
                    goalCell: [],
                    isRobotClicked: false});
-  }
-
-  timer() {
-    var length = this.state.path.length;
-    if(length > this.i) {
-      //move robot to the next spot
-      this.findDirection();
-      this.i = this.i + 1;
-    }
-    else {
-      clearInterval(this.interval);
-    }
-  }
-
-  findDirection(){
-    var newCoord = this.posToPixels(this.state.path[this.i][1], this.state.path[this.i][0]);
-    if (newCoord[0] == this.state.x && newCoord[1] == this.state.y) return;
-    this.setState({x: newCoord[0], y: newCoord[1]});
   }
 
   onGoalClear() {
@@ -664,13 +557,6 @@ class MBotApp extends React.Component {
         }
 
         <div className="status-wrapper">
-          <div className="toggle-wrapper">
-            <span>Show Field:</span>
-            <label className="switch">
-              <input type="checkbox" onClick={() => this.onFieldCheck()}/>
-              <span className="slider round"></span>
-            </label>
-          </div>
           <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} clickedCell={this.state.clickedCell}
                          showField={this.state.showField} fieldVal={this.state.fieldHoverVal}/>
           <ConnectionStatus status={this.state.connection}/>
@@ -678,16 +564,13 @@ class MBotApp extends React.Component {
 
         <div className="canvas-container" id = "canvas" style={canvasStyle}>
           <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
-          <DrawField field={this.state.field} showField={this.state.showField}
-                     width={this.state.width} height={this.state.height} />
           <canvas ref="visitCellsCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
           </canvas>
           <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                      goalCell={this.state.goalCell} goalValid={this.state.goalValid}
                      cellSize={this.state.cellSize} />
           <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
-                     loaded={this.state.mapLoaded} pixelsPerMeter={this.state.pixelsPerMeter}
-                     posToPixels={(x, y) => this.posToPixels(x, y)} />
+                     pixelsPerMeter={this.state.pixelsPerMeter} />
           <canvas ref="clickCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
                   onMouseDown={(e) => this.handleMouseDown(e)}
                   onMouseMove={(e) => this.handleMouseMove(e)}
