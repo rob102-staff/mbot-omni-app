@@ -1,10 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
 
 import config from "./config.js";
 import { WSHelper } from "./web.js";
@@ -365,6 +365,22 @@ class MBotApp extends React.Component {
     window.addEventListener('resize', (evt) => this.handleWindowChange(evt));
     window.addEventListener('scroll', (evt) => this.handleWindowChange(evt));
 
+    // TODO: Discuss what other modes will enable drive control. Currently the
+    // key presses active only when the drive toggle is toggled on.
+    document.addEventListener('keydown', (event) => {
+      var name = event.key;
+      if(drive_check == 1){
+        if (name == "a") this.turnLeft();
+        if (name == "d") this.turnRight();
+        if (name == "s") this.goBack();
+        if (name == "w") this.goStraight();
+        if (name == "q") this.angleLeft();
+        if (name == "e") this.angleRight();
+        if (name == "z") this.goStart();
+        if (name == "x") this.goStop();
+      }
+    }, false);
+
     // Try to connect to the C++ backend.
     this.ws.attemptConnection();
   }
@@ -373,8 +389,6 @@ class MBotApp extends React.Component {
     var map=parseMapFromSocket(mapmsg)
     console.log("Parsed map.")
     this.updateMap(map);
-    
-
   }
 
   handleMessage(msg) {
@@ -595,7 +609,7 @@ class MBotApp extends React.Component {
       drive_check = 0;
     }
   }
-  
+
   onRange() {
     var slider = document.getElementById("myRange");
     var output = document.getElementById("demo");
@@ -700,11 +714,11 @@ class MBotApp extends React.Component {
     }else{
       document.body.classList.remove("new-background-color");
       canvas.classList.remove("white-border")
-      
+
       for (let index = 0; index < map_buttons.length; index++) {
         const element = map_buttons[index];
         const e = document.getElementById(element);
-        e.classList.remove("invert");      
+        e.classList.remove("invert");
       }
     }
   }
@@ -758,7 +772,7 @@ class MBotApp extends React.Component {
               <span className="slider round"></span>
             </label>
           </div>
-          
+
           <button className="button vis start-color2" id= "map1" onClick={() => this.startmap()}>Start Mapping</button>
           <button className="button vis stop-color2" id= "map2" onClick={() => this.stopmap()}>Stop Mapping</button>
           <button className="button vis" id= "map3" onClick={() => this.restartmap()}>Restart Mapping</button>
@@ -790,7 +804,6 @@ class MBotApp extends React.Component {
             <button className="button  vis" id= "drive2" onClick={() => this.goBack()}></button>
           </div>
         </div>
-
 
         <div className="status-wrapper">
           <div className="field-toggle-wrapper">
@@ -828,24 +841,4 @@ class MBotApp extends React.Component {
   }
 }
 
-// TODO: Discuss what other modes will enable drive control. Currently the key presses active only when the drive toggle is toggled on.
-document.addEventListener('keydown', (event) => {
-  var name = event.key;
-  const p = new MBotApp;
-  if(drive_check == 1){
-    if (name == "a") p.turnLeft();
-    if (name == "d") p.turnRight();
-    if (name == "s") p.goBack();
-    if (name == "w") p.goStraight();
-    if (name == "q") p.angleLeft();
-    if (name == "e") p.angleRight();
-    if (name == "z") p.goStart();
-    if (name == "x") p.goStop();
-  }
-}, false);
-
-ReactDOM.render(
-  <MBotApp />,
-  document.getElementById('app-root')
-);
-
+export default MBotApp;
