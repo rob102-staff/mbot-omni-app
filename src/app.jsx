@@ -8,11 +8,10 @@ import Select from '@mui/material/Select';
 
 import config from "./config.js";
 import { WSHelper } from "./web.js";
-import { parseMapFromSocket, normalizeList } from "./map.js";
+import { DrawRobot } from "./robot";
+import { parseMapFromSocket, parseMapFromLcm, normalizeList } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
-
-// Global Variables
-let drive_check = 0;
+import { DriveControls } from "./driveControls.js";
 
 /*******************
  *     BUTTONS
@@ -55,95 +54,41 @@ function ConnectionStatus(connection) {
 }
 
 /*******************
- *   ALGO SELECT
+ *  CONTROL PANELS
  *******************/
 
-function AlgoForm(props) {
-  var menu_items = [];
-  var key, value;
-  for (const algo in config.ALGO_TYPES)
-  {
-    var data = config.ALGO_TYPES[algo];
-    menu_items.push(<MenuItem value={algo} key={data.label}>{data.name}</MenuItem>);
-  }
+function DriveControlPanel(props) {
   return (
-    <FormControl className="algo-form">
-      <InputLabel id="select-algo-label">Algorithm</InputLabel>
-      <Select
-        labelId="select-algo-label"
-        id="select-algo"
-        value={props.value}
-        onChange={props.onChange}
-      >
-        {menu_items}
-      </Select>
-    </FormControl>
+    <div className="flex-container">
+      <div className="button-wrapper flex-child">
+        <span>Speed: </span>
+        <input type="range" min="1" max="100" value={props.speed}
+               onChange={(evt) => props.onSpeedChange(evt)}></input>
+      </div>
+      <div className="button-wrapper flex-child top-spacing">
+        <button className="button start-color" id="drive-start"
+                onClick={() => props.driveControls.start()}>Start</button>
+        <button className="button stop-color" id="drive-stop"
+                onClick={() => props.driveControls.stop()}>Stop</button>
+      </div>
+      <div className="button-wrapper flex-child">
+        <button className="button drive-turn drive-ctrl" id="turn-left"
+                onClick={() => props.driveControls.rotateLeft()}></button>
+        <button className="button drive-move drive-ctrl" id="move-str"
+                onClick={() => props.driveControls.goStraight()}></button>
+        <button className="button drive-turn drive-ctrl" id="turn-right"
+                onClick={() => props.driveControls.rotateRight()}></button>
+        <div>
+          <button className="button drive-move drive-ctrl" id="move-left"
+                  onClick={() => props.driveControls.moveLeft()}></button>
+          <button className="button drive-move drive-ctrl" id="move-right"
+                  onClick={() => props.driveControls.moveRight()}></button>
+        </div>
+        <button className="button drive-move drive-ctrl" id="move-back"
+                onClick={() => props.driveControls.goBack()}></button>
+      </div>
+    </div>
   );
-}
-
-/*******************
- *     ROBOT
- *******************/
-
-class DrawRobot extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.robotCanvas = null;
-    this.robotCtx = null;
-
-    this.robotPos = [config.MAP_DISPLAY_WIDTH / 2, config.MAP_DISPLAY_WIDTH / 2];
-    this.robotSize = config.ROBOT_DEFAULT_SIZE;
-    this.robotAngle = 0;
-
-    this.robotImage = new Image(config.ROBOT_DEFAULT_SIZE, config.ROBOT_DEFAULT_SIZE);
-    this.robotImage.src = '../assets/mbot.png';
-  }
-
-  componentDidMount() {
-    this.robotCanvas = this.refs.robotCanvas;
-
-    this.robotCtx = this.robotCanvas.getContext('2d');
-    this.robotCtx.transform(1, 0, 0, -1, 0, 0);
-    this.robotCtx.transform(1, 0, 0, 1, 0, -this.robotCanvas.width);
-
-    // Apply the current transform since it will be cleared when first drawn.
-    this.robotCtx.translate(this.robotPos[0], this.robotPos[1]);
-    this.robotCtx.rotate(this.robotAngle);
-  }
-
-  drawRobot() {
-    // Clear the robot position.
-    this.robotCtx.clearRect(-this.robotSize / 2, -this.robotSize / 2, this.robotSize, this.robotSize);
-
-    // Reset the canvas since the last draw.
-    this.robotCtx.rotate(-this.robotAngle);
-    this.robotCtx.translate(-this.robotPos[0], -this.robotPos[1]);
-
-    if (this.props.loaded) {
-      // this updates position
-      this.robotPos = [this.props.x, this.props.y];
-      this.robotSize = config.ROBOT_SIZE * this.props.pixelsPerMeter;
-      this.robotAngle = this.props.theta;
-    }
-
-    this.robotCtx.translate(this.robotPos[0], this.robotPos[1]);
-    this.robotCtx.rotate(this.robotAngle);
-
-    // TODO: Scale the image once instead of every time.
-    this.robotCtx.drawImage(this.robotImage, -this.robotSize / 2, -this.robotSize / 2, this.robotSize, this.robotSize);
-  }
-
-  componentDidUpdate() {
-    this.drawRobot();
-  }
-
-  render() {
-    return (
-      <canvas ref="robotCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
-      </canvas>
-    );
-  }
 }
 
 /*******************
@@ -173,39 +118,6 @@ class DrawMap extends React.Component {
   render() {
     return (
       <canvas ref="mapCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
-      </canvas>
-    );
-  }
-}
-
-class DrawField extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.fieldGrid = new GridCellCanvas();
-  }
-
-  componentDidMount() {
-    this.fieldGrid.init(this.refs.fieldCanvas);
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return nextProps.field !== this.props.field || nextProps.showField !== this.props.showField;
-  }
-
-  componentDidUpdate() {
-    if (this.props.showField) {
-      this.fieldGrid.setSize(this.props.width, this.props.height);
-      this.fieldGrid.drawCells(this.props.field, config.FIELD_COLOUR_LOW, config.FIELD_COLOUR_HIGH, config.FIELD_ALPHA);
-    }
-    else {
-      this.fieldGrid.clear();
-    }
-  }
-
-  render() {
-    return (
-      <canvas ref="fieldCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
       </canvas>
     );
   }
@@ -312,20 +224,20 @@ class MBotApp extends React.Component {
       pixelsPerMeter: 0,
       cellSize: 0,
       mapLoaded: false,
-      x: config.MAP_DISPLAY_WIDTH / 2,
-      y: config.MAP_DISPLAY_WIDTH / 2,
-      theta: 0,
       mapfile: null,
       path: [],
       clickedCell: [],
       goalCell: [],
       goalValid: true,
-      field: [],
-      fieldRaw: [],
-      fieldHoverVal: 0,
-      showField: false,
-      isRobotClicked: false,
-      algo: 'PFIELD'
+      speed: 50,
+      darkMode: false,
+      mappingMode: false,
+      drivingMode: false,
+      // Robot parameters.
+      x: config.MAP_DISPLAY_WIDTH / 2,
+      y: config.MAP_DISPLAY_WIDTH / 2,
+      theta: 0,
+      isRobotClicked: false
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
@@ -333,29 +245,13 @@ class MBotApp extends React.Component {
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
 
+    this.driveControls = new DriveControls(this.ws);
     this.visitGrid = new GridCellCanvas();
   }
 
-  anExamplePost() {
-    this.ws.socket.emit("test", {'test_key': "test_value"});
-  }
-
-  askForMap() {
-    this.ws.socket.emit("map", {'test_key': "Need map. Please give."});
-  }
-
-  posToPixels(x, y) {
-    var u = (x * this.state.cellSize);
-    var v = (y * this.state.cellSize);
-
-    return [u, v];
-  }
-
-  pixelsToCell(u, v) {
-    var row = Math.floor(v / this.state.cellSize);
-    var col = Math.floor(u / this.state.cellSize);
-    return [row, col];
-  }
+  /********************
+   *  REACT FUNTIONS
+   ********************/
 
   componentDidMount() {
     this.visitGrid.init(this.refs.visitCellsCanvas);
@@ -367,78 +263,15 @@ class MBotApp extends React.Component {
 
     // TODO: Discuss what other modes will enable drive control. Currently the
     // key presses active only when the drive toggle is toggled on.
-    document.addEventListener('keydown', (event) => {
-      var name = event.key;
-      if(drive_check == 1){
-        if (name == "a") this.turnLeft();
-        if (name == "d") this.turnRight();
-        if (name == "s") this.goBack();
-        if (name == "w") this.goStraight();
-        if (name == "q") this.angleLeft();
-        if (name == "e") this.angleRight();
-        if (name == "z") this.goStart();
-        if (name == "x") this.goStop();
-      }
-    }, false);
+    document.addEventListener('keydown', (evt) => this.handleKeyPress(evt), false);
 
-    // Try to connect to the C++ backend.
+    // Try to connect to the websocket backend.
     this.ws.attemptConnection();
   }
 
-  handleMap(mapmsg) {
-    var map=parseMapFromSocket(mapmsg)
-    console.log("Parsed map.")
-    this.updateMap(map);
-  }
-
-  handleMessage(msg) {
-    console.log(msg)
-    return msg
-  }
-
-  handleWindowChange(evt) {
-    this.rect = this.refs.clickCanvas.getBoundingClientRect();
-  }
-
-  handlePath(msg) {
-    this.setState({path: msg.path});
-    this.i = 0;
-    this.interval = setInterval(this.timer.bind(this), 100);
-  }
-
-  handleCells(msg) {
-    this.visitGrid.drawCell(msg.cell, this.state.cellSize,
-                            config.VISITED_CELL_COLOUR, config.SMALL_CELL_SCALE);
-  }
-
-  handleField(msg) {
-    var rawField = msg.field.slice();
-    this.setState({ field: normalizeList(msg.field), fieldRaw: rawField });
-  }
-
-  updateSocketStatus(status) {
-    if (this.state.connection !== status) {
-      this.setState({connection: status});
-    }
-  }
-
-  updateMap(result) {
-    this.visitGrid.clear();
-    var loaded = result.cells.length > 0;
-    this.setState({cells: result.cells,
-                   width: result.width,
-                   height: result.height,
-                   num_cells: result.num_cells,
-                   origin: result.origin,
-                   metersPerCell: result.meters_per_cell,
-                   cellSize: config.MAP_DISPLAY_WIDTH / result.width,
-                   pixelsPerMeter: config.MAP_DISPLAY_WIDTH / (result.width * result.meters_per_cell),
-                   mapLoaded: loaded,
-                   path: [],
-                   clickedCell: [],
-                   goalCell: [],
-                   isRobotClicked: false});
-  }
+  /*****************************
+   *  COMPONENT EVENT HANDLERS
+   *****************************/
 
   onFileChange(event) {
     this.setState({ mapfile: event.target.files[0] });
@@ -457,9 +290,61 @@ class MBotApp extends React.Component {
     var map_data = {type: "map_file",
                     data: { file_name: this.state.mapfile.name } };
     this.ws.send(map_data);
-  };
+  }
 
-  onMapClick(event) {
+  onFieldCheck() {
+    this.setState({showField: !this.state.showField});
+  }
+
+  onGrabMap() {
+    this.ws.socket.emit("map", {'test_key': "Need map. Please give."});
+  }
+
+  onMappingMode() {
+    this.setState({mappingMode: !this.state.mappingMode});
+  }
+
+  onDrivingMode() {
+    this.setState({drivingMode: !this.state.drivingMode});
+  }
+
+  onDarkMode(){
+    var canvas = document.getElementById("canvas");
+    var driveCtrls = document.getElementsByClassName("drive-ctrl")
+    if (!this.state.darkMode){
+      document.body.classList.add("new-background-color");
+      canvas.classList.add("white-border")
+
+      for (let index = 0; index < driveCtrls.length; index++) {
+        const element = driveCtrls[index];
+        element.classList.add("invert");
+      }
+    } else {
+      document.body.classList.remove("new-background-color");
+      canvas.classList.remove("white-border")
+
+      for (let index = 0; index < driveCtrls.length; index++) {
+        const element = driveCtrls[index];
+        element.classList.remove("invert");
+      }
+    }
+
+    this.setState({darkMode: !this.state.darkMode});
+  }
+
+  onSpeedChange(event) {
+    this.setState({speed: event.target.value});
+  }
+
+  /***************************
+   *  WINDOW EVENT HANDLERS
+   ***************************/
+
+  handleWindowChange(evt) {
+    this.rect = this.refs.clickCanvas.getBoundingClientRect();
+  }
+
+  handleMapClick(event) {
     if (!this.state.mapLoaded) return;
 
     var x = event.clientX - this.rect.left;
@@ -477,7 +362,7 @@ class MBotApp extends React.Component {
       this.setState({ isRobotClicked: true });
     }
     else {
-      this.onMapClick(event);
+      this.handleMapClick(event);
     }
   }
 
@@ -503,22 +388,69 @@ class MBotApp extends React.Component {
     this.setState({isRobotClicked: false});
   }
 
-  timer() {
-    var length = this.state.path.length;
-    if(length > this.i) {
-      //move robot to the next spot
-      this.findDirection();
-      this.i = this.i + 1;
-    }
-    else {
-      clearInterval(this.interval);
+  handleKeyPress(event) {
+    var name = event.key;
+    if (this.state.drivingMode) {
+      if (name == "a") this.turnLeft();
+      if (name == "d") this.turnRight();
+      if (name == "s") this.goBack();
+      if (name == "w") this.goStraight();
+      if (name == "q") this.angleLeft();
+      if (name == "e") this.angleRight();
+      if (name == "z") this.goStart();
+      if (name == "x") this.goStop();
     }
   }
 
-  findDirection(){
-    var newCoord = this.posToPixels(this.state.path[this.i][1], this.state.path[this.i][0]);
-    if (newCoord[0] == this.state.x && newCoord[1] == this.state.y) return;
-    this.setState({x: newCoord[0], y: newCoord[1]});
+  /********************
+   *   WS HANDLERS
+   ********************/
+
+  handleMap(mapmsg) {
+    var map = parseMapFromLcm(mapmsg)
+    console.log("Parsed map.")
+    this.updateMap(map);
+  }
+
+  handleMessage(msg) {
+    // TODO: Handle messages from the websocket.
+    console.log("Received message:", msg)
+  }
+
+  updateSocketStatus(status) {
+    if (this.state.connection !== status) {
+      this.setState({connection: status});
+    }
+  }
+
+  /**********************
+   *   STATE SETTERS
+   **********************/
+
+  setRobotPos(x, y) {
+    this.setState({x: x, y: y});
+  }
+
+  /**********************
+   *   OTHER FUNCTIONS
+   **********************/
+
+  updateMap(result) {
+    this.visitGrid.clear();
+    var loaded = result.cells.length > 0;
+    this.setState({cells: result.cells,
+                   width: result.width,
+                   height: result.height,
+                   num_cells: result.num_cells,
+                   origin: result.origin,
+                   metersPerCell: result.meters_per_cell,
+                   cellSize: config.MAP_DISPLAY_WIDTH / result.width,
+                   pixelsPerMeter: config.MAP_DISPLAY_WIDTH / (result.width * result.meters_per_cell),
+                   mapLoaded: loaded,
+                   path: [],
+                   clickedCell: [],
+                   goalCell: [],
+                   isRobotClicked: false});
   }
 
   onGoalClear() {
@@ -554,174 +486,23 @@ class MBotApp extends React.Component {
     this.ws.send(plan_data);
   }
 
-  onFieldCheck() {
-    this.setState({showField: !this.state.showField});
+  anExamplePost() {
+    this.ws.socket.emit("test", {'test_key': "test_value"});
   }
 
-  handleAlgoSelect(event) {
-    this.setState({algo: event.target.value});
+  posToPixels(x, y) {
+    var u = (x * this.state.cellSize);
+    var v = (y * this.state.cellSize);
+
+    return [u, v];
   }
 
-  onMapCheck() {
-    const map_buttons = ["map1", "map2", "map3", "map4", "map5"];
-
-    var checkBox = document.getElementById("myCheck");
-    if (checkBox.checked == true){
-      console.log("hello");
-      for (let index = 0; index < map_buttons.length; index++) {
-        const element = map_buttons[index];
-        const e = document.getElementById(element);
-        e.classList.remove("vis");
-      }
-
-    }
-    else
-    {
-      for (let index = 0; index < map_buttons.length; index++) {
-        const element = map_buttons[index];
-        const e = document.getElementById(element);
-        e.classList.add("vis")
-      }
-    }
-    this.setState({showField: !this.state.showField});
+  pixelsToCell(u, v) {
+    var row = Math.floor(v / this.state.cellSize);
+    var col = Math.floor(u / this.state.cellSize);
+    return [row, col];
   }
 
-  onDriveCheck() {
-    const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive5", "drive6", "drive7", "drive8", "drive9"];
-
-    var checkBox = document.getElementById("myDrive");
-    if (checkBox.checked == true){
-      console.log("hello");
-      for (let index = 0; index < map_buttons.length; index++) {
-        const element = map_buttons[index];
-        const e = document.getElementById(element);
-        e.classList.remove("vis");
-        }
-      drive_check = 1;
-    }
-    else
-    {
-      for (let index = 0; index < map_buttons.length; index++) {
-        const element = map_buttons[index];
-        const e = document.getElementById(element);
-        e.classList.add("vis")
-      }
-      drive_check = 0;
-    }
-  }
-
-  onRange() {
-    var slider = document.getElementById("myRange");
-    var output = document.getElementById("demo");
-    output.innerHTML = slider.value;
-  }
-
-  turnLeft(){
-    console.log("Going left");
-    const e = document.getElementById("drive4");
-    e.classList.add("dbutton-animation")
-    setTimeout(function(){
-      e.classList.remove("dbutton-animation");
-    }, 500)
-    // this.ws.socket.emit("test", {'test_key': "test_value"});
-  }
-
-  turnRight(){
-    console.log("Going right");
-    const e = document.getElementById("drive3");
-    e.classList.add("dbutton-animation")
-    setTimeout(function(){
-      e.classList.remove("dbutton-animation");
-    }, 500)
-    //this.ws.socket.emit("test", {'test_key': "test_value"});
-  }
-
-  angleLeft(){
-    console.log("Left turn by 20 degrees");
-    const e = document.getElementById("drive8");
-    e.classList.add("dbutton-animation")
-    setTimeout(function(){
-      e.classList.remove("dbutton-animation");
-    }, 500)
-    // this.ws.socket.emit("test", {'test_key': "test_value"});
-  }
-
-  angleRight(){
-    console.log("Right turn by 20 degrees");
-    const e = document.getElementById("drive9");
-    e.classList.add("dbutton-animation")
-    setTimeout(function(){
-      e.classList.remove("dbutton-animation");
-    }, 500)
-    // this.ws.socket.emit("test", {'test_key': "test_value"});
-  }
-
-  goStraight(){
-    console.log("Go forwards");
-    const e = document.getElementById("drive1");
-    e.classList.add("dbutton-animation")
-    setTimeout(function(){
-      e.classList.remove("dbutton-animation");
-    }, 500)
-    // this.ws.socket.emit("test", {'test_key': "test_value"});
-  }
-
-  goBack(){
-    console.log("Go back");
-    const e = document.getElementById("drive2");
-    e.classList.add("dbutton-animation")
-    setTimeout(function(){
-      e.classList.remove("dbutton-animation");
-    }, 500)
-    // this.ws.socket.emit("test", {'test_key': "test_value"});
-  }
-
-  goStart(){
-    console.log("Start robot");
-    const e = document.getElementById("drive6");
-    e.classList.add("startbtn-animation")
-    setTimeout(function(){
-      e.classList.remove("startbtn-animation");
-    }, 1000)
-    // this.ws.socket.emit("test", {'test_key': "test_value"});
-  }
-
-  goStop(){
-    console.log("STOP robot it was about run into Popeye");
-    const e = document.getElementById("drive7");
-    e.classList.add("stopbtn-animation")
-    setTimeout(function(){
-      e.classList.remove("stopbtn-animation");
-    }, 1000)
-    // this.ws.socket.emit("test", {'test_key': "test_value"});
-  }
-
-  darkMode(){
-
-    const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive8", "drive9"];
-
-    var checkBox = document.getElementById("myDark");
-    var canvas = document.getElementById("canvas");
-    if (checkBox.checked == true){
-      document.body.classList.add("new-background-color");
-      canvas.classList.add("white-border")
-
-      for (let index = 0; index < map_buttons.length; index++) {
-        const element = map_buttons[index];
-        const e = document.getElementById(element);
-        e.classList.add("invert");
-      }
-    }else{
-      document.body.classList.remove("new-background-color");
-      canvas.classList.remove("white-border")
-
-      for (let index = 0; index < map_buttons.length; index++) {
-        const element = map_buttons[index];
-        const e = document.getElementById(element);
-        e.classList.remove("invert");
-      }
-    }
-  }
   //TODO: emit message to backend when the running mode is changed.
   startmap(){
     console.log("Starting to map")
@@ -739,7 +520,6 @@ class MBotApp extends React.Component {
     console.log("Setting start point")
   }
 
-
   render() {
     var canvasStyle = {
       width: config.MAP_DISPLAY_WIDTH + "px",
@@ -749,70 +529,51 @@ class MBotApp extends React.Component {
     return (
       <div>
         <div className="button-wrapper">
-          {/* This button is an example (not part of the original webapp) which sends a POST to the Flask server. */}
-          <button className="button" onClick={() => this.askForMap()}>Grab Map</button>
-          <button className="button" onClick={() => console.log(this.state)}>Check State</button>
+          <button className="button" onClick={() => this.onGrabMap()}>Grab Map</button>
         </div>
 
-        <div className="button-wrapper top-spacing">
-          <div className="field-toggle-wrapper top-spacing">
-          <span>Dark Mode</span>
+        <div className="state-toggle-wrapper">
+          <div className="toggle-wrapper">
+            <span>Dark Mode:</span>
             <label className="switch">
-              <input type="checkbox" id="myDark" onClick={() => this.darkMode()}/>
-              <span className="slider round"></span>
-            </label>
-            <span className = "left-space">Mapping Mode</span>
-            <label className="switch">
-              <input type="checkbox" id="myCheck" onClick={() => this.onMapCheck()}/>
-              <span className="slider round"></span>
-            </label>
-            <span className = "left-space">Drive Mode</span>
-            <label className="switch">
-              <input type="checkbox" id="myDrive" onClick={() => this.onDriveCheck()}/>
+              <input type="checkbox" onClick={() => this.onDarkMode()}/>
               <span className="slider round"></span>
             </label>
           </div>
 
-          <button className="button vis start-color2" id= "map1" onClick={() => this.startmap()}>Start Mapping</button>
-          <button className="button vis stop-color2" id= "map2" onClick={() => this.stopmap()}>Stop Mapping</button>
-          <button className="button vis" id= "map3" onClick={() => this.restartmap()}>Restart Mapping</button>
-          <button className="button vis" id= "map5" onClick={() => this.setpoint()}>Start Point</button>
-
-          <button className="button vis" id= "map4" onClick={() => this.anExamplePost()}>Send Map</button>
-        </div>
-
-        <div className="top-and-bottom-space"></div>
-
-
-        <div className="flex-container">
-          <div className="button-wrapper flex-child vis" id = "drive5">
-            <p id="">Current speed: <span id="demo">50</span></p>
-            <input type="range" min="1" max="100" value="50" id="myRange" onInput={() => this.onRange()}></input>
+          <div className="toggle-wrapper">
+            <span>Mapping Mode:</span>
+            <label className="switch">
+              <input type="checkbox" onClick={() => this.onMappingMode()}/>
+              <span className="slider round"></span>
+            </label>
           </div>
-          <div className="button-wrapper flex-child top-spacing s">
-            <button className="button start-color vis" id= "drive6" onClick={() => this.goStart()}>Start</button>
-            <button className="button stop-color vis" id= "drive7" onClick={() => this.goStop()}>Stop</button>
-          </div>
-          <div className="button-wrapper flex-child">
-          <button className="button vis" id= "drive8" onClick={() => this.angleLeft()}></button>
-            <button className="button vis" id= "drive1" onClick={() => this.goStraight()}></button>
-            <button className="button vis" id= "drive9" onClick={() => this.angleRight()}></button>
-            <div className="" >
-              <button className="button  vis" id= "drive4" onClick={() => this.turnLeft()}></button>
-              <button className="button vis" id= "drive3" onClick={() => this.turnRight()}></button>
-            </div>
-            <button className="button  vis" id= "drive2" onClick={() => this.goBack()}></button>
+
+          <div className="toggle-wrapper">
+            <span>Drive Mode:</span>
+            <label className="switch">
+              <input type="checkbox" onClick={() => this.onDrivingMode()}/>
+              <span className="slider round"></span>
+            </label>
           </div>
         </div>
+
+        {this.state.mappingMode &&
+          <div className="button-wrapper top-spacing">
+            <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
+            <button className="button stop-color2" onClick={() => this.stopmap()}>Stop Mapping</button>
+            <button className="button" onClick={() => this.restartmap()}>Restart Mapping</button>
+            <button className="button" onClick={() => this.setpoint()}>Start Point</button>
+          </div>
+        }
+
+        {this.state.drivingMode &&
+          <DriveControlPanel driveControls={this.driveControls}
+                               speed={this.state.speed}
+                               onSpeedChange={(evt) => this.onSpeedChange(evt)} />
+        }
 
         <div className="status-wrapper">
-          <div className="field-toggle-wrapper">
-            <span>Show Field:</span>
-            <label className="switch">
-              <input type="checkbox" onClick={() => this.onFieldCheck()}/>
-              <span className="slider round"></span>
-            </label>
-          </div>
           <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} clickedCell={this.state.clickedCell}
                          showField={this.state.showField} fieldVal={this.state.fieldHoverVal}/>
           <ConnectionStatus status={this.state.connection}/>
@@ -820,16 +581,13 @@ class MBotApp extends React.Component {
 
         <div className="canvas-container" id = "canvas" style={canvasStyle}>
           <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
-          <DrawField field={this.state.field} showField={this.state.showField}
-                     width={this.state.width} height={this.state.height} />
           <canvas ref="visitCellsCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
           </canvas>
           <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                      goalCell={this.state.goalCell} goalValid={this.state.goalValid}
                      cellSize={this.state.cellSize} />
           <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
-                     loaded={this.state.mapLoaded} pixelsPerMeter={this.state.pixelsPerMeter}
-                     posToPixels={(x, y) => this.posToPixels(x, y)} />
+                     pixelsPerMeter={this.state.pixelsPerMeter} />
           <canvas ref="clickCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
                   onMouseDown={(e) => this.handleMouseDown(e)}
                   onMouseMove={(e) => this.handleMouseMove(e)}

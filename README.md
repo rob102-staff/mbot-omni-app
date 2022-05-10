@@ -102,6 +102,12 @@ pip install -r requirements.txt
 ```
 Note: Any other Python requirements should be added to `requirements.txt`.
 
+To install LCM, get the source and unzip it, then do:
+```bash
+cd lcm-1.4.0/lcm-python
+python setup.py install
+```
+
 #### Running
 
 To run the Flask app, do:

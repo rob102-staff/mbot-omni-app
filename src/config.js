@@ -22,20 +22,6 @@ var config = {
     GOAL_CELL_COLOUR: "#00ff00",
     BAD_GOAL_COLOUR: "#ff0000",
     SMALL_CELL_SCALE: 0.8,
-
-    // Planning info.
-    ALGO_TYPES: {
-      DFS: {name: "Depth First Search",
-            label: "dfs"},
-      BFS: {name: "Breadth First Search",
-            label: "bfs"},
-      IDS: {name: "Iterative Deepening",
-            label: "ids"},
-      ASTAR: {name: "A-Star",
-              label: "astar"},
-      PFIELD: {name: "Potential Field",
-              label: "pfield"}
-    }
 };
 
 export default config;
