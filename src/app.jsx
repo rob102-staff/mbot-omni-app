@@ -54,6 +54,44 @@ function ConnectionStatus(connection) {
 }
 
 /*******************
+ *  CONTROL PANELS
+ *******************/
+
+function DriveControlPanel(props) {
+  return (
+    <div className="flex-container">
+      <div className="button-wrapper flex-child">
+        <span>Speed: </span>
+        <input type="range" min="1" max="100" value={props.speed}
+               onChange={(evt) => props.onSpeedChange(evt)}></input>
+      </div>
+      <div className="button-wrapper flex-child top-spacing">
+        <button className="button start-color" id="drive-start"
+                onClick={() => props.driveControls.start()}>Start</button>
+        <button className="button stop-color" id="drive-stop"
+                onClick={() => props.driveControls.stop()}>Stop</button>
+      </div>
+      <div className="button-wrapper flex-child">
+        <button className="button drive-turn drive-ctrl" id="turn-left"
+                onClick={() => props.driveControls.rotateLeft()}></button>
+        <button className="button drive-move drive-ctrl" id="move-str"
+                onClick={() => props.driveControls.goStraight()}></button>
+        <button className="button drive-turn drive-ctrl" id="turn-right"
+                onClick={() => props.driveControls.rotateRight()}></button>
+        <div>
+          <button className="button drive-move drive-ctrl" id="move-left"
+                  onClick={() => props.driveControls.moveLeft()}></button>
+          <button className="button drive-move drive-ctrl" id="move-right"
+                  onClick={() => props.driveControls.moveRight()}></button>
+        </div>
+        <button className="button drive-move drive-ctrl" id="move-back"
+                onClick={() => props.driveControls.goBack()}></button>
+      </div>
+    </div>
+  );
+}
+
+/*******************
  *     CANVAS
  *******************/
 
@@ -533,27 +571,9 @@ class MBotApp extends React.Component {
         }
 
         {this.state.drivingMode &&
-          <div className="flex-container">
-            <div className="button-wrapper flex-child" id = "drive5">
-              <span>Speed: </span>
-              <input type="range" min="1" max="100" value={this.state.speed}
-                     onChange={(evt) => this.onSpeedChange(evt)}></input>
-            </div>
-            <div className="button-wrapper flex-child top-spacing">
-              <button className="button start-color" id="drive-start" onClick={() => this.driveControls.start()}>Start</button>
-              <button className="button stop-color" id="drive-stop" onClick={() => this.driveControls.stop()}>Stop</button>
-            </div>
-            <div className="button-wrapper flex-child">
-              <button className="button drive-turn drive-ctrl" id="turn-left" onClick={() => this.driveControls.rotateLeft()}></button>
-              <button className="button drive-move drive-ctrl" id="move-str" onClick={() => this.driveControls.goStraight()}></button>
-              <button className="button drive-turn drive-ctrl" id="turn-right" onClick={() => this.driveControls.rotateRight()}></button>
-              <div className="" >
-                <button className="button drive-move drive-ctrl" id="move-left" onClick={() => this.driveControls.moveLeft()}></button>
-                <button className="button drive-move drive-ctrl" id="move-right" onClick={() => this.driveControls.moveRight()}></button>
-              </div>
-              <button className="button drive-move drive-ctrl" id="move-back" onClick={() => this.driveControls.goBack()}></button>
-            </div>
-          </div>
+          <DriveControlPanel driveControls={this.driveControls}
+                               speed={this.state.speed}
+                               onSpeedChange={(evt) => this.onSpeedChange(evt)} />
         }
 
         <div className="status-wrapper">
