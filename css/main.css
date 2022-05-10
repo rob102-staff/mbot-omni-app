@@ -263,8 +263,7 @@ input:checked + .slider:before {
 }
 
 /* This is for the drive buttons up, down, left, and right */
-#drive1, #drive2, #drive3, #drive4{
-  /* background-image: url("https://cdn4.iconfinder.com/data/icons/arrow-part-2-line-pixel-art/48/51-play_player_arrow_game_application_mobile_up_down_left_right-512.png"); */
+.drive-move {
   background-size: cover;
   background-color: #00274C;
   color:none;
@@ -274,8 +273,7 @@ input:checked + .slider:before {
   padding: 20px 20px;
 }
 
-/* This is for the turn buttons to turn around the robot */
-#drive8, #drive9{
+.drive-turn {
   background-image: url("https://cdn2.iconfinder.com/data/icons/game-center-mixed-icons/512/arrow1.png");
   background-size: cover;
   background-color: #00274C;
@@ -286,43 +284,43 @@ input:checked + .slider:before {
   padding: 20px 20px; */
 }
 
+.drive-ctrl:hover {
+  background-color:#bdcf58;
+}
+
 /* Drive forward robot */
-#drive1{
+#move-str {
   transform: rotate(270deg);
   margin-left: 4%;
   margin-bottom: 5px;
 }
 
-#drive1:hover, #drive2:hover, #drive3:hover, #drive4:hover, #drive8:hover, #drive9:hover{
-  background-color:#bdcf58;
-}
-
 /* Drive back robot */
-#drive2{
+#move-back {
   transform: rotate(90deg);
   margin-left: 27%;
   margin-top: 5px;
 }
 
 /* Drive to the right */
-#drive3{
+#move-right {
   margin-right: 2%;
 }
 
 /* Drive to the left */
-#drive4{
+#move-left {
   transform: rotate(180deg);
   margin-left: 8%;
   margin-right: 22%;
 }
 
 /* Turn robot to the left */
-#drive8{
+#turn-left {
   transform: scaleX(-1) rotate(60deg);
 }
 
-/* Turn robot to the left */
-#drive9{
+/* Turn robot to the right */
+#turn-right {
   margin-left: 3%;
   transform: rotate(63deg);
 }
@@ -351,10 +349,6 @@ input:checked + .slider:before {
   border-color: #F5F5F5;
 }
 
-.dbutton-animation{ 
-  animation:drive_buttons 0.5s 1;
-}
-
 .startbtn-animation {
   animation:start_button 1s 1;
 }
@@ -364,11 +358,6 @@ input:checked + .slider:before {
 }
 
 /* Reminder: Add @-webkit-keyframes if animation doesn't appear on some devices */
-
-@keyframes drive_buttons{
-  0%      {background-color:rgba(123, 131, 18, 0.6);}
-  100%    {background-color:rgba(25, 113, 129)}
-}
 
 @keyframes start_button{
   0%      {background-color:rgba(9, 138, 63, 0.6);}

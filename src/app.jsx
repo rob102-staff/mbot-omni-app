@@ -540,18 +540,18 @@ class MBotApp extends React.Component {
                      onChange={(evt) => this.onSpeedChange(evt)}></input>
             </div>
             <div className="button-wrapper flex-child top-spacing">
-              <button className="button start-color" id="drive6" onClick={() => this.driveControls.start()}>Start</button>
-              <button className="button stop-color" id="drive7" onClick={() => this.driveControls.stop()}>Stop</button>
+              <button className="button start-color" id="drive-start" onClick={() => this.driveControls.start()}>Start</button>
+              <button className="button stop-color" id="drive-stop" onClick={() => this.driveControls.stop()}>Stop</button>
             </div>
             <div className="button-wrapper flex-child">
-            <button className="button" id="drive8" onClick={() => this.driveControls.rotateLeft()}></button>
-              <button className="button" id="drive1" onClick={() => this.driveControls.goStraight()}></button>
-              <button className="button" id="drive9" onClick={() => this.driveControls.rotateRight()}></button>
+              <button className="button drive-turn drive-ctrl" id="turn-left" onClick={() => this.driveControls.rotateLeft()}></button>
+              <button className="button drive-move drive-ctrl" id="move-str" onClick={() => this.driveControls.goStraight()}></button>
+              <button className="button drive-turn drive-ctrl" id="turn-right" onClick={() => this.driveControls.rotateRight()}></button>
               <div className="" >
-                <button className="button" id="drive4" onClick={() => this.driveControls.moveLeft()}></button>
-                <button className="button" id="drive3" onClick={() => this.driveControls.moveRight()}></button>
+                <button className="button drive-move drive-ctrl" id="move-left" onClick={() => this.driveControls.moveLeft()}></button>
+                <button className="button drive-move drive-ctrl" id="move-right" onClick={() => this.driveControls.moveRight()}></button>
               </div>
-              <button className="button" id="drive2" onClick={() => this.driveControls.goBack()}></button>
+              <button className="button drive-move drive-ctrl" id="move-back" onClick={() => this.driveControls.goBack()}></button>
             </div>
           </div>
         }
