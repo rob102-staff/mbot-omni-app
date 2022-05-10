@@ -12,9 +12,6 @@ import { parseMapFromSocket, parseMapFromLcm, normalizeList } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControls } from "./driveControls.js";
 
-// Global Variables
-let drive_check = 0;
-
 /*******************
  *     BUTTONS
  *******************/
@@ -71,7 +68,7 @@ class DrawRobot extends React.Component {
     this.robotAngle = 0;
 
     this.robotImage = new Image(config.ROBOT_DEFAULT_SIZE, config.ROBOT_DEFAULT_SIZE);
-    this.robotImage.src = '../assets/mbot.png';
+    this.robotImage.src = '/assets/mbot.png';
   }
 
   componentDidMount() {
@@ -455,7 +452,7 @@ class MBotApp extends React.Component {
 
   handleKeyPress(event) {
     var name = event.key;
-    if (drive_check == 1) {
+    if (this.state.drivingMode) {
       if (name == "a") this.turnLeft();
       if (name == "d") this.turnRight();
       if (name == "s") this.goBack();
