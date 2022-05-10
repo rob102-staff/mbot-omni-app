@@ -5,7 +5,7 @@ from lcmtypes.pose_xyt_t import pose_xyt_t
 from lcmtypes.exploration_status_t import exploration_status_t
 from lcmtypes.reset_odometry_t import reset_odometry_t
 from lcmtypes.mbot_state_t import mbot_state_t
-from app.lcm_settings import LCM_ADDRESS, MBOT_MOTOR_COMMAND_CHANNEL, SLAM_MAP_CHANNEL, ODOMETRY_CHANNEL, EXPLORATION_STATUS_CHANNEL, FULL_STATE_CHANNEL, RESET_ODOMETRY_CHANNEL
+from app import lcm_settings
 
 import time
 import sys
@@ -23,16 +23,16 @@ class LcmCommunicationManager:
             a message on their corresponding channel is handled. The decoded
             data will be passed to the callback function.
         '''
-        self._lcm = lcm.LCM(LCM_ADDRESS)
+        self._lcm = lcm.LCM(lcm_settings.LCM_ADDRESS)
         self.subscriptions = []
         self._callback_dict = callback_dict
         
         ###################################
         # TODO: VERIFY AND FIX - ENSURE DATA IS SAVED
-        self.__subscribe(SLAM_MAP_CHANNEL, self._occupancy_grid_handler)
-        self.__subscribe(ODOMETRY_CHANNEL, self._position_listener)
-        self.__subscribe(EXPLORATION_STATUS_CHANNEL, self._exploration_status_listener)
-        self.__subscribe(FULL_STATE_CHANNEL, self.mbot_state_listener)
+        self.__subscribe(lcm_settings.SLAM_MAP_CHANNEL, self._occupancy_grid_handler)
+        self.__subscribe(lcm_settings.ODOMETRY_CHANNEL, self._position_listener)
+        self.__subscribe(lcm_settings.EXPLORATION_STATUS_CHANNEL, self._exploration_status_listener)
+        self.__subscribe(lcm_settings.FULL_STATE_CHANNEL, self.mbot_state_listener)
         ###################################
 
         self.__lcm_thread = threading.Thread(target=self.__run_handle_loop)
@@ -53,8 +53,8 @@ class LcmCommunicationManager:
         cmd = omni_motor_command_t()
         cmd.vx = vx; cmd.vy = vy; cmd.wz = wz 
         cmd.utime = int(time.time() * 1000)
-        self._lcm.publish(MBOT_MOTOR_COMMAND_CHANNEL, cmd.encode())
-        print(f"published: {vx}, {vy}, {wz} to the channel {MBOT_MOTOR_COMMAND_CHANNEL}")  # TODO: remove. For testing
+        self._lcm.publish(lcm_settings.MBOT_MOTOR_COMMAND_CHANNEL, cmd.encode())
+        print(f"published: {vx}, {vy}, {wz} to the channel {lcm_settings.MBOT_MOTOR_COMMAND_CHANNEL}")  # TODO: remove. For testing
 
     def reset_odometry_publisher(self):
         cmd=reset_odometry_t()
@@ -62,7 +62,7 @@ class LcmCommunicationManager:
         cmd.y=0.0
         cmd.theta=0.0
 
-        self._lcm.publish(RESET_ODOMETRY_CHANNEL, cmd.encode())
+        self._lcm.publish(lcm_settings.RESET_ODOMETRY_CHANNEL, cmd.encode())
         print("Resetted odometry.") # TODO: Remove. For testing.
 
     # TODO: Implement start mapping publisher. 
