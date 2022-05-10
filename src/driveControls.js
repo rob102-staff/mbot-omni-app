@@ -43,7 +43,7 @@ class DriveControls {
 
   stop(){
     console.log("STOP robot it was about run into Popeye");
-    this.ws.socket.emit("stop", {'stop cmd': document.getElementById("myRange").value});
+    this.ws.socket.emit("stop", {'stop cmd': "stop"});
   }
 }
 

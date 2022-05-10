@@ -309,26 +309,23 @@ class MBotApp extends React.Component {
   }
 
   onDarkMode(){
-    const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive8", "drive9"];
-
     var canvas = document.getElementById("canvas");
+    var driveCtrls = document.getElementsByClassName("drive-ctrl")
     if (!this.state.darkMode){
       document.body.classList.add("new-background-color");
       canvas.classList.add("white-border")
 
-      for (let index = 0; index < map_buttons.length; index++) {
-        const element = map_buttons[index];
-        const e = document.getElementById(element);
-        e.classList.add("invert");
+      for (let index = 0; index < driveCtrls.length; index++) {
+        const element = driveCtrls[index];
+        element.classList.add("invert");
       }
     } else {
       document.body.classList.remove("new-background-color");
       canvas.classList.remove("white-border")
 
-      for (let index = 0; index < map_buttons.length; index++) {
-        const element = map_buttons[index];
-        const e = document.getElementById(element);
-        e.classList.remove("invert");
+      for (let index = 0; index < driveCtrls.length; index++) {
+        const element = driveCtrls[index];
+        element.classList.remove("invert");
       }
     }
 
