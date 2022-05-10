@@ -41,7 +41,6 @@ def test_message(data):
     if data["direction"] == "spinright":
         lcm_manager.publish_motor_commands(0,0,-.9)
         
-    app.logger.info("The test MOVEEEEE message is received!!!")
     app.logger.info(data)
     
     #socket.emit("message", json.dumps({'data':{'type':'server_test', 'server_test_key':'server_test_val'}}))

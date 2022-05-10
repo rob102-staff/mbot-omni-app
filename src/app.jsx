@@ -1,15 +1,16 @@
 import React from "react";
 import ReactDOM from "react-dom";
 
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
+import InputLabel from '@mui/material/InputLabel';
+import MenuItem from '@mui/material/MenuItem';
+import FormControl from '@mui/material/FormControl';
+import Select from '@mui/material/Select';
 
 import config from "./config.js";
 import { WSHelper } from "./web.js";
-import { parseMapFromSocket, normalizeList } from "./map.js";
+import { parseMapFromSocket, parseMapFromLcm, normalizeList } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
+import { DRIVE_CONTROLS } from "./drive-controls.js";
 
 // Global Variables
 let drive_check = 0;
@@ -333,6 +334,8 @@ class MBotApp extends React.Component {
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
 
+    this.drive_controls = new DRIVE_CONTROLS(this.ws);
+
     this.visitGrid = new GridCellCanvas();
   }
 
@@ -365,16 +368,34 @@ class MBotApp extends React.Component {
     window.addEventListener('resize', (evt) => this.handleWindowChange(evt));
     window.addEventListener('scroll', (evt) => this.handleWindowChange(evt));
 
+    // TODO: Discuss what other modes will enable drive control. Currently the
+    // key presses active only when the drive toggle is toggled on.
+    document.addEventListener('keydown', (event) => {
+      var name = event.key;
+      if(drive_check == 1){
+        if (name == "a") this.turnLeft();
+        if (name == "d") this.turnRight();
+        if (name == "s") this.goBack();
+        if (name == "w") this.goStraight();
+        if (name == "q") this.angleLeft();
+        if (name == "e") this.angleRight();
+        if (name == "z") this.goStart();
+        if (name == "x") this.goStop();
+      }
+    }, false);
+
     // Try to connect to the C++ backend.
     this.ws.attemptConnection();
   }
 
   handleMap(mapmsg) {
-    var map=parseMapFromSocket(mapmsg)
+    console.log(mapmsg)
+    map = mapmsg
+
+    // var map=parseMapFromSocket(mapmsg)
+    var map=parseMapFromLcm(mapmsg)
     console.log("Parsed map.")
     this.updateMap(map);
-    
-
   }
 
   handleMessage(msg) {
@@ -596,6 +617,7 @@ class MBotApp extends React.Component {
     }
   }
 
+<<<<<<< HEAD:src/main.js
   onDriveCheck() {
     const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive5", "drive6", "drive7", "drive8", "drive9"];
     // this.right();
@@ -636,96 +658,12 @@ class MBotApp extends React.Component {
     }
   }
   
+=======
+>>>>>>> f0407649d006b8954ebe9cce6445339b07c5026c:src/app.jsx
   onRange() {
     var slider = document.getElementById("myRange");
     var output = document.getElementById("demo");
     output.innerHTML = slider.value;
-  }
-
-  turnLeft(){
-    console.log("Go left");
-    const e = document.getElementById("drive4");
-    e.classList.add("dbutton-animation")
-    setTimeout(function(){
-      e.classList.remove("dbutton-animation");
-    }, 500)
-    //this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("move", {'direction': "W"});
-  }
-
-  turnRight(){
-    console.log("Go right");
-    const e = document.getElementById("drive3");
-    e.classList.add("dbutton-animation")
-    setTimeout(function(){
-      e.classList.remove("dbutton-animation");
-    }, 500)
-    //this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("move", {'direction': "E"});
-  }
-
-  angleLeft(){
-    console.log("Left turn by 20 degrees");
-    const e = document.getElementById("drive8");
-    e.classList.add("dbutton-animation")
-    setTimeout(function(){
-      e.classList.remove("dbutton-animation");
-    }, 500)
-    // this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("move", {'direction': "spinleft"});
-  }
-
-  angleRight(){
-    console.log("Right turn by 20 degrees");
-    const e = document.getElementById("drive9");
-    e.classList.add("dbutton-animation")
-    setTimeout(function(){
-      e.classList.remove("dbutton-animation");
-    }, 500)
-    // this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("move", {'direction': "spinright"});
-  }
-
-  goStraight(){
-    console.log("Go forwards");
-    const e = document.getElementById("drive1");
-    e.classList.add("dbutton-animation")
-    setTimeout(function(){
-      e.classList.remove("dbutton-animation");
-    }, 500)
-    this.ws.socket.emit("move", {'direction': "N"});
-  }
-
-  goBack(){
-    console.log("Go back");
-    const e = document.getElementById("drive2");
-    e.classList.add("dbutton-animation")
-    setTimeout(function(){
-      e.classList.remove("dbutton-animation");
-    }, 500)
-    // this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("move", {'direction': "S"});
-  }
-
-  goStart(){
-    console.log("Start robot");
-    const e = document.getElementById("drive6");
-    e.classList.add("startbtn-animation")
-    setTimeout(function(){
-      e.classList.remove("startbtn-animation");
-    }, 1000)
-    // this.ws.socket.emit("test", {'test_key': "test_value"});
-  }
-
-  goStop(){
-    console.log("STOP robot it was about run into Popeye");
-    const e = document.getElementById("drive7");
-    e.classList.add("stopbtn-animation")
-    setTimeout(function(){
-      e.classList.remove("stopbtn-animation");
-    }, 1000)
-    // this.ws.socket.emit("test", {'test_key': "test_value"});
-    this.ws.socket.emit("stop", {'stop cmd': document.getElementById("myRange").value});
   }
 
   darkMode(){
@@ -746,11 +684,11 @@ class MBotApp extends React.Component {
     }else{
       document.body.classList.remove("new-background-color");
       canvas.classList.remove("white-border")
-      
+
       for (let index = 0; index < map_buttons.length; index++) {
         const element = map_buttons[index];
         const e = document.getElementById(element);
-        e.classList.remove("invert");      
+        e.classList.remove("invert");
       }
     }
   }
@@ -804,7 +742,7 @@ class MBotApp extends React.Component {
               <span className="slider round"></span>
             </label>
           </div>
-          
+
           <button className="button vis start-color2" id= "map1" onClick={() => this.startmap()}>Start Mapping</button>
           <button className="button vis stop-color2" id= "map2" onClick={() => this.stopmap()}>Stop Mapping</button>
           <button className="button vis" id= "map3" onClick={() => this.restartmap()}>Restart Mapping</button>
@@ -822,21 +760,20 @@ class MBotApp extends React.Component {
             <input type="range" min="1" max="100" value="50" id="myRange" onInput={() => this.onRange()}></input>
           </div>
           <div className="button-wrapper flex-child top-spacing s">
-            <button className="button start-color vis" id= "drive6" onClick={() => this.goStart()}>Start</button>
-            <button className="button stop-color vis" id= "drive7" onClick={() => this.goStop()}>Stop</button>
+            <button className="button start-color vis" id= "drive6" onClick={() => this.drive_controls.start()}>Start</button>
+            <button className="button stop-color vis" id= "drive7" onClick={() => this.drive_controls.stop()}>Stop</button>
           </div>
           <div className="button-wrapper flex-child">
-          <button className="button vis" id= "drive8" onClick={() => this.angleLeft()}></button>
-            <button className="button vis" id= "drive1" onClick={() => this.goStraight()}></button>
-            <button className="button vis" id= "drive9" onClick={() => this.angleRight()}></button>
+          <button className="button vis" id= "drive8" onClick={() => this.drive_controls.rotateLeft()}></button>
+            <button className="button vis" id= "drive1" onClick={() => this.drive_controls.goStraight()}></button>
+            <button className="button vis" id= "drive9" onClick={() => this.drive_controls.rotateRight()}></button>
             <div className="" >
-              <button className="button  vis" id= "drive4" onClick={() => this.turnLeft()}></button>
-              <button className="button vis" id= "drive3" onClick={() => this.turnRight()}></button>
+              <button className="button  vis" id= "drive4" onClick={() => this.drive_controls.moveLeft()}></button>
+              <button className="button vis" id= "drive3" onClick={() => this.drive_controls.moveRight()}></button>
             </div>
-            <button className="button  vis" id= "drive2" onClick={() => this.goBack()}></button>
+            <button className="button  vis" id= "drive2" onClick={() => this.drive_controls.goBack()}></button>
           </div>
         </div>
-
 
         <div className="status-wrapper">
           <div className="field-toggle-wrapper">
@@ -874,24 +811,4 @@ class MBotApp extends React.Component {
   }
 }
 
-// TODO: Discuss what other modes will enable drive control. Currently the key presses active only when the drive toggle is toggled on.
-document.addEventListener('keydown', (event) => {
-  var name = event.key;
-  const p = new MBotApp;
-  if(drive_check == 1){
-    if (name == "a") p.turnLeft();
-    if (name == "d") p.turnRight();
-    if (name == "s") p.goBack();
-    if (name == "w") p.goStraight();
-    if (name == "q") p.angleLeft();
-    if (name == "e") p.angleRight();
-    if (name == "z") p.goStart();
-    if (name == "x") p.goStop();
-  }
-}, false);
-
-ReactDOM.render(
-  <MBotApp />,
-  document.getElementById('app-root')
-);
-
+export default MBotApp;

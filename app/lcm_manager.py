@@ -1,5 +1,3 @@
-import time
-import sys
 import lcm
 from lcmtypes.omni_motor_command_t import omni_motor_command_t
 from lcmtypes.occupancy_grid_t import occupancy_grid_t
@@ -8,7 +6,12 @@ from lcmtypes.exploration_status_t import exploration_status_t
 from lcmtypes.reset_odometry_t import reset_odometry_t
 from lcmtypes.mbot_state_t import mbot_state_t
 from app.lcm_settings import LCM_ADDRESS, MBOT_MOTOR_COMMAND_CHANNEL, SLAM_MAP_CHANNEL, ODOMETRY_CHANNEL, EXPLORATION_STATUS_CHANNEL, FULL_STATE_CHANNEL, RESET_ODOMETRY_CHANNEL
+
+import time
+import sys
 import threading
+from copy import deepcopy
+
 
 class LcmCommunicationManager:
     def __init__(self, callback_dict={}):
@@ -26,14 +29,15 @@ class LcmCommunicationManager:
         
         ###################################
         # TODO: VERIFY AND FIX - ENSURE DATA IS SAVED
-        self.__subscribe(SLAM_MAP_CHANNEL, self.example_occupancy_grid_handler)
-        self.__subscribe(ODOMETRY_CHANNEL, self.position_listener)
-        self.__subscribe(EXPLORATION_STATUS_CHANNEL, self.exploration_status_listener)
+        self.__subscribe(SLAM_MAP_CHANNEL, self._occupancy_grid_handler)
+        self.__subscribe(ODOMETRY_CHANNEL, self._position_listener)
+        self.__subscribe(EXPLORATION_STATUS_CHANNEL, self._exploration_status_listener)
         self.__subscribe(FULL_STATE_CHANNEL, self.mbot_state_listener)
         ###################################
 
         self.__lcm_thread = threading.Thread(target=self.__run_handle_loop)
         self.__lcm_thread.start()
+
 
     def update_callback(self, channel, function):
         self._callback_dict[channel] = function
@@ -65,13 +69,12 @@ class LcmCommunicationManager:
     def start_mapping_publisher(self): 
         raise(Exception("Not Yet Implemented!"))
 
-    def position_listener(self, channel, data): 
+    def _position_listener(self, channel, data): 
         decoded_data=pose_xyt_t.decode(data)
         if channel in self._callback_dict.keys(): 
             self._callback_dict[channel](decoded_data)
-        #print("Received pose!")  # TODO: remove
 
-    def exploration_status_listener(self, channel, data): 
+    def _exploration_status_listener(self, channel, data): 
         decoded_data=exploration_status_t.decode(data)
         if channel in self._callback_dict.keys(): 
             self._callback_dict[channel](decoded_data)
@@ -82,18 +85,12 @@ class LcmCommunicationManager:
         if channel in self._callback_dict.keys(): 
             self._callback_dict[channel](decoded_data)
         print("Received full state!")  # TODO: remove
-        
-    # TODO: remove this. Only for testing.
-    def publish_empty_grid(self):  
-        g = occupancy_grid_t()
-        self._lcm.publish(SLAM_MAP_CHANNEL, g.encode())
 
-    # TODO: validate and fix! remove example from the name afterwards.
-    def example_occupancy_grid_handler(self, channel, data):
+    def _occupancy_grid_handler(self, channel, data):
         decoded_data = occupancy_grid_t.decode(data)
         if channel in self._callback_dict.keys(): 
             self._callback_dict[channel](decoded_data)
-        print("Received map!")  # TODO: remove
+        # print("Received map!")  # TODO: remove
 
     def __del__(self):
         print("joined thread")
