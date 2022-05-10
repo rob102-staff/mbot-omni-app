@@ -595,6 +595,46 @@ class MBotApp extends React.Component {
       drive_check = 0;
     }
   }
+
+  onDriveCheck() {
+    const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive5", "drive6", "drive7", "drive8", "drive9"];
+    // this.right();
+    var checkBox = document.getElementById("myDrive");
+    if (checkBox.checked == true){
+      // console.log("hello");
+      // const p = new MBotApp;
+      drive_check = 1;
+      for (let index = 0; index < map_buttons.length; index++) {
+        const element = map_buttons[index];
+        const e = document.getElementById(element);
+        // this.right();
+        e.addEventListener("keypress", (event)=>{
+          console.log("hallo im alive");
+          var name = event.key;
+          if(drive_check == 1){
+            if (name == "a") this.drive_controls.moveLeft();
+            if (name == "d") console.log("pzsdfg");
+            if (name == "s") this.drive_controls.goBack();
+            if (name == "w") this.drive_controls.goStraight();
+            if (name == "q") this.drive_controls.rotateLeft();
+            if (name == "e") this.drive_controls.rotateRight();
+            if (name == "z") this.drive_controls.start();
+            if (name == "x") this.drive_controls.stop();
+          }
+        });
+        e.classList.remove("vis");
+      }
+    }
+    else
+    {
+      for (let index = 0; index < map_buttons.length; index++) {
+        const element = map_buttons[index];
+        const e = document.getElementById(element);
+        e.classList.add("vis")
+      }
+      drive_check = 0;
+    }
+  }
   
   onRange() {
     var slider = document.getElementById("myRange");
