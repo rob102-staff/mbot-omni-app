@@ -113,14 +113,22 @@ canvas {
   font-size: 14px;
 }
 
-.field-toggle-wrapper {
+.progress {
+  margin: 1em auto;
+}
+
+/* Toggles */
+
+.state-toggle-wrapper {
+  margin: 1em 0;
+}
+
+.toggle-wrapper {
+  padding-right: 1em;
+  display: inline-block;
   text-decoration: none;
   margin-top: auto;
   margin-bottom: auto;
-}
-
-.progress {
-  margin: 1em auto;
 }
 
 /* Nav */
@@ -331,21 +339,12 @@ input:checked + .slider:before {
 
 .flex-child:first-child {
   margin-right: 10px;
-} 
-
-/* Spacing up top, used for start, stop buttons */
-.s{
-  margin-top: 20px;
 }
 
 /* Inverts colors*/
 .invert{
   -webkit-filter: invert(1);
   filter: invert(1);
-}
-
-.vis{
-  visibility: hidden;
 }
 
 .white-border{

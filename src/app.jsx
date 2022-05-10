@@ -10,7 +10,7 @@ import config from "./config.js";
 import { WSHelper } from "./web.js";
 import { parseMapFromSocket, parseMapFromLcm, normalizeList } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
-import { DRIVE_CONTROLS } from "./drive-controls.js";
+import { DriveControls } from "./driveControls.js";
 
 // Global Variables
 let drive_check = 0;
@@ -52,33 +52,6 @@ function ConnectionStatus(connection) {
     <div className="status" style={{backgroundColor: colour}}>
       {msg}
     </div>
-  );
-}
-
-/*******************
- *   ALGO SELECT
- *******************/
-
-function AlgoForm(props) {
-  var menu_items = [];
-  var key, value;
-  for (const algo in config.ALGO_TYPES)
-  {
-    var data = config.ALGO_TYPES[algo];
-    menu_items.push(<MenuItem value={algo} key={data.label}>{data.name}</MenuItem>);
-  }
-  return (
-    <FormControl className="algo-form">
-      <InputLabel id="select-algo-label">Algorithm</InputLabel>
-      <Select
-        labelId="select-algo-label"
-        id="select-algo"
-        value={props.value}
-        onChange={props.onChange}
-      >
-        {menu_items}
-      </Select>
-    </FormControl>
   );
 }
 
@@ -321,12 +294,11 @@ class MBotApp extends React.Component {
       clickedCell: [],
       goalCell: [],
       goalValid: true,
-      field: [],
-      fieldRaw: [],
-      fieldHoverVal: 0,
-      showField: false,
-      isRobotClicked: false,
-      algo: 'PFIELD'
+      speed: 50,
+      darkMode: false,
+      mappingMode: false,
+      drivingMode: false,
+      isRobotClicked: false
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
@@ -334,31 +306,14 @@ class MBotApp extends React.Component {
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
 
-    this.drive_controls = new DRIVE_CONTROLS(this.ws);
+    this.driveControls = new DriveControls(this.ws);
 
     this.visitGrid = new GridCellCanvas();
   }
 
-  anExamplePost() {
-    this.ws.socket.emit("test", {'test_key': "test_value"});
-  }
-
-  askForMap() {
-    this.ws.socket.emit("map", {'test_key': "Need map. Please give."});
-  }
-
-  posToPixels(x, y) {
-    var u = (x * this.state.cellSize);
-    var v = (y * this.state.cellSize);
-
-    return [u, v];
-  }
-
-  pixelsToCell(u, v) {
-    var row = Math.floor(v / this.state.cellSize);
-    var col = Math.floor(u / this.state.cellSize);
-    return [row, col];
-  }
+  /********************
+   *  REACT FUNTIONS
+   ********************/
 
   componentDidMount() {
     this.visitGrid.init(this.refs.visitCellsCanvas);
@@ -370,82 +325,15 @@ class MBotApp extends React.Component {
 
     // TODO: Discuss what other modes will enable drive control. Currently the
     // key presses active only when the drive toggle is toggled on.
-    document.addEventListener('keydown', (event) => {
-      var name = event.key;
-      if(drive_check == 1){
-        if (name == "a") this.turnLeft();
-        if (name == "d") this.turnRight();
-        if (name == "s") this.goBack();
-        if (name == "w") this.goStraight();
-        if (name == "q") this.angleLeft();
-        if (name == "e") this.angleRight();
-        if (name == "z") this.goStart();
-        if (name == "x") this.goStop();
-      }
-    }, false);
+    document.addEventListener('keydown', (evt) => this.handleKeyPress(evt), false);
 
-    // Try to connect to the C++ backend.
+    // Try to connect to the websocket backend.
     this.ws.attemptConnection();
   }
 
-  handleMap(mapmsg) {
-    console.log(mapmsg)
-    map = mapmsg
-
-    // var map=parseMapFromSocket(mapmsg)
-    var map=parseMapFromLcm(mapmsg)
-    console.log("Parsed map.")
-    this.updateMap(map);
-  }
-
-  handleMessage(msg) {
-    console.log(msg)
-    return msg
-  }
-
-  handleWindowChange(evt) {
-    this.rect = this.refs.clickCanvas.getBoundingClientRect();
-  }
-
-  handlePath(msg) {
-    this.setState({path: msg.path});
-    this.i = 0;
-    this.interval = setInterval(this.timer.bind(this), 100);
-  }
-
-  handleCells(msg) {
-    this.visitGrid.drawCell(msg.cell, this.state.cellSize,
-                            config.VISITED_CELL_COLOUR, config.SMALL_CELL_SCALE);
-  }
-
-  handleField(msg) {
-    var rawField = msg.field.slice();
-    this.setState({ field: normalizeList(msg.field), fieldRaw: rawField });
-  }
-
-  updateSocketStatus(status) {
-    if (this.state.connection !== status) {
-      this.setState({connection: status});
-    }
-  }
-
-  updateMap(result) {
-    this.visitGrid.clear();
-    var loaded = result.cells.length > 0;
-    this.setState({cells: result.cells,
-                   width: result.width,
-                   height: result.height,
-                   num_cells: result.num_cells,
-                   origin: result.origin,
-                   metersPerCell: result.meters_per_cell,
-                   cellSize: config.MAP_DISPLAY_WIDTH / result.width,
-                   pixelsPerMeter: config.MAP_DISPLAY_WIDTH / (result.width * result.meters_per_cell),
-                   mapLoaded: loaded,
-                   path: [],
-                   clickedCell: [],
-                   goalCell: [],
-                   isRobotClicked: false});
-  }
+  /*****************************
+   *  COMPONENT EVENT HANDLERS
+   *****************************/
 
   onFileChange(event) {
     this.setState({ mapfile: event.target.files[0] });
@@ -464,9 +352,64 @@ class MBotApp extends React.Component {
     var map_data = {type: "map_file",
                     data: { file_name: this.state.mapfile.name } };
     this.ws.send(map_data);
-  };
+  }
 
-  onMapClick(event) {
+  onFieldCheck() {
+    this.setState({showField: !this.state.showField});
+  }
+
+  onGrabMap() {
+    this.ws.socket.emit("map", {'test_key': "Need map. Please give."});
+  }
+
+  onMappingMode() {
+    this.setState({mappingMode: !this.state.mappingMode});
+  }
+
+  onDrivingMode() {
+    this.setState({drivingMode: !this.state.drivingMode});
+  }
+
+  onDarkMode(){
+    const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive8", "drive9"];
+
+    var canvas = document.getElementById("canvas");
+    if (!this.state.darkMode){
+      document.body.classList.add("new-background-color");
+      canvas.classList.add("white-border")
+
+      for (let index = 0; index < map_buttons.length; index++) {
+        const element = map_buttons[index];
+        const e = document.getElementById(element);
+        e.classList.add("invert");
+      }
+    } else {
+      document.body.classList.remove("new-background-color");
+      canvas.classList.remove("white-border")
+
+      for (let index = 0; index < map_buttons.length; index++) {
+        const element = map_buttons[index];
+        const e = document.getElementById(element);
+        e.classList.remove("invert");
+      }
+    }
+
+    this.setState({darkMode: !this.state.darkMode});
+  }
+
+  onSpeedChange(event) {
+    this.setState({speed: event.target.value});
+  }
+
+  /***************************
+   *  WINDOW EVENT HANDLERS
+   ***************************/
+
+  handleWindowChange(evt) {
+    this.rect = this.refs.clickCanvas.getBoundingClientRect();
+  }
+
+  handleMapClick(event) {
     if (!this.state.mapLoaded) return;
 
     var x = event.clientX - this.rect.left;
@@ -484,7 +427,7 @@ class MBotApp extends React.Component {
       this.setState({ isRobotClicked: true });
     }
     else {
-      this.onMapClick(event);
+      this.handleMapClick(event);
     }
   }
 
@@ -508,6 +451,63 @@ class MBotApp extends React.Component {
     if (this.state.isRobotClicked == false) return;
     // this moves the robot along the path
     this.setState({isRobotClicked: false});
+  }
+
+  handleKeyPress(event) {
+    var name = event.key;
+    if (drive_check == 1) {
+      if (name == "a") this.turnLeft();
+      if (name == "d") this.turnRight();
+      if (name == "s") this.goBack();
+      if (name == "w") this.goStraight();
+      if (name == "q") this.angleLeft();
+      if (name == "e") this.angleRight();
+      if (name == "z") this.goStart();
+      if (name == "x") this.goStop();
+    }
+  }
+
+  /********************
+   *   WS HANDLERS
+   ********************/
+
+  handleMap(mapmsg) {
+    var map = parseMapFromSocket(mapmsg)
+    console.log("Parsed map.")
+    this.updateMap(map);
+  }
+
+  handleMessage(msg) {
+    // TODO: Handle messages from the websocket.
+    console.log("Received message:", msg)
+  }
+
+  updateSocketStatus(status) {
+    if (this.state.connection !== status) {
+      this.setState({connection: status});
+    }
+  }
+
+  /**********************
+   *   OTHER FUNCTIONS
+   **********************/
+
+  updateMap(result) {
+    this.visitGrid.clear();
+    var loaded = result.cells.length > 0;
+    this.setState({cells: result.cells,
+                   width: result.width,
+                   height: result.height,
+                   num_cells: result.num_cells,
+                   origin: result.origin,
+                   metersPerCell: result.meters_per_cell,
+                   cellSize: config.MAP_DISPLAY_WIDTH / result.width,
+                   pixelsPerMeter: config.MAP_DISPLAY_WIDTH / (result.width * result.meters_per_cell),
+                   mapLoaded: loaded,
+                   path: [],
+                   clickedCell: [],
+                   goalCell: [],
+                   isRobotClicked: false});
   }
 
   timer() {
@@ -561,94 +561,23 @@ class MBotApp extends React.Component {
     this.ws.send(plan_data);
   }
 
-  onFieldCheck() {
-    this.setState({showField: !this.state.showField});
+  anExamplePost() {
+    this.ws.socket.emit("test", {'test_key': "test_value"});
   }
 
-  handleAlgoSelect(event) {
-    this.setState({algo: event.target.value});
+  posToPixels(x, y) {
+    var u = (x * this.state.cellSize);
+    var v = (y * this.state.cellSize);
+
+    return [u, v];
   }
 
-  onMapCheck() {
-    const map_buttons = ["map1", "map2", "map3", "map4", "map5"];
-
-    var checkBox = document.getElementById("myCheck");
-    if (checkBox.checked == true){
-      console.log("hello");
-      for (let index = 0; index < map_buttons.length; index++) {
-        const element = map_buttons[index];
-        const e = document.getElementById(element);
-        e.classList.remove("vis");
-      }
-
-    }
-    else
-    {
-      for (let index = 0; index < map_buttons.length; index++) {
-        const element = map_buttons[index];
-        const e = document.getElementById(element);
-        e.classList.add("vis")
-      }
-    }
-    this.setState({showField: !this.state.showField});
+  pixelsToCell(u, v) {
+    var row = Math.floor(v / this.state.cellSize);
+    var col = Math.floor(u / this.state.cellSize);
+    return [row, col];
   }
 
-  onDriveCheck() {
-    const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive5", "drive6", "drive7", "drive8", "drive9"];
-
-    var checkBox = document.getElementById("myDrive");
-    if (checkBox.checked == true){
-      console.log("hello");
-      for (let index = 0; index < map_buttons.length; index++) {
-        const element = map_buttons[index];
-        const e = document.getElementById(element);
-        e.classList.remove("vis");
-        }
-      drive_check = 1;
-    }
-    else
-    {
-      for (let index = 0; index < map_buttons.length; index++) {
-        const element = map_buttons[index];
-        const e = document.getElementById(element);
-        e.classList.add("vis")
-      }
-      drive_check = 0;
-    }
-  }
-
-  onRange() {
-    var slider = document.getElementById("myRange");
-    var output = document.getElementById("demo");
-    output.innerHTML = slider.value;
-  }
-
-  darkMode(){
-
-    const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive8", "drive9"];
-
-    var checkBox = document.getElementById("myDark");
-    var canvas = document.getElementById("canvas");
-    if (checkBox.checked == true){
-      document.body.classList.add("new-background-color");
-      canvas.classList.add("white-border")
-
-      for (let index = 0; index < map_buttons.length; index++) {
-        const element = map_buttons[index];
-        const e = document.getElementById(element);
-        e.classList.add("invert");
-      }
-    }else{
-      document.body.classList.remove("new-background-color");
-      canvas.classList.remove("white-border")
-
-      for (let index = 0; index < map_buttons.length; index++) {
-        const element = map_buttons[index];
-        const e = document.getElementById(element);
-        e.classList.remove("invert");
-      }
-    }
-  }
   //TODO: emit message to backend when the running mode is changed.
   startmap(){
     console.log("Starting to map")
@@ -666,7 +595,6 @@ class MBotApp extends React.Component {
     console.log("Setting start point")
   }
 
-
   render() {
     var canvasStyle = {
       width: config.MAP_DISPLAY_WIDTH + "px",
@@ -676,64 +604,70 @@ class MBotApp extends React.Component {
     return (
       <div>
         <div className="button-wrapper">
-          {/* This button is an example (not part of the original webapp) which sends a POST to the Flask server. */}
-          <button className="button" onClick={() => this.askForMap()}>Grab Map</button>
-          <button className="button" onClick={() => console.log(this.state)}>Check State</button>
+          <button className="button" onClick={() => this.onGrabMap()}>Grab Map</button>
         </div>
 
-        <div className="button-wrapper top-spacing">
-          <div className="field-toggle-wrapper top-spacing">
-          <span>Dark Mode</span>
+        <div className="state-toggle-wrapper">
+          <div className="toggle-wrapper">
+            <span>Dark Mode:</span>
             <label className="switch">
-              <input type="checkbox" id="myDark" onClick={() => this.darkMode()}/>
-              <span className="slider round"></span>
-            </label>
-            <span className = "left-space">Mapping Mode</span>
-            <label className="switch">
-              <input type="checkbox" id="myCheck" onClick={() => this.onMapCheck()}/>
-              <span className="slider round"></span>
-            </label>
-            <span className = "left-space">Drive Mode</span>
-            <label className="switch">
-              <input type="checkbox" id="myDrive" onClick={() => this.onDriveCheck()}/>
+              <input type="checkbox" onClick={() => this.onDarkMode()}/>
               <span className="slider round"></span>
             </label>
           </div>
 
-          <button className="button vis start-color2" id= "map1" onClick={() => this.startmap()}>Start Mapping</button>
-          <button className="button vis stop-color2" id= "map2" onClick={() => this.stopmap()}>Stop Mapping</button>
-          <button className="button vis" id= "map3" onClick={() => this.restartmap()}>Restart Mapping</button>
-          <button className="button vis" id= "map5" onClick={() => this.setpoint()}>Start Point</button>
+          <div className="toggle-wrapper">
+            <span>Mapping Mode:</span>
+            <label className="switch">
+              <input type="checkbox" onClick={() => this.onMappingMode()}/>
+              <span className="slider round"></span>
+            </label>
+          </div>
 
-          <button className="button vis" id= "map4" onClick={() => this.anExamplePost()}>Send Map</button>
+          <div className="toggle-wrapper">
+            <span>Drive Mode:</span>
+            <label className="switch">
+              <input type="checkbox" onClick={() => this.onDrivingMode()}/>
+              <span className="slider round"></span>
+            </label>
+          </div>
         </div>
 
-        <div className="top-and-bottom-space"></div>
-
-
-        <div className="flex-container">
-          <div className="button-wrapper flex-child vis" id = "drive5">
-            <p id="">Current speed: <span id="demo">50</span></p>
-            <input type="range" min="1" max="100" value="50" id="myRange" onInput={() => this.onRange()}></input>
+        {this.state.mappingMode &&
+          <div className="button-wrapper top-spacing">
+            <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
+            <button className="button stop-color2" onClick={() => this.stopmap()}>Stop Mapping</button>
+            <button className="button" onClick={() => this.restartmap()}>Restart Mapping</button>
+            <button className="button" onClick={() => this.setpoint()}>Start Point</button>
           </div>
-          <div className="button-wrapper flex-child top-spacing s">
-            <button className="button start-color vis" id= "drive6" onClick={() => this.drive_controls.start()}>Start</button>
-            <button className="button stop-color vis" id= "drive7" onClick={() => this.drive_controls.stop()}>Stop</button>
-          </div>
-          <div className="button-wrapper flex-child">
-          <button className="button vis" id= "drive8" onClick={() => this.drive_controls.rotateLeft()}></button>
-            <button className="button vis" id= "drive1" onClick={() => this.drive_controls.goStraight()}></button>
-            <button className="button vis" id= "drive9" onClick={() => this.drive_controls.rotateRight()}></button>
-            <div className="" >
-              <button className="button  vis" id= "drive4" onClick={() => this.drive_controls.moveLeft()}></button>
-              <button className="button vis" id= "drive3" onClick={() => this.drive_controls.moveRight()}></button>
+        }
+
+        {this.state.drivingMode &&
+          <div className="flex-container">
+            <div className="button-wrapper flex-child" id = "drive5">
+              <span>Speed: </span>
+              <input type="range" min="1" max="100" value={this.state.speed}
+                     onChange={(evt) => this.onSpeedChange(evt)}></input>
             </div>
-            <button className="button  vis" id= "drive2" onClick={() => this.drive_controls.goBack()}></button>
+            <div className="button-wrapper flex-child top-spacing">
+              <button className="button start-color" id="drive6" onClick={() => this.driveControls.start()}>Start</button>
+              <button className="button stop-color" id="drive7" onClick={() => this.driveControls.stop()}>Stop</button>
+            </div>
+            <div className="button-wrapper flex-child">
+            <button className="button" id="drive8" onClick={() => this.driveControls.rotateLeft()}></button>
+              <button className="button" id="drive1" onClick={() => this.driveControls.goStraight()}></button>
+              <button className="button" id="drive9" onClick={() => this.driveControls.rotateRight()}></button>
+              <div className="" >
+                <button className="button" id="drive4" onClick={() => this.driveControls.moveLeft()}></button>
+                <button className="button" id="drive3" onClick={() => this.driveControls.moveRight()}></button>
+              </div>
+              <button className="button" id="drive2" onClick={() => this.driveControls.goBack()}></button>
+            </div>
           </div>
-        </div>
+        }
 
         <div className="status-wrapper">
-          <div className="field-toggle-wrapper">
+          <div className="toggle-wrapper">
             <span>Show Field:</span>
             <label className="switch">
               <input type="checkbox" onClick={() => this.onFieldCheck()}/>

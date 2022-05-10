@@ -2,7 +2,7 @@
  * MOVE HELPERS
  ********************/
 
-class DRIVE_CONTROLS {
+class DriveControls {
   constructor(wsInput) {
     this.ws = wsInput;
   }
@@ -87,4 +87,4 @@ class DRIVE_CONTROLS {
   }
 }
 
-export { DRIVE_CONTROLS };
+export { DriveControls };
