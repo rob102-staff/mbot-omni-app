@@ -29,6 +29,7 @@ def send_map(data):
 @socket.on('move')
 def test_message(data):
     a = int(data["speed"])/100
+    print(a)
 
     if data["direction"] == "N":
         lcm_manager.publish_motor_commands((a),0,0)

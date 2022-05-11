@@ -14,7 +14,9 @@ class DRIVE_CONTROLS {
     setTimeout(function(){
       e.classList.remove("dbutton-animation");
     }, 500)
-    this.ws.socket.emit("move", {'direction': "W"});
+    let spd = document.getElementById("demo").innerHTML;
+    console.log(spd);
+    this.ws.socket.emit("move", {'direction': "W", 'speed': spd});
   }
 
   moveRight(){
@@ -24,7 +26,8 @@ class DRIVE_CONTROLS {
     setTimeout(function(){
       e.classList.remove("dbutton-animation");
     }, 500)
-    this.ws.socket.emit("move", {'direction': "E"});
+    let spd = document.getElementById("demo").innerHTML;
+    this.ws.socket.emit("move", {'direction': "E", 'speed': spd});
   }
 
   rotateLeft(){
@@ -34,7 +37,8 @@ class DRIVE_CONTROLS {
     setTimeout(function(){
       e.classList.remove("dbutton-animation");
     }, 500)
-    this.ws.socket.emit("move", {'direction': "spinleft"});
+    let spd = document.getElementById("demo").innerHTML;
+    this.ws.socket.emit("move", {'direction': "spinleft", 'speed': spd});
   }
 
   rotateRight(){
@@ -44,7 +48,8 @@ class DRIVE_CONTROLS {
     setTimeout(function(){
       e.classList.remove("dbutton-animation");
     }, 500)
-    this.ws.socket.emit("move", {'direction': "spinright"});
+    let spd = document.getElementById("demo").innerHTML;
+    this.ws.socket.emit("move", {'direction': "spinright", 'speed': spd});
   }
 
   goStraight(){
@@ -54,7 +59,8 @@ class DRIVE_CONTROLS {
     setTimeout(function(){
       e.classList.remove("dbutton-animation");
     }, 500)
-    this.ws.socket.emit("move", {'direction': "N"});
+    let spd = document.getElementById("demo").innerHTML;
+    this.ws.socket.emit("move", {'direction': "N", 'speed': spd});
   }
 
   goBack(){
@@ -64,7 +70,8 @@ class DRIVE_CONTROLS {
     setTimeout(function(){
       e.classList.remove("dbutton-animation");
     }, 500)
-    this.ws.socket.emit("move", {'direction': "S"});
+    let spd = document.getElementById("demo").innerHTML;
+    this.ws.socket.emit("move", {'direction': "S", 'speed': spd});
   }
 
   start(){
