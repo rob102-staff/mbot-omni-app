@@ -595,12 +595,10 @@ class MBotApp extends React.Component {
 
   onDriveCheck() {
     const map_buttons = ["drive1", "drive2", "drive3", "drive4", "drive5", "drive6", "drive7", "drive8", "drive9"];
-    this.right();
     var checkBox = document.getElementById("myDrive");
     if (checkBox.checked == true){
       console.log("hello");
       drive_check = 1;
-      const p = new MBotApp;
       for (let index = 0; index < map_buttons.length; index++) {
         const element = map_buttons[index];
         const e = document.getElementById(element);
