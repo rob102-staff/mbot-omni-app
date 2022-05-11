@@ -370,19 +370,19 @@ class MBotApp extends React.Component {
 
     // TODO: Discuss what other modes will enable drive control. Currently the
     // key presses active only when the drive toggle is toggled on.
-    document.addEventListener('keydown', (event) => {
-      var name = event.key;
-      if(drive_check == 1){
-        if (name == "a") this.turnLeft();
-        if (name == "d") this.turnRight();
-        if (name == "s") this.goBack();
-        if (name == "w") this.goStraight();
-        if (name == "q") this.angleLeft();
-        if (name == "e") this.angleRight();
-        if (name == "z") this.goStart();
-        if (name == "x") this.goStop();
-      }
-    }, false);
+    // document.addEventListener('keydown', (event) => {
+    //   var name = event.key;
+    //   if(drive_check == 1){
+    //     if (name == "a") this.turnLeft();
+    //     if (name == "d") this.turnRight();
+    //     if (name == "s") this.goBack();
+    //     if (name == "w") this.goStraight();
+    //     if (name == "q") this.angleLeft();
+    //     if (name == "e") this.angleRight();
+    //     if (name == "z") this.goStart();
+    //     if (name == "x") this.goStop();
+    //   }
+    // }, false);
 
     // Try to connect to the C++ backend.
     this.ws.attemptConnection();
