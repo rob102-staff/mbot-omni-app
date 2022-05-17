@@ -13,6 +13,10 @@ import { parseMapFromSocket, parseMapFromLcm, normalizeList } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControls } from "./driveControls.js";
 
+
+// Global Variables - Will be replaced with React code soon
+let menu_state = 0;
+
 /*******************
  *     BUTTONS
  *******************/
@@ -59,9 +63,9 @@ function ConnectionStatus(connection) {
 
 function DriveControlPanel(props) {
   return (
-    <div className="flex-container">
+    <div className="row px-5 text-center pt-3">
       <div className="button-wrapper flex-child">
-        <span>Speed: </span>
+        <span>Speed: {props.speed}</span> <br />
         <input type="range" min="1" max="100" value={props.speed}
                onChange={(evt) => props.onSpeedChange(evt)}></input>
       </div>
@@ -73,19 +77,19 @@ function DriveControlPanel(props) {
       </div>
       <div className="button-wrapper flex-child">
         <button className="button drive-turn drive-ctrl" id="turn-left"
-                onClick={() => props.driveControls.rotateLeft()}></button>
+                onClick={() => props.driveControls.rotateLeft(props.speed)}></button>
         <button className="button drive-move drive-ctrl" id="move-str"
-                onClick={() => props.driveControls.goStraight()}></button>
+                onClick={() => props.driveControls.goStraight(props.speed)}></button>
         <button className="button drive-turn drive-ctrl" id="turn-right"
-                onClick={() => props.driveControls.rotateRight()}></button>
-        <div>
+                onClick={() => props.driveControls.rotateRight(props.speed)}></button>
+        <div className="drive-middle">
           <button className="button drive-move drive-ctrl" id="move-left"
-                  onClick={() => props.driveControls.moveLeft()}></button>
+                  onClick={() => props.driveControls.moveLeft(props.speed)}></button>
           <button className="button drive-move drive-ctrl" id="move-right"
-                  onClick={() => props.driveControls.moveRight()}></button>
+                  onClick={() => props.driveControls.moveRight(props.speed)}></button>
         </div>
-        <button className="button drive-move drive-ctrl" id="move-back"
-                onClick={() => props.driveControls.goBack()}></button>
+        <button className="button drive-move drive-ctrl drive-bottom" id="move-back"
+                onClick={() => props.driveControls.goBack(props.speed)}></button>
       </div>
     </div>
   );
@@ -233,6 +237,8 @@ class MBotApp extends React.Component {
       darkMode: false,
       mappingMode: false,
       drivingMode: false,
+      sideBarMode: false,
+      sideBarWidth: 0,
       // Robot parameters.
       x: config.MAP_DISPLAY_WIDTH / 2,
       y: config.MAP_DISPLAY_WIDTH / 2,
@@ -314,6 +320,7 @@ class MBotApp extends React.Component {
     if (!this.state.darkMode){
       document.body.classList.add("new-background-color");
       canvas.classList.add("white-border")
+      canvas.classList.add("canvas-color")
 
       for (let index = 0; index < driveCtrls.length; index++) {
         const element = driveCtrls[index];
@@ -327,6 +334,7 @@ class MBotApp extends React.Component {
         const element = driveCtrls[index];
         element.classList.remove("invert");
       }
+      canvas.classList.remove("canvas-color")
     }
 
     this.setState({darkMode: !this.state.darkMode});
@@ -334,6 +342,12 @@ class MBotApp extends React.Component {
 
   onSpeedChange(event) {
     this.setState({speed: event.target.value});
+  }
+
+  onSideBar(){
+    this.setState({sideBarMode: !this.state.sideBarMode})
+    if(this.state.sideBarMode) this.setState({sideBarWidth: 25 + "%"});
+    else this.setState({sideBarWidth: 0});
   }
 
   /***************************
@@ -391,15 +405,16 @@ class MBotApp extends React.Component {
   handleKeyPress(event) {
     var name = event.key;
     if (this.state.drivingMode) {
-      if (name == "a") this.turnLeft();
-      if (name == "d") this.turnRight();
-      if (name == "s") this.goBack();
-      if (name == "w") this.goStraight();
-      if (name == "q") this.angleLeft();
-      if (name == "e") this.angleRight();
-      if (name == "z") this.goStart();
-      if (name == "x") this.goStop();
+      if (name == "a") this.driveControls.moveLeft(this.state.speed);
+      if (name == "d") this.driveControls.moveRight(this.state.speed);
+      if (name == "s") this.driveControls.goBack(this.state.speed);
+      if (name == "w") this.driveControls.goStraight(this.state.speed);
+      if (name == "q") this.driveControls.rotateLeft(this.state.speed);
+      if (name == "e") this.driveControls.rotateRight(this.state.speed);
+      if (name == "z") this.driveControls.start(this.state.speed);
+      if (name == "x") this.driveControls.stop(this.state.speed);
     }
+    if (name == "p") this.onSideBar();
   }
 
   /********************
@@ -522,58 +537,99 @@ class MBotApp extends React.Component {
 
   render() {
     var canvasStyle = {
-      width: config.MAP_DISPLAY_WIDTH + "px",
+      width: config.MAP_DISPLAY_HEIGHT + "%",
       height: config.MAP_DISPLAY_WIDTH + "px",
     };
 
     return (
-      <div>
-        <div className="button-wrapper">
+      <>
+        <div className="row mx-5">
+          <div className="col-7">
+            <h1>MBot Omni GUI</h1>
+          </div>
+          <div className="col-4"></div>
+          <div className="col-1 very-small-top">
+            <i className="fa-solid fa-bars fa-2xl pf" onClick={() => this.onSideBar()}></i>
+          </div>
+        </div>
+
+        {/* <div className="button-wrapper">
           <button className="button" onClick={() => this.onGrabMap()}>Grab Map</button>
+        </div> */}
+
+        <div id="mySidenav" class="sidenav" style = {{width: this.state.sideBarWidth}}>
+          <a href="#" className = "text-right" onClick={() => this.onSideBar()}>X</a>
+          <div className="row field-toggle-wrapper top-spacing text-white mx-3 mt-4">
+            <div className="col">
+                  <div className="row">
+                    <div className="col-8">
+                      <span>Dark Mode</span>
+                    </div>
+                    <div className="col-4">
+                      <label className="switch">
+                        <input type="checkbox" id="myDark" onClick={() => this.onDarkMode()}/>
+                        <span className="slider round"></span>
+                      </label>
+                    </div>
+                  </div>
+                  <div className="row my-5">
+                    <div className="col-8">
+                      <span className = "">Mapping Mode</span>
+                    </div>
+                    <div className="col-4">
+                      <label className="switch">
+                        <input type="checkbox" id="myCheck" onClick={() => this.onMappingMode()}/>
+                        <span className="slider round"></span>
+                      </label>
+                    </div>
+                  </div>
+                  <div className="row">
+                    <div className="col-8">
+                      <span className = "">Drive Mode</span>
+                    </div>
+                    <div className="col-4">
+                      <label className="switch">
+                        <input type="checkbox" id="myDrive" onClick={() => this.onDrivingMode()}/>
+                        <span className="slider round"></span>
+                      </label>
+                    </div>
+                  </div>
+                  <div className="row mt-5">
+                    <div className="col-8">
+                      <span className = "field-toggle-wrapper">
+                        Show Field:
+                        </span>
+                    </div>
+                    <div className="col-4">
+                      <label className="switch">
+                        <input type="checkbox" id=""/>
+                        <span className="slider round"></span>
+                      </label>
+                    </div>
+                  </div>
+                </div>
+              </div>
         </div>
 
-        <div className="state-toggle-wrapper">
-          <div className="toggle-wrapper">
-            <span>Dark Mode:</span>
-            <label className="switch">
-              <input type="checkbox" onClick={() => this.onDarkMode()}/>
-              <span className="slider round"></span>
-            </label>
-          </div>
 
-          <div className="toggle-wrapper">
-            <span>Mapping Mode:</span>
-            <label className="switch">
-              <input type="checkbox" onClick={() => this.onMappingMode()}/>
-              <span className="slider round"></span>
-            </label>
-          </div>
+        <div className="container pt-3">
+          {this.state.mappingMode &&
+            <div className="button-wrapper top-spacing d-flex justify-content-center">
+              <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
+              <button className="button stop-color2 me-3" onClick={() => this.stopmap()}>Stop Mapping</button>
+              <button className="button" onClick={() => this.restartmap()}>Restart Mapping</button>
+              <button className="button" onClick={() => this.setpoint()}>Start Point</button>
+            </div>
+          }
 
-          <div className="toggle-wrapper">
-            <span>Drive Mode:</span>
-            <label className="switch">
-              <input type="checkbox" onClick={() => this.onDrivingMode()}/>
-              <span className="slider round"></span>
-            </label>
-          </div>
+          {this.state.drivingMode &&
+            <DriveControlPanel driveControls={this.driveControls}
+                                speed={this.state.speed}
+                                onSpeedChange={(evt) => this.onSpeedChange(evt)} />
+          }
         </div>
 
-        {this.state.mappingMode &&
-          <div className="button-wrapper top-spacing">
-            <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
-            <button className="button stop-color2" onClick={() => this.stopmap()}>Stop Mapping</button>
-            <button className="button" onClick={() => this.restartmap()}>Restart Mapping</button>
-            <button className="button" onClick={() => this.setpoint()}>Start Point</button>
-          </div>
-        }
-
-        {this.state.drivingMode &&
-          <DriveControlPanel driveControls={this.driveControls}
-                               speed={this.state.speed}
-                               onSpeedChange={(evt) => this.onSpeedChange(evt)} />
-        }
-
-        <div className="status-wrapper">
+        <div className="status-wrapper mx-5">
           <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} clickedCell={this.state.clickedCell}
                          showField={this.state.showField} fieldVal={this.state.fieldHoverVal}/>
           <ConnectionStatus status={this.state.connection}/>
@@ -594,7 +650,7 @@ class MBotApp extends React.Component {
                   onMouseUp={() => this.handleMouseUp()}>
           </canvas>
         </div>
-      </div>
+      </>
     );
   }
 }

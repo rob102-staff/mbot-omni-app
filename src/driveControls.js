@@ -1,48 +1,66 @@
 /********************
  * MOVE HELPERS
  ********************/
+// import {MBotApp} from "./app";
 
 class DriveControls {
   constructor(wsInput) {
     this.ws = wsInput;
   }
 
-  moveLeft(){
+  animation(name){
+    const e = document.getElementById(name);
+    e.classList.add("dbutton-animation")
+    setTimeout(function(){
+      e.classList.remove("dbutton-animation");
+    }, 500)
+  }
+
+  moveLeft(spd){
     console.log("Moving left...");
-    this.ws.socket.emit("move", {'direction': "W"});
+    // console.log(MBotApp.state.speed);
+    this.animation("move-left");
+    this.ws.socket.emit("move", {'direction': "W", 'speed' : spd});
   }
 
-  moveRight(){
+  moveRight(spd){
     console.log("Moving right...");
-    this.ws.socket.emit("move", {'direction': "E"});
+    this.animation("move-right");
+    this.ws.socket.emit("move", {'direction': "E", 'speed' : spd});
   }
 
-  rotateLeft(){
+  rotateLeft(spd){
     console.log("Turning left...");
-    this.ws.socket.emit("move", {'direction': "spinleft"});
+    this.animation("turn-left");
+    this.ws.socket.emit("move", {'direction': "spinleft", 'speed' : spd});
   }
 
-  rotateRight(){
+  rotateRight(spd){
     console.log("Turning right...");
-    this.ws.socket.emit("move", {'direction': "spinright"});
+    this.animation("turn-right");
+    this.ws.socket.emit("move", {'direction': "spinright", 'speed' : spd});
   }
 
-  goStraight(){
+  goStraight(spd){
     console.log("Moving forwards...");
-    this.ws.socket.emit("move", {'direction': "N"});
+    this.animation("move-str");
+    this.ws.socket.emit("move", {'direction': "N", 'speed' : spd});
   }
 
-  goBack(){
+  goBack(spd){
     console.log("Moving backwards...");
-    this.ws.socket.emit("move", {'direction': "S"});
+    this.animation("move-back");
+    this.ws.socket.emit("move", {'direction': "S", 'speed' : spd});
   }
 
   start(){
     console.log("Start robot");
+    this.animation("drive-start");
   }
 
   stop(){
     console.log("STOP robot it was about run into Popeye");
+    this.animation("drive-stop");
     this.ws.socket.emit("stop", {'stop cmd': "stop"});
   }
 }

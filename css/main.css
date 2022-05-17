@@ -6,13 +6,14 @@ Light grey for backgrounds: #F5F5F5;
 */
 
 body {
-  margin:20px auto;
-  max-width:800px;
+  margin: 50px auto;
+  max-width:100%;
   line-height:1.6;
-  font-size:18px;
+  font-size:20px;
   color:#444;
   padding:0 10px;
   font-family: 'Montserrat', sans-serif;
+  transition: background-color 0.24s;
 }
 
 h1,h2,h3 {
@@ -30,14 +31,20 @@ a:hover {
 }
 
 .canvas-container {
-  border: 1px solid #000000;
-  margin-left: auto;
-  margin-right: auto;
-  margin-top: 0.5em;
-  margin-bottom: 1em;
-  position: relative;
-  height: 100%;
+  border: 3px solid #000000;
+  /* margin-left: auto;  
+  margin-right: auto;  */
+  margin-top: 0.5em;  
+  margin-bottom: 1em; 
+  position: relative; 
+  height: 100%;       
   width: 100%;
+  background-color: #f5f3f3;
+  z-index: 0
+}
+
+.canvas-color{
+  background-color: #22476a;
 }
 
 canvas {
@@ -262,6 +269,63 @@ input:checked + .slider:before {
   color:#ccc;
 }
 
+.pf{
+  position: fixed;
+  z-index: 3;
+  background: #00274C;
+}
+
+.sidenav {
+  height: 100%;
+  width: 0;
+  position: fixed;
+  z-index: 2;
+  top: 0;
+  left: 0;
+  background-color: rgb(18, 18, 18, 0.924);
+  overflow-x: hidden;
+  transition: 0.5s;
+  padding-top: 60px;
+}
+
+.sidenav a {
+  padding: 8px 8px 8px 32px;
+  text-decoration: none;
+  font-size: 25px;
+  color: #818181;
+  display: block;
+  transition: 0.3s;
+}
+
+.sidenav a:hover {
+  color: #f1f1f1;
+}
+
+.sidenav .closebtn {
+  position: absolute;
+  top: 0;
+  right: 25px;
+  font-size: 36px;
+  margin-left: 50px;
+}
+
+.parent { 
+  display: grid; 
+  grid-template-columns: repeat(3, 1fr); 
+  grid-template-rows: repeat(3, 1fr); 
+  grid-column-gap: 0px;
+  grid-row-gap: 0px; 
+  }
+
+.drive-middle{
+  margin-right: 8%;
+  margin: 2% 8% 2% 0
+}
+
+.drive-bottom{
+  margin-right: 30%;
+}
+
 /* This is for the drive buttons up, down, left, and right */
 .drive-move {
   background-size: cover;
@@ -328,7 +392,7 @@ input:checked + .slider:before {
 /* Container to organize drive features */
 .flex-container {
   display: flex;
-  margin: 10px;
+  margin: 0px;
 }
 
 .flex-child {
@@ -349,6 +413,10 @@ input:checked + .slider:before {
   border-color: #F5F5F5;
 }
 
+.dbutton-animation{ 
+  animation:drive_buttons 0.5s 1;
+}
+
 .startbtn-animation {
   animation:start_button 1s 1;
 }
@@ -358,6 +426,11 @@ input:checked + .slider:before {
 }
 
 /* Reminder: Add @-webkit-keyframes if animation doesn't appear on some devices */
+
+@keyframes drive_buttons{
+  0%      {background-color:rgba(123, 131, 18, 0.6);}
+  100%    {background-color:rgba(25, 113, 129)}
+}
 
 @keyframes start_button{
   0%      {background-color:rgba(9, 138, 63, 0.6);}
