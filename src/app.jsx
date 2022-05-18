@@ -421,7 +421,7 @@ class MBotApp extends React.Component {
   handleKeyPressUp(event) {
     var name = event.key;
     if (this.state.drivingMode) {
-      drive_keys = ["a", "d", "s", "w", "q", "e"];
+      let drive_keys = ["a", "d", "s", "w", "q", "e"];
       drive_keys.forEach(item => {if(name == item) this.driveControls.stop();})
     }
   }
@@ -580,7 +580,7 @@ class MBotApp extends React.Component {
           <button className="button" onClick={() => this.onGrabMap()}>Grab Map</button>
         </div> */}
 
-        <div id="mySidenav" class="sidenav" style = {{width: this.state.sideBarWidth}}>
+        <div id="mySidenav" className="sidenav" style = {{width: this.state.sideBarWidth}}>
           <a href="#" className = "text-right" onClick={() => this.onSideBar()}>X</a>
           <div className="row field-toggle-wrapper top-spacing text-white mx-3 mt-4">
             <div className="col">
