@@ -268,7 +268,9 @@ class MBotApp extends React.Component {
 
     // TODO: Discuss what other modes will enable drive control. Currently the
     // key presses active only when the drive toggle is toggled on.
-    document.addEventListener('keydown', (evt) => this.handleKeyPress(evt), false);
+    document.addEventListener('keydown', (evt) => this.handleKeyPressDown(evt), false);
+    document.addEventListener('keyup', (evt) => this.handleKeyPressUp(evt), false);
+
 
     // Try to connect to the websocket backend.
     this.ws.attemptConnection();
@@ -401,7 +403,7 @@ class MBotApp extends React.Component {
     this.setState({isRobotClicked: false});
   }
 
-  handleKeyPress(event) {
+  handleKeyPressDown(event) {
     var name = event.key;
     if (this.state.drivingMode) {
       if (name == "a") this.driveControls.moveLeft(this.state.speed);
@@ -414,6 +416,14 @@ class MBotApp extends React.Component {
       if (name == "x") this.driveControls.stop(this.state.speed);
     }
     if (name == "p") this.onSideBar();
+  }
+
+  handleKeyPressUp(event) {
+    var name = event.key;
+    if (this.state.drivingMode) {
+      drive_keys = ["a", "d", "s", "w", "q", "e"];
+      drive_keys.forEach(item => {if(name == item) this.driveControls.stop();})
+    }
   }
 
   /********************
