@@ -28,21 +28,21 @@ def send_map(data):
 
 @socket.on('move')
 def test_message(data):
-    a = int(data["speed"])/100
-    print(a)
+    spd = int(data["speed"])/100
+    print(spd)
 
     if data["direction"] == "N":
-        lcm_manager.publish_motor_commands((a),0,0)
+        lcm_manager.publish_motor_commands((spd),0,0)
     if data["direction"] == "E":
-        lcm_manager.publish_motor_commands(0,(a),0)
+        lcm_manager.publish_motor_commands(0,(spd),0)
     if data["direction"] == "S":
-        lcm_manager.publish_motor_commands(-(a),0,0)
+        lcm_manager.publish_motor_commands(-(spd),0,0)
     if data["direction"] == "W":
-        lcm_manager.publish_motor_commands(0,-(a),0)
+        lcm_manager.publish_motor_commands(0,-(spd),0)
     if data["direction"] == "spinleft":
-        lcm_manager.publish_motor_commands(0,0,(2*a))
+        lcm_manager.publish_motor_commands(0,0,(2*spd))
     if data["direction"] == "spinright":
-        lcm_manager.publish_motor_commands(0,0,-(2*a))
+        lcm_manager.publish_motor_commands(0,0,-(2*spd))
         
     app.logger.info(data)
     

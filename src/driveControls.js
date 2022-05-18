@@ -1,7 +1,6 @@
 /********************
  * MOVE HELPERS
  ********************/
-// import {MBotApp} from "./app";
 
 class DriveControls {
   constructor(wsInput) {
@@ -18,7 +17,6 @@ class DriveControls {
 
   moveLeft(spd){
     console.log("Moving left...");
-    // console.log(MBotApp.state.speed);
     this.animation("move-left");
     this.ws.socket.emit("move", {'direction': "W", 'speed' : spd});
   }

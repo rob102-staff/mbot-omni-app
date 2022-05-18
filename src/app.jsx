@@ -14,9 +14,6 @@ import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControls } from "./driveControls.js";
 
 
-// Global Variables - Will be replaced with React code soon
-let menu_state = 0;
-
 /*******************
  *     BUTTONS
  *******************/
@@ -239,6 +236,8 @@ class MBotApp extends React.Component {
       drivingMode: false,
       sideBarMode: false,
       sideBarWidth: 0,
+      omni: false,
+      diff: false,
       // Robot parameters.
       x: config.MAP_DISPLAY_WIDTH / 2,
       y: config.MAP_DISPLAY_WIDTH / 2,
@@ -468,6 +467,20 @@ class MBotApp extends React.Component {
                    isRobotClicked: false});
   }
 
+  changeOnmi(){
+    this.setState({omni: !this.state.omni});
+    console.log(this.state.diff);
+  }
+
+  changeDiff(){
+    console.log(this.state.omni);
+    console.log(this.state.diff);
+    this.setState({diff: !this.state.diff});
+    if(this.state.omni && !this.state.diff){
+      this.setState({omni: !this.state.omni});
+    }
+  }
+
   onGoalClear() {
     this.setState({clickedCell: [],
                    goalCell: []});
@@ -561,54 +574,76 @@ class MBotApp extends React.Component {
           <a href="#" className = "text-right" onClick={() => this.onSideBar()}>X</a>
           <div className="row field-toggle-wrapper top-spacing text-white mx-3 mt-4">
             <div className="col">
-                  <div className="row">
-                    <div className="col-8">
-                      <span>Dark Mode</span>
-                    </div>
-                    <div className="col-4">
-                      <label className="switch">
-                        <input type="checkbox" id="myDark" onClick={() => this.onDarkMode()}/>
-                        <span className="slider round"></span>
-                      </label>
-                    </div>
-                  </div>
-                  <div className="row my-5">
-                    <div className="col-8">
-                      <span className = "">Mapping Mode</span>
-                    </div>
-                    <div className="col-4">
-                      <label className="switch">
-                        <input type="checkbox" id="myCheck" onClick={() => this.onMappingMode()}/>
-                        <span className="slider round"></span>
-                      </label>
-                    </div>
-                  </div>
-                  <div className="row">
-                    <div className="col-8">
-                      <span className = "">Drive Mode</span>
-                    </div>
-                    <div className="col-4">
-                      <label className="switch">
-                        <input type="checkbox" id="myDrive" onClick={() => this.onDrivingMode()}/>
-                        <span className="slider round"></span>
-                      </label>
-                    </div>
-                  </div>
-                  <div className="row mt-5">
-                    <div className="col-8">
-                      <span className = "field-toggle-wrapper">
-                        Show Field:
-                        </span>
-                    </div>
-                    <div className="col-4">
-                      <label className="switch">
-                        <input type="checkbox" id=""/>
-                        <span className="slider round"></span>
-                      </label>
-                    </div>
-                  </div>
+              <div className="row">
+                <div className="col-8">
+                  <span>Dark Mode</span>
+                </div>
+                <div className="col-4">
+                  <label className="switch">
+                    <input type="checkbox" id="myDark" onClick={() => this.onDarkMode()}/>
+                    <span className="slider round"></span>
+                  </label>
                 </div>
               </div>
+              <div className="row my-5">
+                <div className="col-8">
+                  <span className = "">Mapping Mode</span>
+                </div>
+                <div className="col-4">
+                  <label className="switch">
+                    <input type="checkbox" id="myCheck" onClick={() => this.onMappingMode()}/>
+                    <span className="slider round"></span>
+                  </label>
+                </div>
+              </div>
+              <div className="row">
+                <div className="col-8">
+                  <span className = "">Drive Mode</span>
+                </div>
+                <div className="col-4">
+                  <label className="switch">
+                    <input type="checkbox" id="myDrive" onClick={() => this.onDrivingMode()}/>
+                    <span className="slider round"></span>
+                  </label>
+                </div>
+              </div>
+              {
+              this.state.drivingMode &&
+              <div className="row mt-5">
+                <div className="">
+                hallo
+                <input
+                  type="checkbox"
+                  checked={this.omni}
+                  onChange={() => this.changeOnmi()}
+                />
+                </div>
+                <div className="">
+                  no hallo
+                  <input
+                  type="checkbox"
+                  checked={this.diff}
+                  onChange={() => this.changeDiff()}
+                />
+                </div>
+              </div>
+              
+              }
+              <div className="row mt-5">
+                <div className="col-8">
+                  <span className = "field-toggle-wrapper">
+                    Show Field:
+                    </span>
+                </div>
+                <div className="col-4">
+                  <label className="switch">
+                    <input type="checkbox" id=""/>
+                    <span className="slider round"></span>
+                  </label>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
 
 
