@@ -419,10 +419,11 @@ class MBotApp extends React.Component {
   }
 
   handleKeyPressUp(event) {
+    console.log("Key UPPP")
     var name = event.key;
     if (this.state.drivingMode) {
       let drive_keys = ["a", "d", "s", "w", "q", "e"];
-      drive_keys.forEach(item => {if(name == item) this.driveControls.stop();})
+      drive_keys.forEach(item => {if(name == item) this.driveControls.stopKeyUp(name);})
     }
   }
 
@@ -560,8 +561,8 @@ class MBotApp extends React.Component {
 
   render() {
     var canvasStyle = {
-      width: config.MAP_DISPLAY_HEIGHT + "%",
-      height: config.MAP_DISPLAY_WIDTH + "px",
+      width: config.MAP_DISPLAY_WIDTH + "%",
+      height: config.MAP_DISPLAY_HEIGHT + "px",
     };
 
     return (

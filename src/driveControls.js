@@ -9,10 +9,20 @@ class DriveControls {
 
   animation(name){
     const e = document.getElementById(name);
-    e.classList.add("dbutton-animation")
+    e.classList.add("keydown-drivecolor");
+  }
+
+  animation2(name){
+    const e = document.getElementById(name);
+    e.classList.add("dbutton-animation");
     setTimeout(function(){
       e.classList.remove("dbutton-animation");
     }, 500)
+  }
+
+  removeAnimationKey(name){
+    const e = document.getElementById(name);
+    e.classList.remove("keydown-drivecolor");
   }
 
   moveLeft(spd){
@@ -53,12 +63,23 @@ class DriveControls {
 
   start(){
     console.log("Start robot");
-    this.animation("drive-start");
+    this.animation2("drive-start");
   }
 
   stop(){
     console.log("STOP robot it was about run into Popeye");
-    this.animation("drive-stop");
+    this.animation2("drive-stop");
+    this.ws.socket.emit("stop", {'stop cmd': "stop"});
+  }
+
+  stopKeyUp(name){
+    console.log("STOP robot it was about run into Popeye");
+    if(name == "w") this.removeAnimationKey("move-str");
+    if(name == "a") this.removeAnimationKey("move-left");
+    if(name == "s") this.removeAnimationKey("move-back");
+    if(name == "d") this.removeAnimationKey("move-right");
+    if(name == "q") this.removeAnimationKey("turn-left");
+    if(name == "e") this.removeAnimationKey("turn-right");
     this.ws.socket.emit("stop", {'stop cmd': "stop"});
   }
 }

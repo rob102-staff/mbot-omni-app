@@ -6,8 +6,8 @@ var config = {
     CONNECT_PERIOD: 5000,     // ms
 
     // Sim info
-    MAP_DISPLAY_HEIGHT: 100,  // %
-    MAP_DISPLAY_WIDTH: 900,   // px
+    MAP_DISPLAY_WIDTH: 100,  // %
+    MAP_DISPLAY_HEIGHT: 800,   // px
     ROBOT_SIZE: 0.274,        // m, diameter
     ROBOT_DEFAULT_SIZE: 100,  // px
 
