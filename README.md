@@ -114,6 +114,7 @@ To run the Flask app, do:
 ```bash
 npm run start-api
 ```
+
 Traffic on `http://localhost:8000` will be forwarded to `http://localhost:5000`,
 where the Flask server is running.
 
