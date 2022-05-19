@@ -577,10 +577,6 @@ class MBotApp extends React.Component {
           </div>
         </div>
 
-        {/* <div className="button-wrapper">
-          <button className="button" onClick={() => this.onGrabMap()}>Grab Map</button>
-        </div> */}
-
         <div id="mySidenav" className="sidenav" style = {{width: this.state.sideBarWidth}}>
           <a href="#" className = "text-right" onClick={() => this.onSideBar()}>X</a>
           <div className="row field-toggle-wrapper top-spacing text-white mx-3 mt-4">
@@ -618,29 +614,19 @@ class MBotApp extends React.Component {
                   </label>
                 </div>
               </div>
-              {
-              this.state.drivingMode &&
+              { this.state.drivingMode &&
               <div className="row mt-5 text-left">
-                <div className="col-6">
-                Omni-Drive
-                <input
-                  type="checkbox"
-                  checked={this.omni}
-                  onChange={() => this.changeOnmi()}
-                />
+                <div className="col-6 text-small">Omni-Drive
+                <input type="checkbox" className="mx-2" checked={this.omni}
+                  onChange={() => this.changeOnmi()}/>
                 </div>
-                <div className="col-6">
-                  Diff-Drive
-                  <input
-                  type="checkbox"
-                  checked={this.diff}
-                  onChange={() => this.changeDiff()}
-                />
+                <div className="col-6"> Diff-Drive
+                  <input type="checkbox" className="mx-2" checked={this.diff}
+                  onChange={() => this.changeDiff()} />
                 </div>
               </div>
-              
               }
-              <div className="row mt-5">
+              <div className="row my-5">
                 <div className="col-8">
                   <span className = "field-toggle-wrapper">
                     Show Field:
@@ -651,6 +637,11 @@ class MBotApp extends React.Component {
                     <input type="checkbox" id=""/>
                     <span className="slider round"></span>
                   </label>
+                </div>
+              </div>
+              <div className="row text-center">
+                <div className="button-wrapper">
+                  <button className="button" onClick={() => this.onGrabMap()}>Grab Map</button>
                 </div>
               </div>
             </div>
