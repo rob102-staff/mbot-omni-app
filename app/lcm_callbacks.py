@@ -63,7 +63,7 @@ class LidarReader():
             "utime" : self.__lidar.utime, 
             "num_ranges" : self.__lidar.num_ranges,
             "ranges" : self.__lidar.ranges,
-            "thetas" : self.__lidar.width,
+            "thetas" : self.__lidar.thetas,
             "times" : self.__lidar.times,
             "intensities" : self.__lidar.intensities,
         }
@@ -81,6 +81,7 @@ class LidarReader():
         self.__lock.acquire()
         self.__lidar = data
         self.__lidar_available = True
+        print("hallo")
         self.__lock.release()
 
     def __del__(self):
