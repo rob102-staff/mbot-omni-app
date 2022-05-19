@@ -322,7 +322,6 @@ class MBotApp extends React.Component {
       document.body.classList.add("new-background-color");
       canvas.classList.add("white-border")
       canvas.classList.add("canvas-color")
-
       for (let index = 0; index < driveCtrls.length; index++) {
         const element = driveCtrls[index];
         element.classList.add("invert");
@@ -335,7 +334,8 @@ class MBotApp extends React.Component {
         const element = driveCtrls[index];
         element.classList.remove("invert");
       }
-      canvas.classList.remove("canvas-color")
+      canvas.classList.remove("canvas-color");
+      canvas.classList.remove("white-border");
     }
 
     this.setState({darkMode: !this.state.darkMode});
@@ -620,17 +620,17 @@ class MBotApp extends React.Component {
               </div>
               {
               this.state.drivingMode &&
-              <div className="row mt-5">
-                <div className="">
-                hallo
+              <div className="row mt-5 text-left">
+                <div className="col-6">
+                Omni-Drive
                 <input
                   type="checkbox"
                   checked={this.omni}
                   onChange={() => this.changeOnmi()}
                 />
                 </div>
-                <div className="">
-                  no hallo
+                <div className="col-6">
+                  Diff-Drive
                   <input
                   type="checkbox"
                   checked={this.diff}

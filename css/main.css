@@ -310,7 +310,6 @@ input:checked + .slider:before {
 }
 
 .drive-middle{
-  margin-right: 8%;
   margin: 2% 8% 2% 0
 }
 
