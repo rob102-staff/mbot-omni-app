@@ -6,8 +6,10 @@ var config = {
     CONNECT_PERIOD: 5000,     // ms
 
     // Sim info
-    MAP_DISPLAY_WIDTH: 100,      // %
-    MAP_DISPLAY_HEIGHT: 800,    // px
+    // (Width and Height have different units due to fact that 100% height doesn't seem to take up the entire screen, but has unintended behavior)
+    // TODO: Fix Height so it takes up 100% of screen similar to Width, and uses the % units
+    MAP_DISPLAY_WIDTH: 100,      // % 
+    MAP_DISPLAY_HEIGHT: 800,    // px 
     ROBOT_SIZE: 0.274,         // m, diameter
     ROBOT_DEFAULT_SIZE: 100,  // px
 

@@ -615,7 +615,7 @@ class MBotApp extends React.Component {
                 </div>
               </div>
               { this.state.drivingMode &&
-              <div className="row mt-5 text-left">
+              <div className="row mt-5 text-left mx-2">
                 <div className="col-6 text-small">Omni-Drive
                 <input type="checkbox" className="mx-2" checked={this.omni}
                   onChange={() => this.changeOnmi()}/>
