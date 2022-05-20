@@ -31,7 +31,7 @@ class WSHelper {
     this.socket.on("close", (evt) => this.attemptConnection());
     this.socket.on('error', (evt) => { this.statusCallback(this.status()); });
     this.socket.on('map', (evt) => this.userHandleMap(evt));
-    this.socket.on('laser', (evt) => this.handleLaser(evt));
+    this.socket.on('lidar', (evt) => this.handleLaser(evt));
 
     console.log("Connection status: ", this.status())
     return this.status();

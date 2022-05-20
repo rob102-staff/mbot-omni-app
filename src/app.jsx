@@ -124,6 +124,17 @@ class DrawMap extends React.Component {
   }
 }
 
+class DrawLasers extends React.Component{
+  constructor(props){
+    super(props)
+  }
+
+  render(){
+    return null;
+  }
+
+}
+
 class DrawCells extends React.Component {
   constructor(props) {
     super(props);
@@ -191,7 +202,7 @@ class DrawCells extends React.Component {
 
   render() {
     return (
-      <canvas ref="cellsCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
+      <canvas ref="cellsCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
       </canvas>
     );
   }
@@ -239,17 +250,21 @@ class MBotApp extends React.Component {
       omni: false,
       diff: false,
       // Robot parameters.
-      x: config.MAP_DISPLAY_WIDTH / 2,
-      y: config.MAP_DISPLAY_WIDTH / 2,
+      x: 200,
+      y: 200,
       theta: 0,
-      isRobotClicked: false
+      isRobotClicked: false,
+      ranges: [],
+      thetas: [],
+      x_values: [],
+      y_values: []
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
     this.ws.userHandleMessage = (evt) => { this.handleMessage(evt); };
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
-    this.ws.handleLaser = (evt) => { this.handleTheLasers(evt)}
+    this.ws.handleLaser = (evt) => { this.handleTheLasers(evt)};
 
     this.driveControls = new DriveControls(this.ws);
     this.visitGrid = new GridCellCanvas();
@@ -451,7 +466,55 @@ class MBotApp extends React.Component {
 
   handleTheLasers(evt){
     console.log("Something is working apparently");
-    console.log(evt);
+    // console.log(evt);
+    // console.log(evt.ranges);
+    this.setState({ranges: evt.ranges, thetas: evt.thetas})
+    
+    let a = [];
+    let b = [];
+
+    for(let i = 0; i < this.state.ranges.length; i++){
+      a[i] = (evt.ranges[i] * Math.cos(evt.thetas[i]));
+      b[i] = (evt.ranges[i] * Math.sin(evt.thetas[i]));
+    } 
+    this.setState({x_values : a, y_values : b})
+    this.testing();
+    this.looping();
+  }
+
+  testing(){
+    console.log("1st Range: ", this.state.ranges[0], ", 1st Theta: ", this.state.thetas[0]);
+    console.log("1st X: ", this.state.x_values[0], ", 1st y_value: ", this.state.y_values[0]);
+  }
+
+  looping(){
+    const canvas = document.getElementById("scanvas2");
+    this.ctx = canvas.getContext('2d');
+    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for(let i = 0; i < this.state.ranges.length; i++){
+      this.draw(this.state.x_values[i] * 500, this.state.y_values[i] * 500)
+    }
+  }
+
+  draw(x, y) {
+    const canvas = document.getElementById("scanvas2");
+
+    if (!canvas.getContext) {
+        return;
+    }
+
+    const ctx = canvas.getContext('2d');
+
+    // set line stroke and line width
+    ctx.strokeStyle = 'green';
+    ctx.lineWidth = 0.5;
+
+    // draw a red line
+    ctx.beginPath();
+    ctx.moveTo(400, 400);
+    ctx.lineTo(x, y);
+    ctx.stroke();
   }
 
   /**********************
@@ -656,6 +719,7 @@ class MBotApp extends React.Component {
 
 
         <div className="container pt-3">
+
           {this.state.mappingMode &&
             <div className="button-wrapper top-spacing d-flex justify-content-center">
               <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
@@ -670,6 +734,7 @@ class MBotApp extends React.Component {
                                 speed={this.state.speed}
                                 onSpeedChange={(evt) => this.onSpeedChange(evt)} />
           }
+
         </div>
 
         <div className="status-wrapper mx-5">
@@ -680,14 +745,15 @@ class MBotApp extends React.Component {
 
         <div className="canvas-container" id = "canvas" style={canvasStyle}>
           <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
-          <canvas ref="visitCellsCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
+          <canvas ref="visitCellsCanvas" id = "scanvas1" width={config.MAP_DISPLAY_HEIGHT} height={config.MAP_DISPLAY_HEIGHT}>
           </canvas>
+          <DrawLasers/>
           <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                      goalCell={this.state.goalCell} goalValid={this.state.goalValid}
                      cellSize={this.state.cellSize} />
           <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
                      pixelsPerMeter={this.state.pixelsPerMeter} />
-          <canvas ref="clickCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
+          <canvas ref="clickCanvas" id = "scanvas2" width={config.MAP_DISPLAY_HEIGHT} height={config.MAP_DISPLAY_HEIGHT}
                   onMouseDown={(e) => this.handleMouseDown(e)}
                   onMouseMove={(e) => this.handleMouseMove(e)}
                   onMouseUp={() => this.handleMouseUp()}>
