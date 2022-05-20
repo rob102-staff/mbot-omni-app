@@ -449,8 +449,9 @@ class MBotApp extends React.Component {
     }
   }
 
-  handleTheLasers(){
+  handleTheLasers(evt){
     console.log("Something is working apparently");
+    console.log(evt);
   }
 
   /**********************
