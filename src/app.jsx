@@ -249,6 +249,7 @@ class MBotApp extends React.Component {
     this.ws.userHandleMessage = (evt) => { this.handleMessage(evt); };
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
+    this.ws.handleLaser = (evt) => { this.handleTheLasers(evt)}
 
     this.driveControls = new DriveControls(this.ws);
     this.visitGrid = new GridCellCanvas();
@@ -446,6 +447,10 @@ class MBotApp extends React.Component {
     if (this.state.connection !== status) {
       this.setState({connection: status});
     }
+  }
+
+  handleTheLasers(){
+    console.log("Something is working apparently");
   }
 
   /**********************
