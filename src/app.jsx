@@ -466,7 +466,7 @@ class MBotApp extends React.Component {
 
   handleTheLasers(evt){
     console.log("Something is working apparently");
-    // console.log(evt);
+    console.log(evt);
     // console.log(evt.ranges);
     this.setState({ranges: evt.ranges, thetas: evt.thetas})
     
@@ -477,6 +477,10 @@ class MBotApp extends React.Component {
       a[i] = (evt.ranges[i] * Math.cos(evt.thetas[i]));
       b[i] = (evt.ranges[i] * Math.sin(evt.thetas[i]));
     } 
+
+    console.log(a);
+    console.log(b);
+
     this.setState({x_values : a, y_values : b})
     this.testing();
     this.looping();
@@ -513,7 +517,10 @@ class MBotApp extends React.Component {
     // draw a red line
     ctx.beginPath();
     ctx.moveTo(400, 400);
-    ctx.lineTo(x, y);
+    if(x > 0 && y > 0) ctx.lineTo(x, y);
+    else if(x > 0 && y < 0) ctx.lineTo(x, 400 - y)
+    else if(x < 0 && y > 0) ctx.lineTo(400 - x, y)
+    else if(x < 0 && y < 0) ctx.lineTo(400 - x, 400 - y)
     ctx.stroke();
   }
 
