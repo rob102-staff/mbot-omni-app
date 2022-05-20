@@ -203,7 +203,33 @@ function MapFileSelect(props) {
     </div>
   );
 }
+/*******************
+ * ROSBRIDGE DISPLAY
+ *******************/
+class OdomDisplayer extends React.Component{
+  constructor(props){
+    super(props);
+    this.odom_updated = false;
+  }
+  componentDidMount(){
+    return;
+  }
 
+  shouldComponentUpdate(nextProps, nextState){
+    var x_updated = nextProps.x !== this.props.x;
+    var y_updated = nextProps.y !== this.props.y;
+    var t_updated = nextProps.theta !== this.props.theta;
+    this.odom_updated = (x_updated || y_updated || t_updated);
+    return this.odom_updated;
+  }
+
+  render(){
+    return (
+      <p>x: {this.props.x}, y: {this.props.y}, t: {this.props.t}</p>
+    )
+  }
+
+}
 /*******************
  *   WHOLE PAGE
  *******************/
@@ -240,21 +266,54 @@ class MBotApp extends React.Component {
       isRobotClicked: false
     };
 
-    this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
-    this.ws.userHandleMessage = (evt) => { this.handleMessage(evt); };
-    this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
-    this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
+    this.ros = new ROSLIB.Ros({
+      url : 'ws://192.168.3.1:9090'
+    });
 
-    this.driveControls = new DriveControls(this.ws);
-    this.visitGrid = new GridCellCanvas();
+    this.ros.on('connection', function(){
+      console.log('ROSBridge -- Connected to websocket server.');
+    });
+    this.ros.on('error', function(error){
+      console.log('ROSBridge -- Error connected to websocket server: ', error);
+    });
+    this.ros.on('close', function(){
+      console.log('ROSBridge -- Connection to websocket server closed');
+    });
+
+    this.odom_listener = new ROSLIB.Topic({
+      ros: this.ros,
+      name : '/lcm_to_ros/ODOMETRY',
+      messageType: '/lcm_to_ros/odometry_t'
+    });
+   
+
+    // this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
+    // this.ws.userHandleMessage = (evt) => { this.handleMessage(evt); };
+    // this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
+    // this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
+
+    // this.driveControls = new DriveControls(this.ws);
+    // this.visitGrid = new GridCellCanvas();
+    console.log("DONE INITIALIZING");
+    console.log(this.state);
   }
 
+  /********************
+   *  ROSBRIDGE MSG HANDLERS
+   ********************/
+  handleOdom = (msg) =>{
+    // Update robot position on incoming odom message
+    this.setState({x: msg.x, y: msg.y, theta:msg.theta});
+    // this.state.x = msg.x;
+    // this.state.y = msg.y;
+    // this.state.theta = msg.theta;
+  }
   /********************
    *  REACT FUNTIONS
    ********************/
 
   componentDidMount() {
-    this.visitGrid.init(this.refs.visitCellsCanvas);
+    // this.visitGrid.init(this.refs.visitCellsCanvas);
 
     // Get the window size and watch for resize events.
     this.rect = this.refs.clickCanvas.getBoundingClientRect();
@@ -265,8 +324,11 @@ class MBotApp extends React.Component {
     // key presses active only when the drive toggle is toggled on.
     document.addEventListener('keydown', (evt) => this.handleKeyPress(evt), false);
 
+    this.odom_listener.subscribe((msg)=>this.handleOdom(msg));
+    console.log(this.odom_listener);
+
     // Try to connect to the websocket backend.
-    this.ws.attemptConnection();
+    // this.ws.attemptConnection();
   }
 
   /*****************************
@@ -572,7 +634,9 @@ class MBotApp extends React.Component {
                                speed={this.state.speed}
                                onSpeedChange={(evt) => this.onSpeedChange(evt)} />
         }
-
+        <div className="odom_shower">
+          <OdomDisplayer x={this.state.x} y={this.state.y} t={this.state.theta} />
+        </div>
         <div className="status-wrapper">
           <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} clickedCell={this.state.clickedCell}
                          showField={this.state.showField} fieldVal={this.state.fieldHoverVal}/>
