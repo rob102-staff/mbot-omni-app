@@ -499,6 +499,7 @@ class MBotApp extends React.Component {
     // for(let i = 0; i < this.state.ranges.length; i++){
     //   this.draw(this.state.x_values[i] * 500, this.state.y_values[i] * 500)
     // }
+
     this.draw2()
   }
 
@@ -565,6 +566,8 @@ class MBotApp extends React.Component {
    **********************/
 
   updateMap(result) {
+    let widthBody = document.body.clientWidth
+
     this.visitGrid.clear();
     var loaded = result.cells.length > 0;
     this.setState({cells: result.cells,
@@ -573,8 +576,8 @@ class MBotApp extends React.Component {
                    num_cells: result.num_cells,
                    origin: result.origin,
                    metersPerCell: result.meters_per_cell,
-                   cellSize: config.MAP_DISPLAY_WIDTH / result.width,
-                   pixelsPerMeter: config.MAP_DISPLAY_WIDTH / (result.width * result.meters_per_cell),
+                   cellSize: widthBody-20 / result.width,
+                   pixelsPerMeter: widthBody-20 / (result.width * result.meters_per_cell),
                    mapLoaded: loaded,
                    path: [],
                    clickedCell: [],
