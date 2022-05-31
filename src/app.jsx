@@ -118,7 +118,7 @@ class DrawMap extends React.Component {
 
   render() {
     return (
-      <canvas ref="mapCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
+      <canvas ref="mapCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
       </canvas>
     );
   }
@@ -496,9 +496,33 @@ class MBotApp extends React.Component {
     this.ctx = canvas.getContext('2d');
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    // for(let i = 0; i < this.state.ranges.length; i++){
+    //   this.draw(this.state.x_values[i] * 500, this.state.y_values[i] * 500)
+    // }
+    this.draw2()
+  }
+
+  draw2(){
+    const canvas = document.getElementById("scanvas2");
+    const ctx = canvas.getContext('2d');
+
+    let widthBody = document.body.clientWidth
+    let halfBody = (widthBody - 20)/2
+
+    ctx.fillStyle = 'rgba(49, 227, 173, 0.3)'
+    ctx.beginPath();
+    ctx.moveTo(halfBody, 400);
     for(let i = 0; i < this.state.ranges.length; i++){
-      this.draw(this.state.x_values[i] * 500, this.state.y_values[i] * 500)
+      let x = this.state.x_values[i] * 500;
+      let y = this.state.y_values[i] * 500;
+
+      if(x > 0 && y > 0) ctx.lineTo(halfBody + x, 400 + y);
+      else if(x > 0 && y < 0) ctx.lineTo(halfBody - x, 400 - y)
+      else if(x < 0 && y > 0) ctx.lineTo(halfBody - x, 400 - y)
+      else if(x < 0 && y < 0) ctx.lineTo(halfBody + x, 400 + y)
     }
+    ctx.closePath()
+    ctx.fill()
   }
 
   draw(x, y) {
@@ -508,19 +532,23 @@ class MBotApp extends React.Component {
         return;
     }
 
+    let widthBody = document.body.clientWidth
+    let halfBody = (widthBody - 20)/2
+
+    console.log(halfBody)
+
     const ctx = canvas.getContext('2d');
 
     // set line stroke and line width
     ctx.strokeStyle = 'green';
     ctx.lineWidth = 0.5;
 
-    // draw a red line
     ctx.beginPath();
-    ctx.moveTo(400, 400);
-    if(x > 0 && y > 0) ctx.lineTo(x, y);
-    else if(x > 0 && y < 0) ctx.lineTo(x, 400 - y)
-    else if(x < 0 && y > 0) ctx.lineTo(400 - x, y)
-    else if(x < 0 && y < 0) ctx.lineTo(400 - x, 400 - y)
+    ctx.moveTo(halfBody, 400);
+    if(x > 0 && y > 0) ctx.lineTo(halfBody + x, 400 + y);
+    else if(x > 0 && y < 0) ctx.lineTo(halfBody - x, 400 - y)
+    else if(x < 0 && y > 0) ctx.lineTo(halfBody - x, 400 - y)
+    else if(x < 0 && y < 0) ctx.lineTo(halfBody + x, 400 + y)
     ctx.stroke();
   }
 
@@ -752,7 +780,7 @@ class MBotApp extends React.Component {
 
         <div className="canvas-container" id = "canvas" style={canvasStyle}>
           <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
-          <canvas ref="visitCellsCanvas" id = "scanvas1" width={config.MAP_DISPLAY_HEIGHT} height={config.MAP_DISPLAY_HEIGHT}>
+          <canvas ref="visitCellsCanvas" id = "scanvas1" width={config.MAP_DISPLAY_WIDTH + "%"} height={config.MAP_DISPLAY_HEIGHT}>
           </canvas>
           <DrawLasers/>
           <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
@@ -760,7 +788,7 @@ class MBotApp extends React.Component {
                      cellSize={this.state.cellSize} />
           <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
                      pixelsPerMeter={this.state.pixelsPerMeter} />
-          <canvas ref="clickCanvas" id = "scanvas2" width={config.MAP_DISPLAY_HEIGHT} height={config.MAP_DISPLAY_HEIGHT}
+          <canvas ref="clickCanvas" id = "scanvas2" width={1900} height={config.MAP_DISPLAY_HEIGHT}
                   onMouseDown={(e) => this.handleMouseDown(e)}
                   onMouseMove={(e) => this.handleMouseMove(e)}
                   onMouseUp={() => this.handleMouseUp()}>
