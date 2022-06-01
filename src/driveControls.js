@@ -38,37 +38,38 @@ class DriveControls {
 
   moveLeft(spd){
     console.log("Moving left...");
-    this.animation("move-left");
+    // this.animation("move-left");
     this.ws.socket.emit("move", {'direction': "W", 'speed' : spd});
   }
 
   moveRight(spd){
     console.log("Moving right...");
-    this.animation("move-right");
+    console.log(spd);
+    // this.animation("move-right");
     this.ws.socket.emit("move", {'direction': "E", 'speed' : spd});
   }
 
   rotateLeft(spd){
     console.log("Turning left...");
-    this.animation("turn-left");
+    // this.animation("turn-left");
     this.ws.socket.emit("move", {'direction': "spinleft", 'speed' : spd});
   }
 
   rotateRight(spd){
     console.log("Turning right...");
-    this.animation("turn-right");
+    // this.animation("turn-right");
     this.ws.socket.emit("move", {'direction': "spinright", 'speed' : spd});
   }
 
   goStraight(spd){
     console.log("Moving forwards...");
-    this.animation("move-str");
+    // this.animation("move-str");
     this.ws.socket.emit("move", {'direction': "N", 'speed' : spd});
   }
 
   goBack(spd){
     console.log("Moving backwards...");
-    this.animation("move-back");
+    // this.animation("move-back");
     this.ws.socket.emit("move", {'direction': "S", 'speed' : spd});
   }
 

@@ -12,7 +12,8 @@ import { DrawRobot } from "./robot";
 import { parseMapFromSocket, parseMapFromLcm, normalizeList } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControls } from "./driveControls.js";
-
+// var Mousetrap = require('mousetrap')
+import Mousetrap from "mousetrap"
 
 /*******************
  *     BUTTONS
@@ -284,9 +285,58 @@ class MBotApp extends React.Component {
 
     // TODO: Discuss what other modes will enable drive control. Currently the
     // key presses active only when the drive toggle is toggled on.
-    document.addEventListener('keydown', (evt) => this.handleKeyPressDown(evt), false);
-    document.addEventListener('keyup', (evt) => this.handleKeyPressUp(evt), false);
 
+
+
+    const controller =  {
+      s: {pressed: false, func: this.driveControls.moveRight},    
+      w: {pressed: false, func: this.driveControls.moveRight},
+      a: {pressed: false, func: this.driveControls.moveRight},
+      d: {pressed: false, func: this.driveControls.moveRight},  
+      e: {pressed: false, func: this.driveControls.moveRight},
+      q: {pressed: false, func: this.driveControls.moveRight}
+    }
+    
+
+    if(this.state.drivingMode){
+      const c = {
+        87: {pressed: false}
+      }
+    }
+
+    document.addEventListener('keydown', (evt) => {
+      this.handleKeyPressDown(evt)
+
+      if(this.state.drivingMode)
+      {
+        if(controller[evt.key]){
+          controller[evt.key].pressed = true
+          controller[evt.key].func(this.state.speed)
+        }
+        for (const [key, value] of Object.entries(controller)) {
+          console.log(key, value);
+        }
+      }
+
+    }, false);
+
+    document.addEventListener('keyup', (evt) => {
+      this.handleKeyPressUp(evt)
+
+      if(this.state.drivingMode)
+      {
+        if(controller[evt.key]){
+          controller[evt.key].pressed = false
+        }
+      }
+
+    }, false);
+
+    // const executeMoves = () => {
+    //   Object.keys(controller).forEach(key=> {
+    //     controller[key].pressed && controller[key].func()
+    //   })
+    // }
 
     // Try to connect to the websocket backend.
     this.ws.attemptConnection();
@@ -363,7 +413,16 @@ class MBotApp extends React.Component {
 
   onSideBar(){
     this.setState({sideBarMode: !this.state.sideBarMode})
-    if(this.state.sideBarMode) this.setState({sideBarWidth: 25 + "%"});
+    let widthBody = document.body.clientWidth
+    // console.log(widthBody);
+    let temp;
+    if(this.state.sideBarMode) 
+    {
+      if(widthBody <= 400) temp = 100 + "%"
+      else if(widthBody <= 770) temp = 80 + "%"
+      else temp = 35 + "%"
+      this.setState({sideBarWidth: temp});
+    }
     else this.setState({sideBarWidth: 0});
   }
 
@@ -420,27 +479,30 @@ class MBotApp extends React.Component {
   }
 
   handleKeyPressDown(event) {
+
+
+
     var name = event.key;
-    if (this.state.drivingMode) {
-      if (name == "a") this.driveControls.moveLeft(this.state.speed);
-      if (name == "d") this.driveControls.moveRight(this.state.speed);
-      if (name == "s") this.driveControls.goBack(this.state.speed);
-      if (name == "w") this.driveControls.goStraight(this.state.speed);
-      if (name == "q") this.driveControls.rotateLeft(this.state.speed);
-      if (name == "e") this.driveControls.rotateRight(this.state.speed);
-      if (name == "z") this.driveControls.start(this.state.speed);
-      if (name == "x") this.driveControls.stop(this.state.speed);
-    }
+    // if (this.state.drivingMode) {
+    //   if (name == "a") this.driveControls.moveLeft(this.state.speed);
+    //   if (name == "d") this.driveControls.moveRight(this.state.speed);
+    //   if (name == "s") this.driveControls.goBack(this.state.speed);
+    //   if (name == "w") this.driveControls.goStraight(this.state.speed);
+    //   if (name == "q") this.driveControls.rotateLeft(this.state.speed);
+    //   if (name == "e") this.driveControls.rotateRight(this.state.speed);
+    //   if (name == "z") this.driveControls.start(this.state.speed);
+    //   if (name == "x") this.driveControls.stop(this.state.speed);
+    // }
     if (name == "p") this.onSideBar();
   }
 
   handleKeyPressUp(event) {
-    console.log("Key UPPP")
-    var name = event.key;
-    if (this.state.drivingMode) {
-      let drive_keys = ["a", "d", "s", "w", "q", "e"];
-      drive_keys.forEach(item => {if(name == item) this.driveControls.stopKeyUp(name);})
-    }
+    // console.log("Key UPPP")
+    // var name = event.key;
+    // if (this.state.drivingMode) {
+    //   let drive_keys = ["a", "d", "s", "w", "q", "e"];
+    //   drive_keys.forEach(item => {if(name == item) this.driveControls.stopKeyUp(name);})
+    // }
   }
 
   /********************
@@ -465,9 +527,7 @@ class MBotApp extends React.Component {
   }
 
   handleTheLasers(evt){
-    console.log("Something is working apparently");
     console.log(evt);
-    // console.log(evt.ranges);
     this.setState({ranges: evt.ranges, thetas: evt.thetas})
     
     let a = [];
@@ -478,17 +538,8 @@ class MBotApp extends React.Component {
       b[i] = (evt.ranges[i] * Math.sin(evt.thetas[i]));
     } 
 
-    console.log(a);
-    console.log(b);
-
     this.setState({x_values : a, y_values : b})
-    this.testing();
     this.looping();
-  }
-
-  testing(){
-    console.log("1st Range: ", this.state.ranges[0], ", 1st Theta: ", this.state.thetas[0]);
-    console.log("1st X: ", this.state.x_values[0], ", 1st y_value: ", this.state.y_values[0]);
   }
 
   looping(){
@@ -496,11 +547,9 @@ class MBotApp extends React.Component {
     this.ctx = canvas.getContext('2d');
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    // for(let i = 0; i < this.state.ranges.length; i++){
-    //   this.draw(this.state.x_values[i] * 500, this.state.y_values[i] * 500)
-    // }
-
-    this.draw2()
+    if(this.state.mappingMode){
+      this.draw2()
+    }
   }
 
   draw2(){
@@ -513,7 +562,7 @@ class MBotApp extends React.Component {
     ctx.fillStyle = 'rgba(49, 227, 173, 0.3)'
     ctx.beginPath();
     ctx.moveTo(halfBody, 400);
-    for(let i = 0; i < this.state.ranges.length; i++){
+    for(let i = 0; i < evt.ranges.length; i++){
       let x = this.state.x_values[i] * 500;
       let y = this.state.y_values[i] * 500;
 
@@ -526,32 +575,32 @@ class MBotApp extends React.Component {
     ctx.fill()
   }
 
-  draw(x, y) {
-    const canvas = document.getElementById("scanvas2");
+  // draw(x, y) {
+  //   const canvas = document.getElementById("scanvas2");
 
-    if (!canvas.getContext) {
-        return;
-    }
+  //   if (!canvas.getContext) {
+  //       return;
+  //   }
 
-    let widthBody = document.body.clientWidth
-    let halfBody = (widthBody - 20)/2
+  //   let widthBody = document.body.clientWidth
+  //   let halfBody = (widthBody - 20)/2
 
-    console.log(halfBody)
+  //   console.log(halfBody)
 
-    const ctx = canvas.getContext('2d');
+  //   const ctx = canvas.getContext('2d');
 
-    // set line stroke and line width
-    ctx.strokeStyle = 'green';
-    ctx.lineWidth = 0.5;
+  //   // set line stroke and line width
+  //   ctx.strokeStyle = 'green';
+  //   ctx.lineWidth = 0.5;
 
-    ctx.beginPath();
-    ctx.moveTo(halfBody, 400);
-    if(x > 0 && y > 0) ctx.lineTo(halfBody + x, 400 + y);
-    else if(x > 0 && y < 0) ctx.lineTo(halfBody - x, 400 - y)
-    else if(x < 0 && y > 0) ctx.lineTo(halfBody - x, 400 - y)
-    else if(x < 0 && y < 0) ctx.lineTo(halfBody + x, 400 + y)
-    ctx.stroke();
-  }
+  //   ctx.beginPath();
+  //   ctx.moveTo(halfBody, 400);
+  //   if(x > 0 && y > 0) ctx.lineTo(halfBody + x, 400 + y);
+  //   else if(x > 0 && y < 0) ctx.lineTo(halfBody - x, 400 - y)
+  //   else if(x < 0 && y > 0) ctx.lineTo(halfBody - x, 400 - y)
+  //   else if(x < 0 && y < 0) ctx.lineTo(halfBody + x, 400 + y)
+  //   ctx.stroke();
+  // }
 
   /**********************
    *   STATE SETTERS
