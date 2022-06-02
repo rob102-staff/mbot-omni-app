@@ -191,7 +191,7 @@ class DrawCells extends React.Component {
 
   render() {
     return (
-      <canvas ref="cellsCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
+      <canvas ref="cellsCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
       </canvas>
     );
   }
@@ -357,6 +357,9 @@ class MBotApp extends React.Component {
 
   handleWindowChange(evt) {
     this.rect = this.refs.clickCanvas.getBoundingClientRect();
+    config.CANVAS_DISPLAY_WIDTH = document.documentElement.clientWidth * 0.95;  
+    config.CANVAS_DISPLAY_HEIGHT = document.documentElement.clientHeight * 0.85;
+    this.setState({width: config.CANVAS_DISPLAY_WIDTH, height: config.CANVAS_DISPLAY_HEIGHT})
   }
 
   handleMapClick(event) {
@@ -561,8 +564,8 @@ class MBotApp extends React.Component {
 
   render() {
     var canvasStyle = {
-      width: config.MAP_DISPLAY_WIDTH + "%",
-      height: config.MAP_DISPLAY_HEIGHT + "px",
+      width: config.CANVAS_DISPLAY_WIDTH,
+      height: config.CANVAS_DISPLAY_HEIGHT,
     };
 
     return (

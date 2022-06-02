@@ -6,15 +6,16 @@ var config = {
     CONNECT_PERIOD: 5000,     // ms
 
     // Sim info
-    // (Width and Height have different units due to fact that 100% height doesn't seem to take up the entire screen, but has unintended behavior)
-    // TODO: Fix Height so it takes up 100% of screen similar to Width, and uses the % units
-    MAP_DISPLAY_WIDTH: 800,      // % 
-    MAP_DISPLAY_HEIGHT: 800,    // px 
+    MAP_DISPLAY_WIDTH: 800,      // px
+    MAP_DISPLAY_HEIGHT: 800,    // px
+    CANVAS_DISPLAY_WIDTH: document.documentElement.clientWidth * 0.95,      // px
+    CANVAS_DISPLAY_HEIGHT: document.documentElement.clientHeight * 0.85,    // px
     ROBOT_SIZE: 0.274,         // m, diameter
     ROBOT_DEFAULT_SIZE: 100,  // px
 
     // Display info
-    MAP_COLOUR_HIGH: "#00274C",        // Michigan blue
+    MAP_COLOUR_HIGH: "#000000",      // Black
+    //MAP_COLOUR_HIGH: "#00274C",        // Michigan blue
     MAP_COLOUR_LOW: "#ffffff",        // White
     FIELD_COLOUR_HIGH: "#444444",    // White
     FIELD_COLOUR_LOW: "#ffffff",    // Grey
