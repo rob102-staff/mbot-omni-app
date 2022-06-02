@@ -61,18 +61,18 @@ function ConnectionStatus(connection) {
 function DriveControlPanel(props) {
   return (
     <div className="row px-5 text-center pt-3">
-      <div className="button-wrapper flex-child">
+      <div className="button-wrapper col-md-4">
         <span>Speed: {props.speed}</span> <br />
         <input type="range" min="1" max="100" value={props.speed}
                onChange={(evt) => props.onSpeedChange(evt)}></input>
       </div>
-      <div className="button-wrapper flex-child top-spacing">
+      <div className="button-wrapper col-md-4 top-spacing">
         <button className="button start-color" id="drive-start"
                 onClick={() => props.driveControls.start()}>Start</button>
         <button className="button stop-color" id="drive-stop"
                 onClick={() => props.driveControls.stop()}>Stop</button>
       </div>
-      <div className="button-wrapper flex-child">
+      <div className="button-wrapper col-md-4">
         <button className="button drive-turn drive-ctrl" id="turn-left"
                 onClick={() => props.driveControls.rotateLeft(props.speed)}></button>
         <button className="button drive-move drive-ctrl" id="move-str"
@@ -318,6 +318,10 @@ class MBotApp extends React.Component {
         console.log(x, y, t)
 
       }
+
+      if (evt.key == "b") this.onDarkMode();
+      if (evt.key == "n") this.setState({mappingMode: !this.state.mappingMode});
+      if (evt.key == "m") this.setState({drivingMode: !this.state.drivingMode});
 
     }, false);
 
@@ -799,7 +803,7 @@ class MBotApp extends React.Component {
         </div>
 
 
-        <div className="container pt-3">
+        <div className="pt-3">
 
           {this.state.mappingMode &&
             <div className="button-wrapper top-spacing d-flex justify-content-center">

@@ -389,14 +389,6 @@ input:checked + .slider:before {
   margin: 0px;
 }
 
-.flex-child {
-  flex: 1;
-}  
-
-.flex-child:first-child {
-  margin-right: 10px;
-}
-
 /* Inverts colors*/
 .invert{
   -webkit-filter: invert(1);
