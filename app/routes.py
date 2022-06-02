@@ -1,4 +1,3 @@
-from math import lcm
 import flask
 from app import app, socket, lcm_manager
 import json
@@ -35,20 +34,7 @@ def test_message(data):
     y = data["ry"]
     theta = data["theta"]
 
-    lcm_manager.publish_motor_commands((x * spd), (y * spd), (2.5 * theta * spd))
-
-    if data["direction"] == "N":
-        lcm_manager.publish_motor_commands((spd),0,0)
-    if data["direction"] == "E":
-        lcm_manager.publish_motor_commands(0,-(spd),0)
-    if data["direction"] == "S":
-        lcm_manager.publish_motor_commands(-(spd),0,0)
-    if data["direction"] == "W":
-        lcm_manager.publish_motor_commands(0,(spd),0)
-    if data["direction"] == "spinleft":
-        lcm_manager.publish_motor_commands(0,0,(2*spd))
-    if data["direction"] == "spinright":
-        lcm_manager.publish_motor_commands(0,0,-(2*spd))
+    lcm_manager.publish_motor_commands((x * spd), -(y * spd), -(2.5 * theta * spd))
         
     app.logger.info(data)
     

@@ -2,7 +2,7 @@
  * MOVE HELPERS
  ********************/
 
-class DriveControls {
+ class DriveControls {
   constructor(wsInput) {
     this.ws = wsInput;
   }
@@ -36,42 +36,6 @@ class DriveControls {
     btn_element.classList.remove("keydown-drivecolor");
   }
 
-  moveLeft(spd){
-    console.log("Moving left...");
-    this.animation("move-left");
-    // this.ws.socket.emit("move", {'direction': "W", 'speed' : spd});
-  }
-
-  moveRight(spd){
-    console.log("Moving right...");
-    this.animation("move-right");
-    // this.ws.socket.emit("move", {'direction': "E", 'speed' : spd});
-  }
-
-  rotateLeft(spd){
-    console.log("Turning left...");
-    this.animation("turn-left");
-    // this.ws.socket.emit("move", {'direction': "spinleft", 'speed' : spd});
-  }
-
-  rotateRight(spd){
-    console.log("Turning right...");
-    this.animation("turn-right");
-    // this.ws.socket.emit("move", {'direction': "spinright", 'speed' : spd});
-  }
-
-  goStraight(spd){
-    console.log("Moving forwards...");
-    this.animation("move-str");
-    // this.ws.socket.emit("move", {'direction': "N", 'speed' : spd});
-  }
-
-  goBack(spd){
-    console.log("Moving backwards...");
-    this.animation("move-back");
-    // this.ws.socket.emit("move", {'direction': "S", 'speed' : spd});
-  }
-
   //Currently "Start" is here for asthetic purposes, as it serves no functional purpose at the moment.
   start(){
     console.log("Start robot");
@@ -88,6 +52,15 @@ class DriveControls {
     this.ws.socket.emit("move", {'rx' : x, 'ry' : y, 'theta': t, 'speed' : spd})
   }
 
+  goKeyDown(name){
+    if(name == "w") this.animation("move-str");
+    if(name == "a") this.animation("move-left");
+    if(name == "s") this.animation("move-back");
+    if(name == "d") this.animation("move-right");
+    if(name == "q") this.animation("turn-left");
+    if(name == "e") this.animation("turn-right");
+  }
+
   // This function does the same thing as stop(), expect that it is meant for the drive-keys when pressed with a key. 
   // When the key is lifted up, this function is called, which then removes the color change from that corresponding drive-button
   stopKeyUp(name){
@@ -98,7 +71,6 @@ class DriveControls {
     if(name == "d") this.removeAnimationKey("move-right");
     if(name == "q") this.removeAnimationKey("turn-left");
     if(name == "e") this.removeAnimationKey("turn-right");
-    this.ws.socket.emit("stop", {'stop cmd': "stop"});
   }
 }
 

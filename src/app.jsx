@@ -12,8 +12,7 @@ import { DrawRobot } from "./robot";
 import { parseMapFromSocket, parseMapFromLcm, normalizeList } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControls } from "./driveControls.js";
-// var Mousetrap = require('mousetrap')
-import Mousetrap from "mousetrap"
+
 
 /*******************
  *     BUTTONS
@@ -306,17 +305,14 @@ class MBotApp extends React.Component {
       {
         if(controller[evt.key]){
           controller[evt.key].pressed = true
-          if(controller[evt.key].fn == "back" && x > -1) x--;
+          if(controller[evt.key].fn == "back" && x > -1) x--; 
           if(controller[evt.key].fn == "forward" && x < 1) x++;
           if(controller[evt.key].fn == "left" && y > -1) y--;
-          if(controller[evt.key].fn == "right" && y < 1) y++;
-          if(controller[evt.key].fn == "tleft" && t > -1) t--;
-          if(controller[evt.key].fn == "tright" && t < 1) t++;
+          if(controller[evt.key].fn == "right" && y < 1) y++; 
+          if(controller[evt.key].fn == "tleft" && t > -1) t--; 
+          if(controller[evt.key].fn == "tright" && t < 1) t++; 
+          this.driveControls.goKeyDown(evt.key);
         }
-        // for (const [key, value] of Object.entries(controller)) {
-        //   if(value.pressed) console.log("hi")
-        //   console.log(value.pressed);
-        // }
 
         this.driveControls.newDrive(x, y, t, this.state.speed)
         console.log(x, y, t)
@@ -339,6 +335,8 @@ class MBotApp extends React.Component {
           if(controller[evt.key].fn == "tleft") t++;
           if(controller[evt.key].fn == "tright") t--;
         }
+
+        this.driveControls.stopKeyUp(evt.key);
 
         console.log(x, y, t)
 
@@ -496,16 +494,6 @@ class MBotApp extends React.Component {
 
   handleKeyPressDown(event) {
     var name = event.key;
-    // if (this.state.drivingMode) {
-    //   if (name == "a") this.driveControls.moveLeft(this.state.speed);
-    //   if (name == "d") this.driveControls.moveRight(this.state.speed);
-    //   if (name == "s") this.driveControls.goBack(this.state.speed);
-    //   if (name == "w") this.driveControls.goStraight(this.state.speed);
-    //   if (name == "q") this.driveControls.rotateLeft(this.state.speed);
-    //   if (name == "e") this.driveControls.rotateRight(this.state.speed);
-    //   if (name == "z") this.driveControls.start(this.state.speed);
-    //   if (name == "x") this.driveControls.stop(this.state.speed);
-    // }
     if (name == "p") this.onSideBar();
   }
 
