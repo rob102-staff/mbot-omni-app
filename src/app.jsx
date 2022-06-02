@@ -286,40 +286,71 @@ class MBotApp extends React.Component {
     // TODO: Discuss what other modes will enable drive control. Currently the
     // key presses active only when the drive toggle is toggled on.
 
-    // const controller =  {
-    //   s: {pressed: false, func: this.driveControls.moveRight},    
-    //   w: {pressed: false, func: this.driveControls.moveRight},
-    //   a: {pressed: false, func: this.driveControls.moveRight},
-    //   d: {pressed: false, func: this.driveControls.moveRight},  
-    //   e: {pressed: false, func: this.driveControls.moveRight},
-    //   q: {pressed: false, func: this.driveControls.moveRight}
-    // }
+    const controller =  {
+      s: {pressed: false, fn: "back"},    
+      w: {pressed: false, fn: "forward"},
+      a: {pressed: false, fn: "left"},
+      d: {pressed: false, fn: "right"},  
+      e: {pressed: false, fn: "tright"},
+      q: {pressed: false, fn: "tleft"}
+    }
+
+    let x = 0;
+    let y = 0;
+    let t = 0;
 
     document.addEventListener('keydown', (evt) => {
       this.handleKeyPressDown(evt)
 
-      // if(this.state.drivingMode)
-      // {
-      //   if(controller[evt.key]){
-      //     controller[evt.key].pressed = true
-      //     controller[evt.key].func(this.state.speed)
-      //   }
-      //   for (const [key, value] of Object.entries(controller)) {
-      //     console.log(key, value);
-      //   }
-      // }
+      if(this.state.drivingMode)
+      {
+        if(controller[evt.key]){
+          controller[evt.key].pressed = true
+          if(controller[evt.key].fn == "back" && x > -1) x--;
+          if(controller[evt.key].fn == "forward" && x < 1) x++;
+          if(controller[evt.key].fn == "left" && y > -1) y--;
+          if(controller[evt.key].fn == "right" && y < 1) y++;
+          if(controller[evt.key].fn == "tleft" && t > -1) t--;
+          if(controller[evt.key].fn == "tright" && t < 1) t++;
+        }
+        // for (const [key, value] of Object.entries(controller)) {
+        //   if(value.pressed) console.log("hi")
+        //   console.log(value.pressed);
+        // }
+
+        this.driveControls.newDrive(x, y, t, this.state.speed)
+        console.log(x, y, t)
+
+      }
 
     }, false);
 
     document.addEventListener('keyup', (evt) => {
-      this.handleKeyPressUp(evt)
+      // this.handleKeyPressUp(evt)
 
-      // if(this.state.drivingMode)
-      // {
-      //   if(controller[evt.key]){
-      //     controller[evt.key].pressed = false
-      //   }
-      // }
+      if(this.state.drivingMode)
+      {
+        if(controller[evt.key]){
+          controller[evt.key].pressed = false
+          if(controller[evt.key].fn == "back") x++;
+          if(controller[evt.key].fn == "forward") x--;
+          if(controller[evt.key].fn == "left") y++;
+          if(controller[evt.key].fn == "right") y--;
+          if(controller[evt.key].fn == "tleft") t++;
+          if(controller[evt.key].fn == "tright") t--;
+        }
+
+        console.log(x, y, t)
+
+        let reset = true;
+
+        for (const [key, value] of Object.entries(controller)) {
+          if(value.pressed) reset = false
+        }
+        if(reset) {x = 0; y = 0; t = 0;}
+
+        this.driveControls.newDrive(x, y, t, this.state.speed)
+      }
 
     }, false);
 
@@ -465,25 +496,25 @@ class MBotApp extends React.Component {
 
   handleKeyPressDown(event) {
     var name = event.key;
-    if (this.state.drivingMode) {
-      if (name == "a") this.driveControls.moveLeft(this.state.speed);
-      if (name == "d") this.driveControls.moveRight(this.state.speed);
-      if (name == "s") this.driveControls.goBack(this.state.speed);
-      if (name == "w") this.driveControls.goStraight(this.state.speed);
-      if (name == "q") this.driveControls.rotateLeft(this.state.speed);
-      if (name == "e") this.driveControls.rotateRight(this.state.speed);
-      if (name == "z") this.driveControls.start(this.state.speed);
-      if (name == "x") this.driveControls.stop(this.state.speed);
-    }
+    // if (this.state.drivingMode) {
+    //   if (name == "a") this.driveControls.moveLeft(this.state.speed);
+    //   if (name == "d") this.driveControls.moveRight(this.state.speed);
+    //   if (name == "s") this.driveControls.goBack(this.state.speed);
+    //   if (name == "w") this.driveControls.goStraight(this.state.speed);
+    //   if (name == "q") this.driveControls.rotateLeft(this.state.speed);
+    //   if (name == "e") this.driveControls.rotateRight(this.state.speed);
+    //   if (name == "z") this.driveControls.start(this.state.speed);
+    //   if (name == "x") this.driveControls.stop(this.state.speed);
+    // }
     if (name == "p") this.onSideBar();
   }
 
   handleKeyPressUp(event) {
-    var name = event.key;
-    if (this.state.drivingMode) {
-      let drive_keys = ["a", "d", "s", "w", "q", "e"];
-      drive_keys.forEach(item => {if(name == item) this.driveControls.stopKeyUp(name);})
-    }
+    // var name = event.key;
+    // if (this.state.drivingMode) {
+    //   let drive_keys = ["a", "d", "s", "w", "q", "e"];
+    //   drive_keys.forEach(item => {if(name == item) this.driveControls.stopKeyUp(name);})
+    // }
   }
 
   /********************

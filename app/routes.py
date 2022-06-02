@@ -1,3 +1,4 @@
+from math import lcm
 import flask
 from app import app, socket, lcm_manager
 import json
@@ -29,6 +30,12 @@ def send_map(data):
 @socket.on('move')
 def test_message(data):
     spd = int(data["speed"])/100
+
+    x = data["rx"]
+    y = data["ry"]
+    theta = data["theta"]
+
+    lcm_manager.publish_motor_commands((x * spd), (y * spd), (2.5 * theta * spd))
 
     if data["direction"] == "N":
         lcm_manager.publish_motor_commands((spd),0,0)

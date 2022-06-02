@@ -39,37 +39,37 @@ class DriveControls {
   moveLeft(spd){
     console.log("Moving left...");
     this.animation("move-left");
-    this.ws.socket.emit("move", {'direction': "W", 'speed' : spd});
+    // this.ws.socket.emit("move", {'direction': "W", 'speed' : spd});
   }
 
   moveRight(spd){
     console.log("Moving right...");
     this.animation("move-right");
-    this.ws.socket.emit("move", {'direction': "E", 'speed' : spd});
+    // this.ws.socket.emit("move", {'direction': "E", 'speed' : spd});
   }
 
   rotateLeft(spd){
     console.log("Turning left...");
     this.animation("turn-left");
-    this.ws.socket.emit("move", {'direction': "spinleft", 'speed' : spd});
+    // this.ws.socket.emit("move", {'direction': "spinleft", 'speed' : spd});
   }
 
   rotateRight(spd){
     console.log("Turning right...");
     this.animation("turn-right");
-    this.ws.socket.emit("move", {'direction': "spinright", 'speed' : spd});
+    // this.ws.socket.emit("move", {'direction': "spinright", 'speed' : spd});
   }
 
   goStraight(spd){
     console.log("Moving forwards...");
     this.animation("move-str");
-    this.ws.socket.emit("move", {'direction': "N", 'speed' : spd});
+    // this.ws.socket.emit("move", {'direction': "N", 'speed' : spd});
   }
 
   goBack(spd){
     console.log("Moving backwards...");
     this.animation("move-back");
-    this.ws.socket.emit("move", {'direction': "S", 'speed' : spd});
+    // this.ws.socket.emit("move", {'direction': "S", 'speed' : spd});
   }
 
   //Currently "Start" is here for asthetic purposes, as it serves no functional purpose at the moment.
@@ -82,6 +82,10 @@ class DriveControls {
     console.log("STOP robot it was about run into Popeye");
     this.animationStartStop("drive-stop");
     this.ws.socket.emit("stop", {'stop cmd': "stop"});
+  }
+
+  newDrive(x, y, t, spd){
+    this.ws.socket.emit("move", {'rx' : x, 'ry' : y, 'theta': t, 'speed' : spd})
   }
 
   // This function does the same thing as stop(), expect that it is meant for the drive-keys when pressed with a key. 
