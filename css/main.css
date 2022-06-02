@@ -38,7 +38,7 @@ a:hover {
   position: relative; 
   height: 100%;       
   width: 100%;
-  background-color: #f5f3f3;
+  background-color: #00274C;
   z-index: 0;
   margin: auto;
 }
@@ -50,6 +50,18 @@ a:hover {
 canvas {
   position: absolute;
   display: block;
+}
+
+#mapCanvas {
+  position: relative;
+  padding: 0;
+  margin: auto;
+  display: block;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
 }
 
 .roboticon {
