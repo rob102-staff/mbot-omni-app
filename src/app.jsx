@@ -561,8 +561,8 @@ class MBotApp extends React.Component {
 
   render() {
     var canvasStyle = {
-      width: config.MAP_DISPLAY_WIDTH + "%",
-      height: config.MAP_DISPLAY_HEIGHT + "px",
+      width: config.MAP_DISPLAY_WIDTH,
+      height: config.MAP_DISPLAY_HEIGHT,
     };
 
     return (
