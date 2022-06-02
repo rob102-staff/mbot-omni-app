@@ -286,57 +286,42 @@ class MBotApp extends React.Component {
     // TODO: Discuss what other modes will enable drive control. Currently the
     // key presses active only when the drive toggle is toggled on.
 
-
-
-    const controller =  {
-      s: {pressed: false, func: this.driveControls.moveRight},    
-      w: {pressed: false, func: this.driveControls.moveRight},
-      a: {pressed: false, func: this.driveControls.moveRight},
-      d: {pressed: false, func: this.driveControls.moveRight},  
-      e: {pressed: false, func: this.driveControls.moveRight},
-      q: {pressed: false, func: this.driveControls.moveRight}
-    }
-    
-
-    if(this.state.drivingMode){
-      const c = {
-        87: {pressed: false}
-      }
-    }
+    // const controller =  {
+    //   s: {pressed: false, func: this.driveControls.moveRight},    
+    //   w: {pressed: false, func: this.driveControls.moveRight},
+    //   a: {pressed: false, func: this.driveControls.moveRight},
+    //   d: {pressed: false, func: this.driveControls.moveRight},  
+    //   e: {pressed: false, func: this.driveControls.moveRight},
+    //   q: {pressed: false, func: this.driveControls.moveRight}
+    // }
 
     document.addEventListener('keydown', (evt) => {
       this.handleKeyPressDown(evt)
 
-      if(this.state.drivingMode)
-      {
-        if(controller[evt.key]){
-          controller[evt.key].pressed = true
-          controller[evt.key].func(this.state.speed)
-        }
-        for (const [key, value] of Object.entries(controller)) {
-          console.log(key, value);
-        }
-      }
+      // if(this.state.drivingMode)
+      // {
+      //   if(controller[evt.key]){
+      //     controller[evt.key].pressed = true
+      //     controller[evt.key].func(this.state.speed)
+      //   }
+      //   for (const [key, value] of Object.entries(controller)) {
+      //     console.log(key, value);
+      //   }
+      // }
 
     }, false);
 
     document.addEventListener('keyup', (evt) => {
       this.handleKeyPressUp(evt)
 
-      if(this.state.drivingMode)
-      {
-        if(controller[evt.key]){
-          controller[evt.key].pressed = false
-        }
-      }
+      // if(this.state.drivingMode)
+      // {
+      //   if(controller[evt.key]){
+      //     controller[evt.key].pressed = false
+      //   }
+      // }
 
     }, false);
-
-    // const executeMoves = () => {
-    //   Object.keys(controller).forEach(key=> {
-    //     controller[key].pressed && controller[key].func()
-    //   })
-    // }
 
     // Try to connect to the websocket backend.
     this.ws.attemptConnection();
@@ -479,30 +464,26 @@ class MBotApp extends React.Component {
   }
 
   handleKeyPressDown(event) {
-
-
-
     var name = event.key;
-    // if (this.state.drivingMode) {
-    //   if (name == "a") this.driveControls.moveLeft(this.state.speed);
-    //   if (name == "d") this.driveControls.moveRight(this.state.speed);
-    //   if (name == "s") this.driveControls.goBack(this.state.speed);
-    //   if (name == "w") this.driveControls.goStraight(this.state.speed);
-    //   if (name == "q") this.driveControls.rotateLeft(this.state.speed);
-    //   if (name == "e") this.driveControls.rotateRight(this.state.speed);
-    //   if (name == "z") this.driveControls.start(this.state.speed);
-    //   if (name == "x") this.driveControls.stop(this.state.speed);
-    // }
+    if (this.state.drivingMode) {
+      if (name == "a") this.driveControls.moveLeft(this.state.speed);
+      if (name == "d") this.driveControls.moveRight(this.state.speed);
+      if (name == "s") this.driveControls.goBack(this.state.speed);
+      if (name == "w") this.driveControls.goStraight(this.state.speed);
+      if (name == "q") this.driveControls.rotateLeft(this.state.speed);
+      if (name == "e") this.driveControls.rotateRight(this.state.speed);
+      if (name == "z") this.driveControls.start(this.state.speed);
+      if (name == "x") this.driveControls.stop(this.state.speed);
+    }
     if (name == "p") this.onSideBar();
   }
 
   handleKeyPressUp(event) {
-    // console.log("Key UPPP")
-    // var name = event.key;
-    // if (this.state.drivingMode) {
-    //   let drive_keys = ["a", "d", "s", "w", "q", "e"];
-    //   drive_keys.forEach(item => {if(name == item) this.driveControls.stopKeyUp(name);})
-    // }
+    var name = event.key;
+    if (this.state.drivingMode) {
+      let drive_keys = ["a", "d", "s", "w", "q", "e"];
+      drive_keys.forEach(item => {if(name == item) this.driveControls.stopKeyUp(name);})
+    }
   }
 
   /********************
@@ -566,41 +547,35 @@ class MBotApp extends React.Component {
       let x = this.state.x_values[i] * 500;
       let y = this.state.y_values[i] * 500;
 
-      if(x > 0 && y > 0) ctx.lineTo(halfBody + x, 400 + y);
-      else if(x > 0 && y < 0) ctx.lineTo(halfBody - x, 400 - y)
-      else if(x < 0 && y > 0) ctx.lineTo(halfBody - x, 400 - y)
-      else if(x < 0 && y < 0) ctx.lineTo(halfBody + x, 400 + y)
+      if(x != 0 && y != 0) ctx.lineTo(halfBody + x, 400 + y);
     }
     ctx.closePath()
     ctx.fill()
   }
 
-  // draw(x, y) {
-  //   const canvas = document.getElementById("scanvas2");
+  draw(x, y) {
+    const canvas = document.getElementById("scanvas2");
 
-  //   if (!canvas.getContext) {
-  //       return;
-  //   }
+    if (!canvas.getContext) {
+        return;
+    }
 
-  //   let widthBody = document.body.clientWidth
-  //   let halfBody = (widthBody - 20)/2
+    let widthBody = document.body.clientWidth
+    let halfBody = (widthBody - 20)/2
 
-  //   console.log(halfBody)
+    console.log(halfBody)
 
-  //   const ctx = canvas.getContext('2d');
+    const ctx = canvas.getContext('2d');
 
-  //   // set line stroke and line width
-  //   ctx.strokeStyle = 'green';
-  //   ctx.lineWidth = 0.5;
+    // set line stroke and line width
+    ctx.strokeStyle = 'green';
+    ctx.lineWidth = 0.5;
 
-  //   ctx.beginPath();
-  //   ctx.moveTo(halfBody, 400);
-  //   if(x > 0 && y > 0) ctx.lineTo(halfBody + x, 400 + y);
-  //   else if(x > 0 && y < 0) ctx.lineTo(halfBody - x, 400 - y)
-  //   else if(x < 0 && y > 0) ctx.lineTo(halfBody - x, 400 - y)
-  //   else if(x < 0 && y < 0) ctx.lineTo(halfBody + x, 400 + y)
-  //   ctx.stroke();
-  // }
+    ctx.beginPath();
+    ctx.moveTo(halfBody, 400);
+    if(x != 0 && y != 0) ctx.lineTo(halfBody + x, 400 + y);
+    ctx.stroke();
+  }
 
   /**********************
    *   STATE SETTERS
