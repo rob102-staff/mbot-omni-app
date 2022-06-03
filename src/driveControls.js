@@ -36,7 +36,7 @@
     btn_element.classList.remove("keydown-drivecolor");
   }
 
-  //Currently "Start" is here for asthetic purposes, as it serves no functional purpose at the moment.
+  //"Start" is here for asthetic purposes.
   start(){
     console.log("Start robot");
     this.animationStartStop("drive-start");
@@ -48,10 +48,12 @@
     this.ws.socket.emit("stop", {'stop cmd': "stop"});
   }
 
+  //Function that updates Flask about the motor commands
   newDrive(x, y, t, spd){
     this.ws.socket.emit("move", {'rx' : x, 'ry' : y, 'theta': t, 'speed' : spd})
   }
 
+  //Here for key-animations
   goKeyDown(name){
     if(name == "w") this.animation("move-str");
     if(name == "a") this.animation("move-left");
