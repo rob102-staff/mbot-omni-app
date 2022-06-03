@@ -296,11 +296,13 @@ class MBotApp extends React.Component {
 
     let x = 0;
     let y = 0;
-    let t = 0;
+    let t = 0; 
 
     document.addEventListener('keydown', (evt) => {
+      //handles a couple of shortcut keys
       this.handleKeyPressDown(evt)
 
+      //First checks if the drive State is active, then adds speed values in rx, ry, and theta
       if(this.state.drivingMode)
       {
         if(controller[evt.key]){
@@ -314,20 +316,18 @@ class MBotApp extends React.Component {
           this.driveControls.goKeyDown(evt.key);
         }
 
+        //Updates drive commands to robot
         this.driveControls.newDrive(x, y, t, this.state.speed)
         console.log(x, y, t)
 
       }
-
-      if (evt.key == "b") this.onDarkMode();
-      if (evt.key == "n") this.setState({mappingMode: !this.state.mappingMode});
-      if (evt.key == "m") this.setState({drivingMode: !this.state.drivingMode});
 
     }, false);
 
     document.addEventListener('keyup', (evt) => {
       // this.handleKeyPressUp(evt)
 
+      //First checks if the drive State is active, then substracts speed values in rx, ry, and theta
       if(this.state.drivingMode)
       {
         if(controller[evt.key]){
@@ -340,17 +340,19 @@ class MBotApp extends React.Component {
           if(controller[evt.key].fn == "tright") t--;
         }
 
+        //animation for color change
         this.driveControls.stopKeyUp(evt.key);
 
         console.log(x, y, t)
 
+        //Stops robot if it finds that all keys have been lifted up, acts as a failsafe to above logic
         let reset = true;
-
         for (const [key, value] of Object.entries(controller)) {
           if(value.pressed) reset = false
         }
         if(reset) {x = 0; y = 0; t = 0;}
 
+        //code to update drive speeds
         this.driveControls.newDrive(x, y, t, this.state.speed)
       }
 
@@ -499,6 +501,9 @@ class MBotApp extends React.Component {
   handleKeyPressDown(event) {
     var name = event.key;
     if (name == "p") this.onSideBar();
+    if (name == "b") this.onDarkMode();
+    if (name == "n") this.setState({mappingMode: !this.state.mappingMode});
+    if (name == "m") this.setState({drivingMode: !this.state.drivingMode});
   }
 
   handleKeyPressUp(event) {
