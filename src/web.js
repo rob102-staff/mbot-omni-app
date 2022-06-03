@@ -13,7 +13,8 @@ class WSHelper {
     this.connect_period = reconnect_delay;
     this.userHandleMessage = (evt) => {console.warn("userHandleMessage is not yet set up.")};
     this.statusCallback = (status) => {console.warn("statusCallback is not yet set up.")};
-    this.userHandleMap = (evt) => {console.warm("userHandleMap is not yet set up.")};
+    this.userHandleMap = (evt) => {console.warn("userHandleMap is not yet set up.")};
+    this.handleLaser = (evt) => {console.warn("handleLaser is not yet set up.")};
   }
 
   connect() {
@@ -30,6 +31,7 @@ class WSHelper {
     this.socket.on("close", (evt) => this.attemptConnection());
     this.socket.on('error', (evt) => { this.statusCallback(this.status()); });
     this.socket.on('map', (evt) => this.userHandleMap(evt));
+    this.socket.on('lidar', (evt) => this.handleLaser(evt));
 
     console.log("Connection status: ", this.status())
     return this.status();

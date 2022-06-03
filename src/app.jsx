@@ -249,6 +249,7 @@ class MBotApp extends React.Component {
     this.ws.userHandleMessage = (evt) => { this.handleMessage(evt); };
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
+    this.ws.handleLaser = (evt) => { this.handleTheLasers(evt)};
 
     this.driveControls = new DriveControls(this.ws);
     this.visitGrid = new GridCellCanvas();
@@ -450,6 +451,77 @@ class MBotApp extends React.Component {
       this.setState({connection: status});
     }
   }
+
+  handleTheLasers(evt){
+    console.log(evt);
+    this.setState({ranges: evt.ranges, thetas: evt.thetas})
+    
+    let a = [];
+    let b = [];
+
+    for(let i = 0; i < this.state.ranges.length; i++){
+      a[i] = (evt.ranges[i] * Math.cos(evt.thetas[i]));
+      b[i] = (evt.ranges[i] * Math.sin(evt.thetas[i]));
+    } 
+
+    this.setState({x_values : a, y_values : b})
+    this.looping();
+  }
+
+  looping(){
+    const canvas = document.getElementById("scanvas2");
+    this.ctx = canvas.getContext('2d');
+    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    if(this.state.mappingMode){
+      this.draw2()
+    }
+  }
+
+  draw2(){
+    const canvas = document.getElementById("scanvas2");
+    const ctx = canvas.getContext('2d');
+
+    let widthBody = document.body.clientWidth
+    let halfBody = (widthBody - 20)/2
+
+    ctx.fillStyle = 'rgba(49, 227, 173, 0.3)'
+    ctx.beginPath();
+    ctx.moveTo(halfBody, 400);
+    for(let i = 0; i < evt.ranges.length; i++){
+      let x = this.state.x_values[i] * 500;
+      let y = this.state.y_values[i] * 500;
+
+      if(x != 0 && y != 0) ctx.lineTo(halfBody + x, 400 + y);
+    }
+    ctx.closePath()
+    ctx.fill()
+  }
+
+  draw(x, y) {
+    const canvas = document.getElementById("scanvas2");
+
+    if (!canvas.getContext) {
+        return;
+    }
+
+    let widthBody = document.body.clientWidth
+    let halfBody = (widthBody - 20)/2
+
+    console.log(halfBody)
+
+    const ctx = canvas.getContext('2d');
+
+    // set line stroke and line width
+    ctx.strokeStyle = 'green';
+    ctx.lineWidth = 0.5;
+
+    ctx.beginPath();
+    ctx.moveTo(halfBody, 400);
+    if(x != 0 && y != 0) ctx.lineTo(halfBody + x, 400 + y);
+    ctx.stroke();
+  }
+
 
   /**********************
    *   STATE SETTERS
