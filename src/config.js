@@ -9,7 +9,7 @@ var config = {
     MAP_DISPLAY_WIDTH: 800,      // px
     MAP_DISPLAY_HEIGHT: 800,    // px
     CANVAS_DISPLAY_WIDTH: document.documentElement.clientWidth * 0.95,      // px
-    CANVAS_DISPLAY_HEIGHT: document.documentElement.clientHeight * 0.85,    // px
+    CANVAS_DISPLAY_HEIGHT: document.documentElement.clientHeight * 0.55,    // px
     ROBOT_SIZE: 0.274,         // m, diameter
     ROBOT_DEFAULT_SIZE: 100,  // px
 

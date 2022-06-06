@@ -439,6 +439,7 @@ class MBotApp extends React.Component {
     var map = parseMapFromLcm(mapmsg)
     console.log("Parsed map.")
     this.updateMap(map);
+    console.log(this.state.metersPerCell)
   }
 
   handleMessage(msg) {
@@ -464,6 +465,7 @@ class MBotApp extends React.Component {
       b[i] = (evt.ranges[i] * Math.sin(evt.thetas[i]));
     } 
 
+
     this.setState({x_values : a, y_values : b})
     this.looping();
   }
@@ -473,9 +475,15 @@ class MBotApp extends React.Component {
     this.ctx = canvas.getContext('2d');
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    if(this.state.mappingMode){
-      this.draw2()
+    for(let i = 0; i < this.state.ranges.length; i++){
+      let x = this.state.x_values[i] * 40;
+      let y = this.state.y_values[i] * 40;
+      this.draw(x, y);
     }
+
+    // if(this.state.mappingMode){
+      // this.draw2()
+    // }
   }
 
   draw2(){
@@ -483,14 +491,14 @@ class MBotApp extends React.Component {
     const ctx = canvas.getContext('2d');
 
     let widthBody = document.body.clientWidth
-    let halfBody = (widthBody - 20)/2
+    let halfBody = (widthBody)/2
 
     ctx.fillStyle = 'rgba(49, 227, 173, 0.3)'
     ctx.beginPath();
     ctx.moveTo(halfBody, 400);
-    for(let i = 0; i < evt.ranges.length; i++){
-      let x = this.state.x_values[i] * 500;
-      let y = this.state.y_values[i] * 500;
+    for(let i = 0; i < this.state.ranges.length; i++){
+      let x = this.state.x_values[i] * 100;
+      let y = this.state.y_values[i] * 100;
 
       if(x != 0 && y != 0) ctx.lineTo(halfBody + x, 400 + y);
     }
@@ -506,7 +514,7 @@ class MBotApp extends React.Component {
     }
 
     let widthBody = document.body.clientWidth
-    let halfBody = (widthBody - 20)/2
+    let halfBody = (widthBody)/2 - 25
 
     console.log(halfBody)
 
@@ -517,8 +525,8 @@ class MBotApp extends React.Component {
     ctx.lineWidth = 0.5;
 
     ctx.beginPath();
-    ctx.moveTo(halfBody, 400);
-    if(x != 0 && y != 0) ctx.lineTo(halfBody + x, 400 + y);
+    ctx.moveTo(halfBody, 410);
+    if(x != 0 && y != 0) ctx.lineTo(halfBody + x, 409 + y);
     ctx.stroke();
   }
 
@@ -749,14 +757,14 @@ class MBotApp extends React.Component {
 
         <div className="canvas-container" id = "canvas" style={canvasStyle}>
           <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
-          <canvas ref="visitCellsCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
+          <canvas ref="visitCellsCanvas" id = "" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
           </canvas>
           <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                      goalCell={this.state.goalCell} goalValid={this.state.goalValid}
                      cellSize={this.state.cellSize} />
           <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
                      pixelsPerMeter={this.state.pixelsPerMeter} />
-          <canvas ref="clickCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
+          <canvas ref="clickCanvas" id = "scanvas2" width={2*config.MAP_DISPLAY_HEIGHT} height={config.MAP_DISPLAY_WIDTH}
                   onMouseDown={(e) => this.handleMouseDown(e)}
                   onMouseMove={(e) => this.handleMouseMove(e)}
                   onMouseUp={() => this.handleMouseUp()}>
