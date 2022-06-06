@@ -516,10 +516,15 @@ class MBotApp extends React.Component {
     let b = [];
 
     for(let i = 0; i < this.state.ranges.length; i++){
-      a[i] = (evt.ranges[i] * Math.cos(evt.thetas[i]));
-      b[i] = (evt.ranges[i] * Math.sin(evt.thetas[i]));
+      a[i] = (evt.ranges[i] * Math.cos(evt.thetas[i])) / this.state.metersPerCell;
+      b[i] = (evt.ranges[i] * Math.sin(evt.thetas[i])) / this.state.metersPerCell;
     } 
 
+    console.log(document.body.scrollWidth)
+    console.log(document.documentElement.scrollWidth)
+    console.log(document.body.offsetWidth)
+    console.log(document.documentElement.offsetWidth)
+    console.log(document.documentElement.clientWidth)
 
     this.setState({x_values : a, y_values : b})
     this.looping();
@@ -531,14 +536,12 @@ class MBotApp extends React.Component {
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     for(let i = 0; i < this.state.ranges.length; i++){
-      let x = this.state.x_values[i] * 40;
-      let y = this.state.y_values[i] * 40;
+      let x = this.state.x_values[i];
+      let y = this.state.y_values[i];
       this.draw(x, y);
     }
 
-    // if(this.state.mappingMode){
-      // this.draw2()
-    // }
+
   }
 
   draw2(){
@@ -568,8 +571,8 @@ class MBotApp extends React.Component {
         return;
     }
 
-    let widthBody = document.body.clientWidth
-    let halfBody = (widthBody)/2 - 25
+    let widthBody = Math.max(document.body.offsetWidth, document.documentElement.offsetWidth, document.documentElement.clientWidth)
+    let halfBody = widthBody/2
 
     console.log(halfBody)
 
@@ -580,8 +583,8 @@ class MBotApp extends React.Component {
     ctx.lineWidth = 0.5;
 
     ctx.beginPath();
-    ctx.moveTo(halfBody, 410);
-    if(x != 0 && y != 0) ctx.lineTo(halfBody + x, 409 + y);
+    ctx.moveTo(halfBody, 420);
+    if(x != 0 && y != 0) ctx.lineTo(halfBody + x, 420 + y);
     ctx.stroke();
   }
 
