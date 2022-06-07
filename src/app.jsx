@@ -124,6 +124,19 @@ class DrawMap extends React.Component {
   }
 }
 
+class DrawLasers extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render(){
+    return(
+      <canvas id = "mapLasers" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+      </canvas>
+    );
+  }
+}
+
 class DrawCells extends React.Component {
   constructor(props) {
     super(props);
@@ -516,8 +529,14 @@ class MBotApp extends React.Component {
     let b = [];
 
     for(let i = 0; i < this.state.ranges.length; i++){
-      a[i] = (evt.ranges[i] * Math.cos(evt.thetas[i])) / this.state.metersPerCell;
-      b[i] = (evt.ranges[i] * Math.sin(evt.thetas[i])) / this.state.metersPerCell;
+      if(this.state.metersPerCell > 0){
+        a[i] = (evt.ranges[i] * Math.cos(evt.thetas[i])) / this.state.metersPerCell;
+        b[i] = (evt.ranges[i] * Math.sin(evt.thetas[i])) / this.state.metersPerCell;
+      }
+      else {
+        a[i] = (evt.ranges[i] * Math.cos(evt.thetas[i])) / 0.025;
+        b[i] = (evt.ranges[i] * Math.sin(evt.thetas[i])) / 0.025;
+      }
     } 
 
     console.log(document.body.scrollWidth)
@@ -531,9 +550,11 @@ class MBotApp extends React.Component {
   }
 
   looping(){
-    const canvas = document.getElementById("scanvas2");
+    const canvas = document.getElementById("mapLasers");
     this.ctx = canvas.getContext('2d');
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    console.log("hallo")
 
     for(let i = 0; i < this.state.ranges.length; i++){
       let x = this.state.x_values[i];
@@ -541,11 +562,10 @@ class MBotApp extends React.Component {
       this.draw(x, y);
     }
 
-
   }
 
   draw2(){
-    const canvas = document.getElementById("scanvas2");
+    const canvas = document.getElementById("mapLasers");
     const ctx = canvas.getContext('2d');
 
     let widthBody = document.body.clientWidth
@@ -565,7 +585,7 @@ class MBotApp extends React.Component {
   }
 
   draw(x, y) {
-    const canvas = document.getElementById("scanvas2");
+    const canvas = document.getElementById("mapLasers");
 
     if (!canvas.getContext) {
         return;
@@ -583,8 +603,8 @@ class MBotApp extends React.Component {
     ctx.lineWidth = 0.5;
 
     ctx.beginPath();
-    ctx.moveTo(halfBody, 420);
-    if(x != 0 && y != 0) ctx.lineTo(halfBody + x, 420 + y);
+    ctx.moveTo(400, 400);
+    if(x != 0 && y != 0) ctx.lineTo(400 + x, 400 + y);
     ctx.stroke();
   }
 
@@ -817,6 +837,7 @@ class MBotApp extends React.Component {
           <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
           <canvas ref="visitCellsCanvas" id = "" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
           </canvas>
+          <DrawLasers/>
           <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                      goalCell={this.state.goalCell} goalValid={this.state.goalValid}
                      cellSize={this.state.cellSize} />
