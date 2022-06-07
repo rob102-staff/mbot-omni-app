@@ -255,6 +255,10 @@ class MBotApp extends React.Component {
       x: config.MAP_DISPLAY_WIDTH / 2,
       y: config.MAP_DISPLAY_WIDTH / 2,
       theta: 0,
+      ranges: [],
+      thetas: [],
+      x_values: [],
+      y_values: [],
       isRobotClicked: false
     };
 
@@ -524,6 +528,26 @@ class MBotApp extends React.Component {
 
   checkThePoses(evt){
     console.log(evt)
+
+    const canvas = document.getElementById("mapLasers");
+
+    if (!canvas.getContext) {
+        return;
+    }
+
+    let x = (50 * Math.cos(evt.theta))
+    let y = (50 * Math.sin(evt.theta))
+
+    const ctx = canvas.getContext('2d');
+
+    // set line stroke and line width
+    ctx.strokeStyle = 'rgb(231, 125, 237)';
+    ctx.lineWidth = 1.5;
+
+    ctx.beginPath();
+    ctx.moveTo(400, 400);
+    ctx.lineTo(400 + x, 400 + y);
+    ctx.stroke();
   }
 
   handleTheLasers(evt){
