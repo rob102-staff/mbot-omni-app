@@ -263,6 +263,8 @@ class MBotApp extends React.Component {
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
     this.ws.handleLaser = (evt) => { this.handleTheLasers(evt)};
+    this.ws.checkPose = (evt) => { this.checkThePoses(evt)};
+
 
     this.driveControls = new DriveControls(this.ws);
     this.visitGrid = new GridCellCanvas();
@@ -521,8 +523,11 @@ class MBotApp extends React.Component {
     }
   }
 
+  checkThePoses(evt){
+    console.log(evt)
+  }
+
   handleTheLasers(evt){
-    console.log(evt);
     this.setState({ranges: evt.ranges, thetas: evt.thetas})
     
     let a = [];

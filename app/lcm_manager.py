@@ -35,6 +35,7 @@ class LcmCommunicationManager:
         self.__subscribe(lcm_settings.EXPLORATION_STATUS_CHANNEL, self._exploration_status_listener)
         self.__subscribe(lcm_settings.FULL_STATE_CHANNEL, self.mbot_state_listener)
         self.__subscribe(lcm_settings.LIDAR_CHANNEL, self.lidar_listener)
+        self.__subscribe(lcm_settings.TRUE_POSE_CHANNEL, self.pose_listener)
         ###################################
 
         self.__lcm_thread = threading.Thread(target=self.__run_handle_loop)
@@ -100,6 +101,11 @@ class LcmCommunicationManager:
             self._callback_dict[channel](decoded_data)
         print("Lidar is Listening")
         
+    def pose_listener(self, channel, data):
+        decoded_data = pose_xyt_t.decode(data)
+        if channel in self._callback_dict.keys(): 
+            self._callback_dict[channel](decoded_data)
+        print("Pose is Supposing")
 
     def __del__(self):
         print("joined thread")
