@@ -15,7 +15,7 @@ CORS(app)
 lcm_callback_dict = {
     lcm_settings.SLAM_MAP_CHANNEL: OccupancyGridEmiter(socket, 'map', period=0.5),
     lcm_settings.LIDAR_CHANNEL: LidarReader(socket, 'lidar', period=0.5),
-    lcm_settings.TRUE_POSE_CHANNEL: PoseFinder(socket, 'pose', period=0.5)
+    lcm_settings.SLAM_POSE_CHANNEL: PoseFinder(socket, 'pose', period=0.5)
 }
 
 lcm_manager = LcmCommunicationManager(lcm_callback_dict)

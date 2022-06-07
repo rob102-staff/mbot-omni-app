@@ -509,7 +509,6 @@ class MBotApp extends React.Component {
     var map = parseMapFromLcm(mapmsg)
     console.log("Parsed map.")
     this.updateMap(map);
-    console.log(this.state.metersPerCell)
   }
 
   handleMessage(msg) {
@@ -553,14 +552,11 @@ class MBotApp extends React.Component {
     this.ctx = canvas.getContext('2d');
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    console.log("hallo")
-
     for(let i = 0; i < this.state.ranges.length; i++){
       let x = this.state.x_values[i];
       let y = this.state.y_values[i];
       this.draw(x, y);
     }
-
   }
 
   draw2(){

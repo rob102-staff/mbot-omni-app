@@ -35,7 +35,7 @@ class LcmCommunicationManager:
         self.__subscribe(lcm_settings.EXPLORATION_STATUS_CHANNEL, self._exploration_status_listener)
         self.__subscribe(lcm_settings.FULL_STATE_CHANNEL, self.mbot_state_listener)
         self.__subscribe(lcm_settings.LIDAR_CHANNEL, self.lidar_listener)
-        self.__subscribe(lcm_settings.TRUE_POSE_CHANNEL, self.pose_listener)
+        self.__subscribe(lcm_settings.SLAM_POSE_CHANNEL, self.pose_listener)
         ###################################
 
         self.__lcm_thread = threading.Thread(target=self.__run_handle_loop)
