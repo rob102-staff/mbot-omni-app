@@ -544,12 +544,6 @@ class MBotApp extends React.Component {
       }
     } 
 
-    console.log(document.body.scrollWidth)
-    console.log(document.documentElement.scrollWidth)
-    console.log(document.body.offsetWidth)
-    console.log(document.documentElement.offsetWidth)
-    console.log(document.documentElement.clientWidth)
-
     this.setState({x_values : a, y_values : b})
     this.looping();
   }
@@ -573,17 +567,14 @@ class MBotApp extends React.Component {
     const canvas = document.getElementById("mapLasers");
     const ctx = canvas.getContext('2d');
 
-    let widthBody = document.body.clientWidth
-    let halfBody = (widthBody)/2
-
     ctx.fillStyle = 'rgba(49, 227, 173, 0.3)'
     ctx.beginPath();
-    ctx.moveTo(halfBody, 400);
+    ctx.moveTo(400, 400);
     for(let i = 0; i < this.state.ranges.length; i++){
       let x = this.state.x_values[i] * 100;
       let y = this.state.y_values[i] * 100;
 
-      if(x != 0 && y != 0) ctx.lineTo(halfBody + x, 400 + y);
+      if(x != 0 && y != 0) ctx.lineTo(400 + x, 400 + y);
     }
     ctx.closePath()
     ctx.fill()
@@ -595,11 +586,6 @@ class MBotApp extends React.Component {
     if (!canvas.getContext) {
         return;
     }
-
-    let widthBody = Math.max(document.body.offsetWidth, document.documentElement.offsetWidth, document.documentElement.clientWidth)
-    let halfBody = widthBody/2
-
-    console.log(halfBody)
 
     const ctx = canvas.getContext('2d');
 
