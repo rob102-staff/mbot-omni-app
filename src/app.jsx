@@ -362,8 +362,8 @@ class MBotApp extends React.Component {
 
   handleWindowChange(evt) {
     this.rect = this.clickCanvas.current.getBoundingClientRect();
-    config.CANVAS_DISPLAY_WIDTH = document.documentElement.clientWidth * 0.95;  
-    config.CANVAS_DISPLAY_HEIGHT = document.documentElement.clientHeight * 0.85;
+    config.CANVAS_DISPLAY_WIDTH = document.documentElement.clientWidth * config.CANVAS_WIDTH_MODIFIER;  
+    config.CANVAS_DISPLAY_HEIGHT = document.documentElement.clientHeight * config.CANVAS_HEIGHT_MODIFIER;
     this.setState({width: config.CANVAS_DISPLAY_WIDTH, height: config.CANVAS_DISPLAY_HEIGHT})
   }
 
