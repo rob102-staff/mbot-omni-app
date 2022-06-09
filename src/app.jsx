@@ -685,26 +685,26 @@ class MBotApp extends React.Component {
 
         
         <div className="canvas-container" id = "canvas" style={canvasStyle}>
-        <TransformWrapper>
-        <TransformComponent>
-          <div style={canvasStyle}>
-          <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
-          
-          <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
-          </canvas>
-          <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
-                     goalCell={this.state.goalCell} goalValid={this.state.goalValid}
-                     cellSize={this.state.cellSize} />
-          <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
-                     pixelsPerMeter={this.state.pixelsPerMeter} />
-          <canvas ref={this.clickCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
-                  onMouseDown={(e) => this.handleMouseDown(e)}
-                  onMouseMove={(e) => this.handleMouseMove(e)}
-                  onMouseUp={() => this.handleMouseUp()}>
-          </canvas>
-          </div>
-          </TransformComponent>
-      </TransformWrapper>
+          <TransformWrapper>
+            <TransformComponent>
+              <div style={canvasStyle}>
+              <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
+              
+              <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
+              </canvas>
+              <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
+                        goalCell={this.state.goalCell} goalValid={this.state.goalValid}
+                        cellSize={this.state.cellSize} />
+              <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
+                        pixelsPerMeter={this.state.pixelsPerMeter} />
+              <canvas ref={this.clickCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
+                      onMouseDown={(e) => this.handleMouseDown(e)}
+                      onMouseMove={(e) => this.handleMouseMove(e)}
+                      onMouseUp={() => this.handleMouseUp()}>
+              </canvas>
+              </div>
+            </TransformComponent>
+          </TransformWrapper>
         </div>
         
 
