@@ -257,6 +257,8 @@ class MBotApp extends React.Component {
       // Robot parameters.
       x: config.MAP_DISPLAY_WIDTH / 2,
       y: config.MAP_DISPLAY_WIDTH / 2,
+      xPose: 0,
+      yPose: 0,
       theta: 0,
       ranges: [],
       thetas: [],
@@ -275,6 +277,8 @@ class MBotApp extends React.Component {
 
     this.driveControls = new DriveControls(this.ws);
     this.visitGrid = new GridCellCanvas();
+    this.visitCellsCanvas = React.createRef();	
+    this.clickCanvas = React.createRef();
   }
 
   /********************
@@ -282,10 +286,10 @@ class MBotApp extends React.Component {
    ********************/
 
   componentDidMount() {
-    this.visitGrid.init(this.refs.visitCellsCanvas);
+    this.visitGrid.init(this.visitCellsCanvas.current);
 
     // Get the window size and watch for resize events.
-    this.rect = this.refs.clickCanvas.getBoundingClientRect();
+    this.rect = this.clickCanvas.current.getBoundingClientRect();
     window.addEventListener('resize', (evt) => this.handleWindowChange(evt));
     window.addEventListener('scroll', (evt) => this.handleWindowChange(evt));
 
@@ -538,8 +542,10 @@ class MBotApp extends React.Component {
         return;
     }
 
-    let x = (50 * Math.cos(evt.theta))
-    let y = (50 * Math.sin(evt.theta))
+    let x = (20 * Math.cos(evt.theta))
+    let y = (20 * Math.sin(evt.theta))
+
+    this.setState({xPose: evt.x, yPose: evt.y});
 
     const ctx = canvas.getContext('2d');
 
@@ -548,8 +554,16 @@ class MBotApp extends React.Component {
     ctx.lineWidth = 1.5;
 
     ctx.beginPath();
-    ctx.moveTo(400, 400);
-    ctx.lineTo(400 + x, 400 + y);
+    if(this.state.metersPerCell > 0) 
+    {
+      ctx.moveTo(400 + this.state.xPose/this.state.metersPerCell, 400 - this.state.yPose/this.state.metersPerCell);
+      ctx.lineTo(400 + x + this.state.xPose/this.state.metersPerCell, 400 + y - this.state.yPose/this.state.metersPerCell);
+    }
+    else 
+    {
+      ctx.moveTo(400, 400)
+      ctx.lineTo(400 + x, 400 + y);
+    }
     ctx.stroke();
   }
 
@@ -561,8 +575,8 @@ class MBotApp extends React.Component {
 
     for(let i = 0; i < this.state.ranges.length; i++){
       if(this.state.metersPerCell > 0){
-        a[i] = (evt.ranges[i] * Math.cos(evt.thetas[i])) / this.state.metersPerCell;
-        b[i] = (evt.ranges[i] * Math.sin(evt.thetas[i])) / this.state.metersPerCell;
+        a[i] = ((evt.ranges[i] * Math.cos(evt.thetas[i]))) / this.state.metersPerCell;
+        b[i] = ((evt.ranges[i] * Math.sin(evt.thetas[i]))) / this.state.metersPerCell;
       }
       else {
         a[i] = (evt.ranges[i] * Math.cos(evt.thetas[i])) / 0.025;
@@ -578,6 +592,9 @@ class MBotApp extends React.Component {
     const canvas = document.getElementById("mapLasers");
     this.ctx = canvas.getContext('2d');
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    console.log((this.state.yPose/this.state.metersPerCell))
+    console.log((this.state.xPose/this.state.metersPerCell))
 
     for(let i = 0; i < this.state.ranges.length; i++){
       let x = this.state.x_values[i];
@@ -617,8 +634,24 @@ class MBotApp extends React.Component {
     ctx.lineWidth = 0.5;
 
     ctx.beginPath();
-    ctx.moveTo(400, 400);
-    if(x != 0 && y != 0) ctx.lineTo(400 + x, 400 + y);
+   
+    if(this.state.metersPerCell > 0) 
+    {
+      ctx.moveTo(400 + this.state.xPose/this.state.metersPerCell, 400 - this.state.yPose/this.state.metersPerCell);
+    }
+    else {
+      ctx.moveTo(400, 400)
+    }
+
+    if(x != 0 && y != 0) 
+    {
+      if(this.state.metersPerCell > 0){
+        ctx.lineTo(400 + x + (this.state.xPose/this.state.metersPerCell), 400 + y - (this.state.yPose/this.state.metersPerCell));
+      }
+      else{
+        ctx.lineTo(400 + x, 400 + y);
+      }
+    }
     ctx.stroke();
   }
 

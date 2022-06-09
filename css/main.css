@@ -52,7 +52,7 @@ canvas {
   display: block;
 }
 
-#mapLasers {
+#mapCanvas, #mapLasers {
   position: relative;
   padding: 0;
   margin: auto;
