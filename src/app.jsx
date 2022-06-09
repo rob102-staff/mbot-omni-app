@@ -685,6 +685,9 @@ class MBotApp extends React.Component {
 
         
         <div className="canvas-container" id = "canvas" style={canvasStyle}>
+        <TransformWrapper>
+        <TransformComponent>
+          <div style={canvasStyle}>
           <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
           
           <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
@@ -699,6 +702,9 @@ class MBotApp extends React.Component {
                   onMouseMove={(e) => this.handleMouseMove(e)}
                   onMouseUp={() => this.handleMouseUp()}>
           </canvas>
+          </div>
+          </TransformComponent>
+      </TransformWrapper>
         </div>
         
 
