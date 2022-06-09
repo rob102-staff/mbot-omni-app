@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
@@ -96,15 +97,16 @@ function DriveControlPanel(props) {
  *     CANVAS
  *******************/
 
-class DrawMap extends React.Component {
+ class DrawMap extends React.Component {
   constructor(props) {
     super(props);
 
     this.mapGrid = new GridCellCanvas();
+    this.mapCanvas = React.createRef();
   }
 
   componentDidMount() {
-    this.mapGrid.init(this.refs.mapCanvas);
+    this.mapGrid.init(this.mapCanvas.current);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -118,20 +120,7 @@ class DrawMap extends React.Component {
 
   render() {
     return (
-      <canvas id="mapCanvas" ref="mapCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
-      </canvas>
-    );
-  }
-}
-
-class DrawLasers extends React.Component {
-  constructor(props) {
-    super(props);
-  }
-
-  render(){
-    return(
-      <canvas id = "mapLasers" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+      <canvas id="mapCanvas" ref={this.mapCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
       </canvas>
     );
   }
@@ -146,10 +135,11 @@ class DrawCells extends React.Component {
     this.goalUpdated = true;
 
     this.cellGrid = new GridCellCanvas();
+    this.cellsCanvas = React.createRef();
   }
 
   componentDidMount() {
-    this.cellGrid.init(this.refs.cellsCanvas);
+    this.cellGrid.init(this.cellsCanvas.current);
   }
 
   drawPath() {
@@ -204,7 +194,20 @@ class DrawCells extends React.Component {
 
   render() {
     return (
-      <canvas ref="cellsCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+      <canvas ref={this.cellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+      </canvas>
+    );
+  }
+}
+
+class DrawLasers extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render(){
+    return(
+      <canvas id = "mapLasers" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
       </canvas>
     );
   }
@@ -443,10 +446,10 @@ class MBotApp extends React.Component {
    *  WINDOW EVENT HANDLERS
    ***************************/
 
-  handleWindowChange(evt) {
-    this.rect = this.refs.clickCanvas.getBoundingClientRect();
-    config.CANVAS_DISPLAY_WIDTH = document.documentElement.clientWidth * 0.95;  
-    config.CANVAS_DISPLAY_HEIGHT = document.documentElement.clientHeight * 0.85;
+   handleWindowChange(evt) {
+    this.rect = this.clickCanvas.current.getBoundingClientRect();
+    config.CANVAS_DISPLAY_WIDTH = document.documentElement.clientWidth * config.CANVAS_WIDTH_MODIFIER;  
+    config.CANVAS_DISPLAY_HEIGHT = document.documentElement.clientHeight * config.CANVAS_HEIGHT_MODIFIER;
     this.setState({width: config.CANVAS_DISPLAY_WIDTH, height: config.CANVAS_DISPLAY_HEIGHT})
   }
 
@@ -632,7 +635,7 @@ class MBotApp extends React.Component {
    *   OTHER FUNCTIONS
    **********************/
 
-  updateMap(result) {
+   updateMap(result) {
     this.visitGrid.clear();
     var loaded = result.cells.length > 0;
     this.setState({cells: result.cells,
@@ -844,22 +847,31 @@ class MBotApp extends React.Component {
           <ConnectionStatus status={this.state.connection}/>
         </div>
 
+
         <div className="canvas-container" id = "canvas" style={canvasStyle}>
-          <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
-          <canvas ref="visitCellsCanvas" id = "" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
-          </canvas>
-          <DrawLasers/>
-          <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
-                     goalCell={this.state.goalCell} goalValid={this.state.goalValid}
-                     cellSize={this.state.cellSize} />
-          <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
-                     pixelsPerMeter={this.state.pixelsPerMeter} />
-          <canvas ref="clickCanvas" id = "scanvas2" width={2*config.MAP_DISPLAY_HEIGHT} height={config.MAP_DISPLAY_WIDTH}
-                  onMouseDown={(e) => this.handleMouseDown(e)}
-                  onMouseMove={(e) => this.handleMouseMove(e)}
-                  onMouseUp={() => this.handleMouseUp()}>
-          </canvas>
+          <TransformWrapper>
+            <TransformComponent>
+              <div style={canvasStyle}>
+              <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
+              
+              <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
+              </canvas>
+              <DrawLasers/>
+              <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
+                        goalCell={this.state.goalCell} goalValid={this.state.goalValid}
+                        cellSize={this.state.cellSize} />
+              <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
+                        pixelsPerMeter={this.state.pixelsPerMeter} />
+              <canvas ref={this.clickCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
+                      onMouseDown={(e) => this.handleMouseDown(e)}
+                      onMouseMove={(e) => this.handleMouseMove(e)}
+                      onMouseUp={() => this.handleMouseUp()}>
+              </canvas>
+              </div>
+            </TransformComponent>
+          </TransformWrapper>
         </div>
+
       </>
     );
   }

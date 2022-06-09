@@ -2,7 +2,7 @@
  * DRAWING HELPERS
  *******************/
 
-function colourStringToRGB(colour_str) {
+ function colourStringToRGB(colour_str) {
   var rgb = [parseInt(colour_str.substring(1, 3), 16),
              parseInt(colour_str.substring(3, 5), 16),
              parseInt(colour_str.substring(5, 7), 16)];

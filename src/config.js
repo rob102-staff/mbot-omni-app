@@ -1,3 +1,6 @@
+let width_modifier = 0.95
+let height_modifier = 0.85
+
 var config = {
     // Connection info.
     HOST: "localhost",
@@ -8,8 +11,10 @@ var config = {
     // Sim info
     MAP_DISPLAY_WIDTH: 800,      // px
     MAP_DISPLAY_HEIGHT: 800,    // px
-    CANVAS_DISPLAY_WIDTH: document.documentElement.clientWidth * 0.95,      // px
-    CANVAS_DISPLAY_HEIGHT: document.documentElement.clientHeight * 0.55,    // px
+    CANVAS_WIDTH_MODIFIER: width_modifier, // %
+    CANVAS_HEIGHT_MODIFIER: height_modifier, // %
+    CANVAS_DISPLAY_WIDTH: document.documentElement.clientWidth * width_modifier,      // px
+    CANVAS_DISPLAY_HEIGHT: document.documentElement.clientHeight * height_modifier,    // px
     ROBOT_SIZE: 0.274,         // m, diameter
     ROBOT_DEFAULT_SIZE: 100,  // px
 
