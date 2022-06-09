@@ -1,5 +1,6 @@
 import React from "react";
 import ReactDOM from "react-dom";
+import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
@@ -101,10 +102,11 @@ class DrawMap extends React.Component {
     super(props);
 
     this.mapGrid = new GridCellCanvas();
+    this.mapCanvas = React.createRef();
   }
 
   componentDidMount() {
-    this.mapGrid.init(this.refs.mapCanvas);
+    this.mapGrid.init(this.mapCanvas.current);
   }
 
   shouldComponentUpdate(nextProps, nextState) {
@@ -118,7 +120,7 @@ class DrawMap extends React.Component {
 
   render() {
     return (
-      <canvas id="mapCanvas" ref="mapCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+      <canvas id="mapCanvas" ref={this.mapCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
       </canvas>
     );
   }
@@ -133,10 +135,11 @@ class DrawCells extends React.Component {
     this.goalUpdated = true;
 
     this.cellGrid = new GridCellCanvas();
+    this.cellsCanvas = React.createRef();
   }
 
   componentDidMount() {
-    this.cellGrid.init(this.refs.cellsCanvas);
+    this.cellGrid.init(this.cellsCanvas.current);
   }
 
   drawPath() {
@@ -191,7 +194,7 @@ class DrawCells extends React.Component {
 
   render() {
     return (
-      <canvas ref="cellsCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+      <canvas ref={this.cellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
       </canvas>
     );
   }
@@ -252,6 +255,8 @@ class MBotApp extends React.Component {
 
     this.driveControls = new DriveControls(this.ws);
     this.visitGrid = new GridCellCanvas();
+    this.visitCellsCanvas = React.createRef();
+    this.clickCanvas = React.createRef();
   }
 
   /********************
@@ -259,10 +264,10 @@ class MBotApp extends React.Component {
    ********************/
 
   componentDidMount() {
-    this.visitGrid.init(this.refs.visitCellsCanvas);
+    this.visitGrid.init(this.visitCellsCanvas.current);
 
     // Get the window size and watch for resize events.
-    this.rect = this.refs.clickCanvas.getBoundingClientRect();
+    this.rect = this.clickCanvas.current.getBoundingClientRect();
     window.addEventListener('resize', (evt) => this.handleWindowChange(evt));
     window.addEventListener('scroll', (evt) => this.handleWindowChange(evt));
 
@@ -356,7 +361,7 @@ class MBotApp extends React.Component {
    ***************************/
 
   handleWindowChange(evt) {
-    this.rect = this.refs.clickCanvas.getBoundingClientRect();
+    this.rect = this.clickCanvas.current.getBoundingClientRect();
     config.CANVAS_DISPLAY_WIDTH = document.documentElement.clientWidth * 0.95;  
     config.CANVAS_DISPLAY_HEIGHT = document.documentElement.clientHeight * 0.85;
     this.setState({width: config.CANVAS_DISPLAY_WIDTH, height: config.CANVAS_DISPLAY_HEIGHT})
@@ -675,21 +680,28 @@ class MBotApp extends React.Component {
           <ConnectionStatus status={this.state.connection}/>
         </div>
 
+
+      
+
+        
         <div className="canvas-container" id = "canvas" style={canvasStyle}>
           <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
-          <canvas ref="visitCellsCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
+          
+          <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
           </canvas>
           <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                      goalCell={this.state.goalCell} goalValid={this.state.goalValid}
                      cellSize={this.state.cellSize} />
           <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
                      pixelsPerMeter={this.state.pixelsPerMeter} />
-          <canvas ref="clickCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
+          <canvas ref={this.clickCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
                   onMouseDown={(e) => this.handleMouseDown(e)}
                   onMouseMove={(e) => this.handleMouseMove(e)}
                   onMouseUp={() => this.handleMouseUp()}>
           </canvas>
         </div>
+        
+
       </>
     );
   }
