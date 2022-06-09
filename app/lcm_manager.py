@@ -5,6 +5,7 @@ from lcmtypes.pose_xyt_t import pose_xyt_t
 from lcmtypes.exploration_status_t import exploration_status_t
 from lcmtypes.reset_odometry_t import reset_odometry_t
 from lcmtypes.mbot_state_t import mbot_state_t
+from lcmtypes.lidar_t import lidar_t
 from app import lcm_settings
 
 import time
@@ -33,6 +34,7 @@ class LcmCommunicationManager:
         self.__subscribe(lcm_settings.ODOMETRY_CHANNEL, self._position_listener)
         self.__subscribe(lcm_settings.EXPLORATION_STATUS_CHANNEL, self._exploration_status_listener)
         self.__subscribe(lcm_settings.FULL_STATE_CHANNEL, self.mbot_state_listener)
+        self.__subscribe(lcm_settings.LIDAR_CHANNEL, self.lidar_listener)
         ###################################
 
         self.__lcm_thread = threading.Thread(target=self.__run_handle_loop)
@@ -91,6 +93,13 @@ class LcmCommunicationManager:
         if channel in self._callback_dict.keys(): 
             self._callback_dict[channel](decoded_data)
         # print("Received map!")  # TODO: remove
+
+    def lidar_listener(self, channel, data):
+        decoded_data = lidar_t.decode(data)
+        if channel in self._callback_dict.keys(): 
+            self._callback_dict[channel](decoded_data)
+        print("Lidar is Listening")
+        
 
     def __del__(self):
         print("joined thread")

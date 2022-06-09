@@ -61,18 +61,18 @@ function ConnectionStatus(connection) {
 function DriveControlPanel(props) {
   return (
     <div className="row px-5 text-center pt-3">
-      <div className="button-wrapper flex-child">
+      <div className="button-wrapper col-md-4">
         <span>Speed: {props.speed}</span> <br />
         <input type="range" min="1" max="100" value={props.speed}
                onChange={(evt) => props.onSpeedChange(evt)}></input>
       </div>
-      <div className="button-wrapper flex-child top-spacing">
+      <div className="button-wrapper col-md-4 top-spacing">
         <button className="button start-color" id="drive-start"
                 onClick={() => props.driveControls.start()}>Start</button>
         <button className="button stop-color" id="drive-stop"
                 onClick={() => props.driveControls.stop()}>Stop</button>
       </div>
-      <div className="button-wrapper flex-child">
+      <div className="button-wrapper col-md-4">
         <button className="button drive-turn drive-ctrl" id="turn-left"
                 onClick={() => props.driveControls.rotateLeft(props.speed)}></button>
         <button className="button drive-move drive-ctrl" id="move-str"
@@ -118,10 +118,21 @@ class DrawMap extends React.Component {
 
   render() {
     return (
-      <canvas ref="mapCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
+      <canvas ref="mapCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
       </canvas>
     );
   }
+}
+
+class DrawLasers extends React.Component{
+  constructor(props){
+    super(props)
+  }
+
+  render(){
+    return null;
+  }
+
 }
 
 class DrawCells extends React.Component {
@@ -191,7 +202,7 @@ class DrawCells extends React.Component {
 
   render() {
     return (
-      <canvas ref="cellsCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
+      <canvas ref="cellsCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
       </canvas>
     );
   }
@@ -239,16 +250,21 @@ class MBotApp extends React.Component {
       omni: false,
       diff: false,
       // Robot parameters.
-      x: config.MAP_DISPLAY_WIDTH / 2,
-      y: config.MAP_DISPLAY_WIDTH / 2,
+      x: 200,
+      y: 200,
       theta: 0,
-      isRobotClicked: false
+      isRobotClicked: false,
+      ranges: [],
+      thetas: [],
+      x_values: [],
+      y_values: []
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
     this.ws.userHandleMessage = (evt) => { this.handleMessage(evt); };
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
+    this.ws.handleLaser = (evt) => { this.handleTheLasers(evt)};
 
     this.driveControls = new DriveControls(this.ws);
     this.visitGrid = new GridCellCanvas();
@@ -268,9 +284,79 @@ class MBotApp extends React.Component {
 
     // TODO: Discuss what other modes will enable drive control. Currently the
     // key presses active only when the drive toggle is toggled on.
-    document.addEventListener('keydown', (evt) => this.handleKeyPressDown(evt), false);
-    document.addEventListener('keyup', (evt) => this.handleKeyPressUp(evt), false);
 
+    const controller =  {
+      s: {pressed: false, fn: "back"},    
+      w: {pressed: false, fn: "forward"},
+      a: {pressed: false, fn: "left"},
+      d: {pressed: false, fn: "right"},  
+      e: {pressed: false, fn: "tright"},
+      q: {pressed: false, fn: "tleft"}
+    }
+
+    let x = 0;
+    let y = 0;
+    let t = 0; 
+
+    document.addEventListener('keydown', (evt) => {
+      //handles a couple of shortcut keys
+      this.handleKeyPressDown(evt)
+
+      //First checks if the drive State is active, then adds speed values in rx, ry, and theta
+      if(this.state.drivingMode)
+      {
+        if(controller[evt.key]){
+          controller[evt.key].pressed = true
+          if(controller[evt.key].fn == "back" && x > -1) x--; 
+          if(controller[evt.key].fn == "forward" && x < 1) x++;
+          if(controller[evt.key].fn == "left" && y > -1) y--;
+          if(controller[evt.key].fn == "right" && y < 1) y++; 
+          if(controller[evt.key].fn == "tleft" && t > -1) t--; 
+          if(controller[evt.key].fn == "tright" && t < 1) t++; 
+          this.driveControls.goKeyDown(evt.key);
+        }
+
+        //Updates drive commands to robot
+        this.driveControls.newDrive(x, y, t, this.state.speed)
+        console.log(x, y, t)
+
+      }
+
+    }, false);
+
+    document.addEventListener('keyup', (evt) => {
+      // this.handleKeyPressUp(evt)
+
+      //First checks if the drive State is active, then substracts speed values in rx, ry, and theta
+      if(this.state.drivingMode)
+      {
+        if(controller[evt.key]){
+          controller[evt.key].pressed = false
+          if(controller[evt.key].fn == "back") x++;
+          if(controller[evt.key].fn == "forward") x--;
+          if(controller[evt.key].fn == "left") y++;
+          if(controller[evt.key].fn == "right") y--;
+          if(controller[evt.key].fn == "tleft") t++;
+          if(controller[evt.key].fn == "tright") t--;
+        }
+
+        //animation for color change
+        this.driveControls.stopKeyUp(evt.key);
+
+        console.log(x, y, t)
+
+        //Stops robot if it finds that all keys have been lifted up, acts as a failsafe to above logic
+        let reset = true;
+        for (const [key, value] of Object.entries(controller)) {
+          if(value.pressed) reset = false
+        }
+        if(reset) {x = 0; y = 0; t = 0;}
+
+        //code to update drive speeds
+        this.driveControls.newDrive(x, y, t, this.state.speed)
+      }
+
+    }, false);
 
     // Try to connect to the websocket backend.
     this.ws.attemptConnection();
@@ -347,7 +433,16 @@ class MBotApp extends React.Component {
 
   onSideBar(){
     this.setState({sideBarMode: !this.state.sideBarMode})
-    if(this.state.sideBarMode) this.setState({sideBarWidth: 25 + "%"});
+    let widthBody = document.body.clientWidth
+    // console.log(widthBody);
+    let temp;
+    if(this.state.sideBarMode) 
+    {
+      if(widthBody <= 400) temp = 100 + "%"
+      else if(widthBody <= 770) temp = 80 + "%"
+      else temp = 35 + "%"
+      this.setState({sideBarWidth: temp});
+    }
     else this.setState({sideBarWidth: 0});
   }
 
@@ -405,26 +500,13 @@ class MBotApp extends React.Component {
 
   handleKeyPressDown(event) {
     var name = event.key;
-    if (this.state.drivingMode) {
-      if (name == "a") this.driveControls.moveLeft(this.state.speed);
-      if (name == "d") this.driveControls.moveRight(this.state.speed);
-      if (name == "s") this.driveControls.goBack(this.state.speed);
-      if (name == "w") this.driveControls.goStraight(this.state.speed);
-      if (name == "q") this.driveControls.rotateLeft(this.state.speed);
-      if (name == "e") this.driveControls.rotateRight(this.state.speed);
-      if (name == "z") this.driveControls.start(this.state.speed);
-      if (name == "x") this.driveControls.stop(this.state.speed);
-    }
     if (name == "p") this.onSideBar();
+    if (name == "b") this.onDarkMode();
+    if (name == "n") this.setState({mappingMode: !this.state.mappingMode});
+    if (name == "m") this.setState({drivingMode: !this.state.drivingMode});
   }
 
   handleKeyPressUp(event) {
-    console.log("Key UPPP")
-    var name = event.key;
-    if (this.state.drivingMode) {
-      let drive_keys = ["a", "d", "s", "w", "q", "e"];
-      drive_keys.forEach(item => {if(name == item) this.driveControls.stopKeyUp(name);})
-    }
   }
 
   /********************
@@ -448,6 +530,8 @@ class MBotApp extends React.Component {
     }
   }
 
+  handleTheLasers(evt){}
+
   /**********************
    *   STATE SETTERS
    **********************/
@@ -461,6 +545,8 @@ class MBotApp extends React.Component {
    **********************/
 
   updateMap(result) {
+    let widthBody = document.body.clientWidth
+
     this.visitGrid.clear();
     var loaded = result.cells.length > 0;
     this.setState({cells: result.cells,
@@ -469,8 +555,8 @@ class MBotApp extends React.Component {
                    num_cells: result.num_cells,
                    origin: result.origin,
                    metersPerCell: result.meters_per_cell,
-                   cellSize: config.MAP_DISPLAY_WIDTH / result.width,
-                   pixelsPerMeter: config.MAP_DISPLAY_WIDTH / (result.width * result.meters_per_cell),
+                   cellSize: widthBody-20 / result.width,
+                   pixelsPerMeter: widthBody-20 / (result.width * result.meters_per_cell),
                    mapLoaded: loaded,
                    path: [],
                    clickedCell: [],
@@ -649,7 +735,8 @@ class MBotApp extends React.Component {
         </div>
 
 
-        <div className="container pt-3">
+        <div className="pt-3">
+
           {this.state.mappingMode &&
             <div className="button-wrapper top-spacing d-flex justify-content-center">
               <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
@@ -664,6 +751,7 @@ class MBotApp extends React.Component {
                                 speed={this.state.speed}
                                 onSpeedChange={(evt) => this.onSpeedChange(evt)} />
           }
+
         </div>
 
         <div className="status-wrapper mx-5">
@@ -674,14 +762,15 @@ class MBotApp extends React.Component {
 
         <div className="canvas-container" id = "canvas" style={canvasStyle}>
           <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
-          <canvas ref="visitCellsCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
+          <canvas ref="visitCellsCanvas" id = "scanvas1" width={config.MAP_DISPLAY_WIDTH + "%"} height={config.MAP_DISPLAY_HEIGHT}>
           </canvas>
+          <DrawLasers/>
           <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                      goalCell={this.state.goalCell} goalValid={this.state.goalValid}
                      cellSize={this.state.cellSize} />
           <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
                      pixelsPerMeter={this.state.pixelsPerMeter} />
-          <canvas ref="clickCanvas" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
+          <canvas ref="clickCanvas" id = "scanvas2" width={1900} height={config.MAP_DISPLAY_HEIGHT}
                   onMouseDown={(e) => this.handleMouseDown(e)}
                   onMouseMove={(e) => this.handleMouseMove(e)}
                   onMouseUp={() => this.handleMouseUp()}>
