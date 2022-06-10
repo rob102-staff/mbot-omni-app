@@ -48,11 +48,6 @@ a:hover {
 }
 
 canvas {
-  position: absolute;
-  display: block;
-}
-
-#mapCanvas, #mapLasers {
   position: relative;
   padding: 0;
   margin: auto;
