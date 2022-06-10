@@ -58,6 +58,7 @@ class RobotPathFollower {
 class DrawRobot extends React.Component {
   constructor(props) {
     super(props);
+    console.log("Initializing ROBOT");
 
     this.robotCanvas = React.createRef();
     this.robotCtx = null;

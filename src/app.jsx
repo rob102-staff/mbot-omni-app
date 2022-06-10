@@ -75,19 +75,19 @@ function DriveControlPanel(props) {
       </div>
       <div className="button-wrapper flex-child">
         <button className="button drive-turn drive-ctrl" id="turn-left"
-                onClick={() => props.driveControls.rotateLeft(props.speed)}></button>
+                onClick={() => props.driveControls.newDrive(0, 0, -1, props.speed)}></button>
         <button className="button drive-move drive-ctrl" id="move-str"
-                onClick={() => props.driveControls.goStraight(props.speed)}></button>
+                onClick={() => props.driveControls.newDrive(1, 0, 0, props.speed)}></button>
         <button className="button drive-turn drive-ctrl" id="turn-right"
-                onClick={() => props.driveControls.rotateRight(props.speed)}></button>
+                onClick={() => props.driveControls.newDrive(0, 0, 1, props.speed)}></button>
         <div className="drive-middle">
           <button className="button drive-move drive-ctrl" id="move-left"
-                  onClick={() => props.driveControls.moveLeft(props.speed)}></button>
+                  onClick={() => props.driveControls.newDrive(0, -1, 0, props.speed)}></button>
           <button className="button drive-move drive-ctrl" id="move-right"
-                  onClick={() => props.driveControls.moveRight(props.speed)}></button>
+                  onClick={() => props.driveControls.newDrive(0, 1, 0, props.speed)}></button>
         </div>
         <button className="button drive-move drive-ctrl drive-bottom" id="move-back"
-                onClick={() => props.driveControls.goBack(props.speed)}></button>
+                onClick={() => props.driveControls.newDrive(-1, 0, 0, props.speed)}></button>
       </div>
     </div>
   );
@@ -328,14 +328,13 @@ class MBotApp extends React.Component {
 
         //Updates drive commands to robot
         this.driveControls.newDrive(x, y, t, this.state.speed)
-        console.log(x, y, t)
+        // console.log(x, y, t)
 
       }
 
     }, false);
 
     document.addEventListener('keyup', (evt) => {
-      // this.handleKeyPressUp(evt)
 
       //First checks if the drive State is active, then substracts speed values in rx, ry, and theta
       if(this.state.drivingMode)
@@ -353,7 +352,7 @@ class MBotApp extends React.Component {
         //animation for color change
         this.driveControls.stopKeyUp(evt.key);
 
-        console.log(x, y, t)
+        // console.log(x, y, t)
 
         //Stops robot if it finds that all keys have been lifted up, acts as a failsafe to above logic
         let reset = true;
@@ -534,8 +533,6 @@ class MBotApp extends React.Component {
   }
 
   checkThePoses(evt){
-    console.log(evt)
-
     const canvas = document.getElementById("mapLasers");
 
     if (!canvas.getContext) {
@@ -559,11 +556,13 @@ class MBotApp extends React.Component {
     {
       ctx.moveTo(400 + this.state.xPose/this.state.metersPerCell, 400 - this.state.yPose/this.state.metersPerCell);
       ctx.lineTo(400 + x + this.state.xPose/this.state.metersPerCell, 400 + y - this.state.yPose/this.state.metersPerCell);
+      this.setRobotPos(400 + this.state.xPose/this.state.metersPerCell, 400 + this.state.yPose/this.state.metersPerCell)
     }
     else 
     {
       ctx.moveTo(400, 400)
       ctx.lineTo(400 + x, 400 + y);
+      this.setRobotPos(400, 400)
     }
     ctx.stroke();
   }
@@ -686,12 +685,9 @@ class MBotApp extends React.Component {
 
   changeOnmi(){
     this.setState({omni: !this.state.omni});
-    console.log(this.state.diff);
   }
 
   changeDiff(){
-    console.log(this.state.omni);
-    console.log(this.state.diff);
     this.setState({diff: !this.state.diff});
     if(this.state.omni && !this.state.diff){
       this.setState({omni: !this.state.omni});

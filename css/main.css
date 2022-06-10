@@ -47,12 +47,8 @@ a:hover {
   background-color: #22476a;
 }
 
-canvas {
-  position: absolute;
-  display: block;
-}
 
-#mapCanvas, #mapLasers {
+canvas {
   position: relative;
   padding: 0;
   margin: auto;
