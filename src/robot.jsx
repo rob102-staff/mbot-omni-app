@@ -63,7 +63,7 @@ class DrawRobot extends React.Component {
     this.robotCanvas = React.createRef();
     this.robotCtx = null;
 
-    this.lastRobotPos = [0, 0];
+    this.lastRobotPos = [400, 400];
     this.lastRobotSize = config.ROBOT_DEFAULT_SIZE;
     this.lastRobotAngle = 0;
 
@@ -96,7 +96,9 @@ class DrawRobot extends React.Component {
 
   drawRobot() {
     var robotSize = this.robotSize();
-
+    if(robotSize === 100){
+      return;
+    }
     // Clear the robot position.
     this.robotCtx.clearRect(-robotSize / 2, -robotSize / 2, robotSize, robotSize);
 
