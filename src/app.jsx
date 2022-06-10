@@ -546,6 +546,7 @@ class MBotApp extends React.Component {
     let y = (20 * Math.sin(evt.theta))
 
     this.setState({xPose: evt.x, yPose: evt.y});
+    this.setState({theta: evt.theta})
 
     const ctx = canvas.getContext('2d');
 
@@ -575,8 +576,8 @@ class MBotApp extends React.Component {
 
     for(let i = 0; i < this.state.ranges.length; i++){
       if(this.state.metersPerCell > 0){
-        a[i] = ((evt.ranges[i] * Math.cos(evt.thetas[i]))) / this.state.metersPerCell;
-        b[i] = ((evt.ranges[i] * Math.sin(evt.thetas[i]))) / this.state.metersPerCell;
+        a[i] = ((evt.ranges[i] * Math.cos(evt.thetas[i] - this.state.theta))) / this.state.metersPerCell;
+        b[i] = ((evt.ranges[i] * Math.sin(evt.thetas[i] - this.state.theta))) / this.state.metersPerCell;
       }
       else {
         a[i] = (evt.ranges[i] * Math.cos(evt.thetas[i])) / 0.025;
@@ -592,9 +593,6 @@ class MBotApp extends React.Component {
     const canvas = document.getElementById("mapLasers");
     this.ctx = canvas.getContext('2d');
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    console.log((this.state.yPose/this.state.metersPerCell))
-    console.log((this.state.xPose/this.state.metersPerCell))
 
     for(let i = 0; i < this.state.ranges.length; i++){
       let x = this.state.x_values[i];
