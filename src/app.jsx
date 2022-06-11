@@ -585,26 +585,41 @@ class MBotApp extends React.Component {
     this.ctx = canvas.getContext('2d');
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    for(let i = 0; i < this.state.ranges.length; i++) {
-      let x = this.state.x_values[i];
-      let y = this.state.y_values[i];
-      this.draw(x, y);
-    }
+    this.draw2()
   }
 
   draw2(){
     const canvas = document.getElementById("mapLasers");
     const ctx = canvas.getContext('2d');
 
-    ctx.fillStyle = 'rgba(49, 227, 173, 0.3)'
+    ctx.fillStyle = 'rgba(49, 227, 173, 0.5)'
     ctx.beginPath();
-    ctx.moveTo(400, 400);
-    for(let i = 0; i < this.state.ranges.length; i++) {
-      let x = this.state.x_values[i] * 100;
-      let y = this.state.y_values[i] * 100;
 
-      if(x != 0 && y != 0) ctx.lineTo(400 + x, 400 + y);
+    if(this.state.metersPerCell > 0) 
+    {
+      ctx.moveTo(400 + this.state.xPose/this.state.metersPerCell, 400 - this.state.yPose/this.state.metersPerCell);
     }
+    else {
+      ctx.moveTo(400, 400)
+    }
+
+
+
+    for(let i = 0; i < this.state.ranges.length; i++){
+      let x = this.state.x_values[i];
+      let y = this.state.y_values[i];
+  
+      if(x != 0 && y != 0) 
+      {
+        if(this.state.metersPerCell > 0){
+          ctx.lineTo(400 + x + (this.state.xPose/this.state.metersPerCell), 400 + y - (this.state.yPose/this.state.metersPerCell));
+        }
+        else{
+          ctx.lineTo(400 + x, 400 + y);
+        }
+      }
+    }
+
     ctx.closePath()
     ctx.fill()
   }

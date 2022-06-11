@@ -99,13 +99,13 @@ class LcmCommunicationManager:
         decoded_data = lidar_t.decode(data)
         if channel in self._callback_dict.keys(): 
             self._callback_dict[channel](decoded_data)
-        print("Lidar is Listening")
+        # print("Lidar is Listening")
         
     def pose_listener(self, channel, data):
         decoded_data = pose_xyt_t.decode(data)
         if channel in self._callback_dict.keys(): 
             self._callback_dict[channel](decoded_data)
-        print("Pose is Supposing")
+        # print("Pose is Supposing")
 
     def __del__(self):
         print("joined thread")
