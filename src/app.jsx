@@ -207,7 +207,7 @@ class DrawLasers extends React.Component {
 
   render(){
     return(
-      <canvas id = "mapLasers" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+      <canvas id="mapLasers" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
       </canvas>
     );
   }
@@ -328,7 +328,6 @@ class MBotApp extends React.Component {
 
         //Updates drive commands to robot
         this.driveControls.newDrive(x, y, t, this.state.speed)
-        // console.log(x, y, t)
 
       }
 
@@ -351,8 +350,6 @@ class MBotApp extends React.Component {
 
         //animation for color change
         this.driveControls.stopKeyUp(evt.key);
-
-        // console.log(x, y, t)
 
         //Stops robot if it finds that all keys have been lifted up, acts as a failsafe to above logic
         let reset = true;
@@ -409,10 +406,10 @@ class MBotApp extends React.Component {
     this.setState({drivingMode: !this.state.drivingMode});
   }
 
-  onDarkMode(){
+  onDarkMode(){ 
     var canvas = document.getElementById("canvas");
     var driveCtrls = document.getElementsByClassName("drive-ctrl")
-    if (!this.state.darkMode){
+    if (!this.state.darkMode) {
       document.body.classList.add("new-background-color");
       canvas.classList.add("white-border")
       canvas.classList.add("canvas-color")
@@ -517,13 +514,12 @@ class MBotApp extends React.Component {
 
   handleMap(mapmsg) {
     var map = parseMapFromLcm(mapmsg)
-    console.log("Parsed map.")
     this.updateMap(map);
   }
 
   handleMessage(msg) {
     // TODO: Handle messages from the websocket.
-    console.log("Received message:", msg)
+    console.log("Received message: ", msg)
   }
 
   updateSocketStatus(status) {
@@ -552,14 +548,11 @@ class MBotApp extends React.Component {
     ctx.lineWidth = 1.5;
 
     ctx.beginPath();
-    if(this.state.metersPerCell > 0) 
-    {
+    if(this.state.metersPerCell > 0) {
       ctx.moveTo(400 + this.state.xPose/this.state.metersPerCell, 400 - this.state.yPose/this.state.metersPerCell);
       ctx.lineTo(400 + x + this.state.xPose/this.state.metersPerCell, 400 + y - this.state.yPose/this.state.metersPerCell);
       this.setRobotPos(400 + this.state.xPose/this.state.metersPerCell, 400 + this.state.yPose/this.state.metersPerCell)
-    }
-    else 
-    {
+    } else {
       ctx.moveTo(400, 400)
       ctx.lineTo(400 + x, 400 + y);
       this.setRobotPos(400, 400)
@@ -567,18 +560,17 @@ class MBotApp extends React.Component {
     ctx.stroke();
   }
 
-  handleTheLasers(evt){
+  handleTheLasers(evt) {
     this.setState({ranges: evt.ranges, thetas: evt.thetas})
     
     let a = [];
     let b = [];
 
-    for(let i = 0; i < this.state.ranges.length; i++){
-      if(this.state.metersPerCell > 0){
+    for(let i = 0; i < this.state.ranges.length; i++) {
+      if(this.state.metersPerCell > 0) {
         a[i] = ((evt.ranges[i] * Math.cos(evt.thetas[i] - this.state.theta))) / this.state.metersPerCell;
         b[i] = ((evt.ranges[i] * Math.sin(evt.thetas[i] - this.state.theta))) / this.state.metersPerCell;
-      }
-      else {
+      } else {
         a[i] = (evt.ranges[i] * Math.cos(evt.thetas[i])) / 0.025;
         b[i] = (evt.ranges[i] * Math.sin(evt.thetas[i])) / 0.025;
       }
@@ -588,12 +580,12 @@ class MBotApp extends React.Component {
     this.looping();
   }
 
-  looping(){
+  looping() {
     const canvas = document.getElementById("mapLasers");
     this.ctx = canvas.getContext('2d');
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    for(let i = 0; i < this.state.ranges.length; i++){
+    for(let i = 0; i < this.state.ranges.length; i++) {
       let x = this.state.x_values[i];
       let y = this.state.y_values[i];
       this.draw(x, y);
@@ -607,7 +599,7 @@ class MBotApp extends React.Component {
     ctx.fillStyle = 'rgba(49, 227, 173, 0.3)'
     ctx.beginPath();
     ctx.moveTo(400, 400);
-    for(let i = 0; i < this.state.ranges.length; i++){
+    for(let i = 0; i < this.state.ranges.length; i++) {
       let x = this.state.x_values[i] * 100;
       let y = this.state.y_values[i] * 100;
 
@@ -632,20 +624,16 @@ class MBotApp extends React.Component {
 
     ctx.beginPath();
    
-    if(this.state.metersPerCell > 0) 
-    {
+    if(this.state.metersPerCell > 0) {
       ctx.moveTo(400 + this.state.xPose/this.state.metersPerCell, 400 - this.state.yPose/this.state.metersPerCell);
-    }
-    else {
+    } else {
       ctx.moveTo(400, 400)
     }
 
-    if(x != 0 && y != 0) 
-    {
-      if(this.state.metersPerCell > 0){
+    if(x != 0 && y != 0) {
+      if(this.state.metersPerCell > 0) {
         ctx.lineTo(400 + x + (this.state.xPose/this.state.metersPerCell), 400 + y - (this.state.yPose/this.state.metersPerCell));
-      }
-      else{
+      } else{
         ctx.lineTo(400 + x, 400 + y);
       }
     }
@@ -683,13 +671,13 @@ class MBotApp extends React.Component {
                    isRobotClicked: false});
   }
 
-  changeOnmi(){
+  changeOnmi() {
     this.setState({omni: !this.state.omni});
   }
 
-  changeDiff(){
+  changeDiff() {
     this.setState({diff: !this.state.diff});
-    if(this.state.omni && !this.state.diff){
+    if(this.state.omni && !this.state.diff) {
       this.setState({omni: !this.state.omni});
     }
   }
@@ -764,7 +752,7 @@ class MBotApp extends React.Component {
   render() {
     var canvasStyle = {
       width: config.CANVAS_DISPLAY_WIDTH,
-      height: config.CANVAS_DISPLAY_HEIGHT,
+      height: config.CANVAS_DISPLAY_HEIGHT
     };
 
     return (
@@ -879,21 +867,21 @@ class MBotApp extends React.Component {
           <TransformWrapper>
             <TransformComponent>
               <div style={canvasStyle}>
-              <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
-              
-              <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
-              </canvas>
-              <DrawLasers/>
-              <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
-                        goalCell={this.state.goalCell} goalValid={this.state.goalValid}
-                        cellSize={this.state.cellSize} />
-              <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
-                        pixelsPerMeter={this.state.pixelsPerMeter} />
-              <canvas ref={this.clickCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
-                      onMouseDown={(e) => this.handleMouseDown(e)}
-                      onMouseMove={(e) => this.handleMouseMove(e)}
-                      onMouseUp={() => this.handleMouseUp()}>
-              </canvas>
+                <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
+                
+                <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
+                </canvas>
+                <DrawLasers/>
+                <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
+                          goalCell={this.state.goalCell} goalValid={this.state.goalValid}
+                          cellSize={this.state.cellSize} />
+                <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
+                          pixelsPerMeter={this.state.pixelsPerMeter} />
+                <canvas ref={this.clickCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
+                        onMouseDown={(e) => this.handleMouseDown(e)}
+                        onMouseMove={(e) => this.handleMouseMove(e)}
+                        onMouseUp={() => this.handleMouseUp()}>
+                </canvas>
               </div>
             </TransformComponent>
           </TransformWrapper>
