@@ -203,6 +203,8 @@ class DrawCells extends React.Component {
 class DrawLasers extends React.Component {
   constructor(props) {
     super(props);
+    console.log(props.evt)
+    console.log("hello")
   }
 
   render(){
@@ -264,6 +266,7 @@ class MBotApp extends React.Component {
       thetas: [],
       x_values: [],
       y_values: [],
+      lasers: {},
       isRobotClicked: false
     };
 
@@ -406,31 +409,26 @@ class MBotApp extends React.Component {
     this.setState({drivingMode: !this.state.drivingMode});
   }
 
-  onDarkMode(){ 
+  onDarkMode(){
     var canvas = document.getElementById("canvas");
     var driveCtrls = document.getElementsByClassName("drive-ctrl")
-    if (!this.state.darkMode) {
+    if (!this.state.darkMode){
       document.body.classList.add("new-background-color");
-      canvas.classList.add("white-border")
-      canvas.classList.add("canvas-color")
+      canvas.classList.add("white-border", "canvas-color")
       for (let index = 0; index < driveCtrls.length; index++) {
-        const element = driveCtrls[index];
-        element.classList.add("invert");
+        driveCtrls[index].classList.add("invert");
       }
     } else {
       document.body.classList.remove("new-background-color");
       canvas.classList.remove("white-border")
-
+    
       for (let index = 0; index < driveCtrls.length; index++) {
-        const element = driveCtrls[index];
-        element.classList.remove("invert");
+        driveCtrls[index].classList.remove("invert");
       }
-      canvas.classList.remove("canvas-color");
-      canvas.classList.remove("white-border");
+      canvas.classList.remove("canvas-color", "white-border");
     }
-
     this.setState({darkMode: !this.state.darkMode});
-  }
+  } 
 
   onSpeedChange(event) {
     this.setState({speed: event.target.value});
@@ -529,39 +527,13 @@ class MBotApp extends React.Component {
   }
 
   checkThePoses(evt){
-    const canvas = document.getElementById("mapLasers");
-
-    if (!canvas.getContext) {
-        return;
-    }
-
-    let x = (20 * Math.cos(evt.theta))
-    let y = (20 * Math.sin(evt.theta))
-
     this.setState({xPose: evt.x, yPose: evt.y});
     this.setState({theta: evt.theta})
-
-    const ctx = canvas.getContext('2d');
-
-    // set line stroke and line width
-    ctx.strokeStyle = 'rgb(231, 125, 237)';
-    ctx.lineWidth = 1.5;
-
-    ctx.beginPath();
-    if(this.state.metersPerCell > 0) {
-      ctx.moveTo(400 + this.state.xPose/this.state.metersPerCell, 400 - this.state.yPose/this.state.metersPerCell);
-      ctx.lineTo(400 + x + this.state.xPose/this.state.metersPerCell, 400 + y - this.state.yPose/this.state.metersPerCell);
-      this.setRobotPos(400 + this.state.xPose/this.state.metersPerCell, 400 + this.state.yPose/this.state.metersPerCell)
-    } else {
-      ctx.moveTo(400, 400)
-      ctx.lineTo(400 + x, 400 + y);
-      this.setRobotPos(400, 400)
-    }
-    ctx.stroke();
   }
 
   handleTheLasers(evt) {
     this.setState({ranges: evt.ranges, thetas: evt.thetas})
+    this.setState({lasers: evt})
     
     let a = [];
     let b = [];
@@ -577,83 +549,42 @@ class MBotApp extends React.Component {
     } 
 
     this.setState({x_values : a, y_values : b})
-    this.looping();
-  }
-
-  looping() {
-    const canvas = document.getElementById("mapLasers");
-    this.ctx = canvas.getContext('2d');
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    this.draw2()
+    this.draw2();
   }
 
   draw2(){
     const canvas = document.getElementById("mapLasers");
-    const ctx = canvas.getContext('2d');
+    this.ctx = canvas.getContext('2d');
+    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    ctx.fillStyle = 'rgba(49, 227, 173, 0.5)'
-    ctx.beginPath();
+    this.ctx.fillStyle = 'rgba(49, 227, 173, 0.5)'
+    this.ctx.beginPath();
 
-    if(this.state.metersPerCell > 0) 
-    {
-      ctx.moveTo(400 + this.state.xPose/this.state.metersPerCell, 400 - this.state.yPose/this.state.metersPerCell);
+    let xCell = this.state.xPose/this.state.metersPerCell
+    let yCell = this.state.yPose/this.state.metersPerCell
+
+    //Origin point
+    if(this.state.metersPerCell > 0) {
+      this.ctx.moveTo(400 + xCell, 400 - yCell);
     }
-    else {
-      ctx.moveTo(400, 400)
-    }
+    else this.ctx.moveTo(400, 400)
 
-
-
+    //All points of the mapped out area
     for(let i = 0; i < this.state.ranges.length; i++){
       let x = this.state.x_values[i];
       let y = this.state.y_values[i];
   
-      if(x != 0 && y != 0) 
-      {
-        if(this.state.metersPerCell > 0){
-          ctx.lineTo(400 + x + (this.state.xPose/this.state.metersPerCell), 400 + y - (this.state.yPose/this.state.metersPerCell));
+      if(x != 0 && y != 0) {
+        if(this.state.metersPerCell > 0) {
+          this.ctx.lineTo(400 + x + (xCell), 400 + y - (yCell));
         }
-        else{
-          ctx.lineTo(400 + x, 400 + y);
-        }
+        else this.ctx.lineTo(400 + x, 400 + y);
       }
     }
-
-    ctx.closePath()
-    ctx.fill()
+    this.ctx.closePath()
+    this.ctx.fill()
   }
 
-  draw(x, y) {
-    const canvas = document.getElementById("mapLasers");
-
-    if (!canvas.getContext) {
-        return;
-    }
-
-    const ctx = canvas.getContext('2d');
-
-    // set line stroke and line width
-    ctx.strokeStyle = 'green';
-    ctx.lineWidth = 0.5;
-
-    ctx.beginPath();
-   
-    if(this.state.metersPerCell > 0) {
-      ctx.moveTo(400 + this.state.xPose/this.state.metersPerCell, 400 - this.state.yPose/this.state.metersPerCell);
-    } else {
-      ctx.moveTo(400, 400)
-    }
-
-    if(x != 0 && y != 0) {
-      if(this.state.metersPerCell > 0) {
-        ctx.lineTo(400 + x + (this.state.xPose/this.state.metersPerCell), 400 + y - (this.state.yPose/this.state.metersPerCell));
-      } else{
-        ctx.lineTo(400 + x, 400 + y);
-      }
-    }
-    ctx.stroke();
-  }
 
 
   /**********************
@@ -886,7 +817,7 @@ class MBotApp extends React.Component {
                 
                 <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
                 </canvas>
-                <DrawLasers/>
+                <DrawLasers evt = {this.state.lasers}/>
                 <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                           goalCell={this.state.goalCell} goalValid={this.state.goalValid}
                           cellSize={this.state.cellSize} />
