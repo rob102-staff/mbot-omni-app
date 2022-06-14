@@ -203,8 +203,45 @@ class DrawCells extends React.Component {
 class DrawLasers extends React.Component {
   constructor(props) {
     super(props);
-    console.log(props.evt)
-    console.log("hello")
+  }
+
+  componentDidUpdate(){
+    //initial setup to get canvas
+    const canvas = document.getElementById("mapLasers");
+    this.ctx = canvas.getContext('2d');
+    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+    this.ctx.fillStyle = 'rgba(49, 227, 173, 0.5)'
+
+    //checks if the mapping mode is engaged
+    if(this.props.state.mappingMode){
+      this.ctx.beginPath();
+
+      //checks the robot's pose, and calculates its position on the map
+      let xCell = this.props.state.xPose/this.props.state.metersPerCell
+      let yCell = this.props.state.yPose/this.props.state.metersPerCell
+
+      //Origin point
+      if(this.props.state.metersPerCell > 0) {
+        this.ctx.moveTo(400 + xCell, 400 - yCell);
+      }
+      else this.ctx.moveTo(400, 400)
+
+      //All points of the mapped out area
+      for(let i = 0; i < this.props.state.lidarLength; i++){
+        let x = this.props.state.x_values[i];
+        let y = this.props.state.y_values[i];
+    
+        if(x != 0 && y != 0) {
+          if(this.props.state.metersPerCell > 0) {
+            this.ctx.lineTo(400 + x + (xCell), 400 + y - (yCell));
+          }
+          else this.ctx.lineTo(400 + x, 400 + y);
+        }
+      }
+
+      this.ctx.closePath()
+      this.ctx.fill()
+    }
   }
 
   render(){
@@ -262,8 +299,7 @@ class MBotApp extends React.Component {
       xPose: 0,
       yPose: 0,
       theta: 0,
-      ranges: [],
-      thetas: [],
+      lidarLength: 0,
       x_values: [],
       y_values: [],
       lasers: {},
@@ -339,8 +375,7 @@ class MBotApp extends React.Component {
     document.addEventListener('keyup', (evt) => {
 
       //First checks if the drive State is active, then substracts speed values in rx, ry, and theta
-      if(this.state.drivingMode)
-      {
+      if(this.state.drivingMode){
         if(controller[evt.key]){
           controller[evt.key].pressed = false
           if(controller[evt.key].fn == "back") x++;
@@ -436,7 +471,14 @@ class MBotApp extends React.Component {
 
   onSideBar(){
     this.setState({sideBarMode: !this.state.sideBarMode})
-    if(this.state.sideBarMode) this.setState({sideBarWidth: 25 + "%"});
+    let widthBody = document.body.clientWidth
+    let temp;
+    if(this.state.sideBarMode) {
+      if(widthBody <= 400) temp = 100 + "%"
+      else if(widthBody <= 770) temp = 80 + "%"
+      else temp = 35 + "%"
+      this.setState({sideBarWidth: temp});
+    }
     else this.setState({sideBarWidth: 0});
   }
 
@@ -503,10 +545,7 @@ class MBotApp extends React.Component {
     if (name == "m") this.setState({drivingMode: !this.state.drivingMode});
   }
 
-  handleKeyPressUp(event) {
-  }
-
-  /********************
+ /********************
    *   WS HANDLERS
    ********************/
 
@@ -517,7 +556,7 @@ class MBotApp extends React.Component {
 
   handleMessage(msg) {
     // TODO: Handle messages from the websocket.
-    console.log("Received message: ", msg)
+    // console.log("Received message: ", msg)
   }
 
   updateSocketStatus(status) {
@@ -532,59 +571,23 @@ class MBotApp extends React.Component {
   }
 
   handleTheLasers(evt) {
-    this.setState({ranges: evt.ranges, thetas: evt.thetas})
-    this.setState({lasers: evt})
+    this.setState({lidarLength: evt.ranges.length})
     
     let a = [];
     let b = [];
+    let mPC;
 
-    for(let i = 0; i < this.state.ranges.length; i++) {
-      if(this.state.metersPerCell > 0) {
-        a[i] = ((evt.ranges[i] * Math.cos(evt.thetas[i] - this.state.theta))) / this.state.metersPerCell;
-        b[i] = ((evt.ranges[i] * Math.sin(evt.thetas[i] - this.state.theta))) / this.state.metersPerCell;
-      } else {
-        a[i] = (evt.ranges[i] * Math.cos(evt.thetas[i])) / 0.025;
-        b[i] = (evt.ranges[i] * Math.sin(evt.thetas[i])) / 0.025;
-      }
+    //sets a default value if metersPerCell isn't initialized yet (because mapping isn't engaged)
+    if(!(this.state.metersPerCell) > 0) mPC = 0.025
+    else mPC = this.state.metersPerCell
+
+    for(let i = 0; i < this.state.lidarLength; i++) {
+      a[i] = ((evt.ranges[i] * Math.cos(evt.thetas[i] - this.state.theta))) / mPC;
+      b[i] = ((evt.ranges[i] * Math.sin(evt.thetas[i] - this.state.theta))) / mPC;
     } 
 
     this.setState({x_values : a, y_values : b})
-    this.draw2();
   }
-
-  draw2(){
-    const canvas = document.getElementById("mapLasers");
-    this.ctx = canvas.getContext('2d');
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    this.ctx.fillStyle = 'rgba(49, 227, 173, 0.5)'
-    this.ctx.beginPath();
-
-    let xCell = this.state.xPose/this.state.metersPerCell
-    let yCell = this.state.yPose/this.state.metersPerCell
-
-    //Origin point
-    if(this.state.metersPerCell > 0) {
-      this.ctx.moveTo(400 + xCell, 400 - yCell);
-    }
-    else this.ctx.moveTo(400, 400)
-
-    //All points of the mapped out area
-    for(let i = 0; i < this.state.ranges.length; i++){
-      let x = this.state.x_values[i];
-      let y = this.state.y_values[i];
-  
-      if(x != 0 && y != 0) {
-        if(this.state.metersPerCell > 0) {
-          this.ctx.lineTo(400 + x + (xCell), 400 + y - (yCell));
-        }
-        else this.ctx.lineTo(400 + x, 400 + y);
-      }
-    }
-    this.ctx.closePath()
-    this.ctx.fill()
-  }
-
 
 
   /**********************
@@ -817,7 +820,7 @@ class MBotApp extends React.Component {
                 
                 <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
                 </canvas>
-                <DrawLasers evt = {this.state.lasers}/>
+                <DrawLasers state = {this.state}/>
                 <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                           goalCell={this.state.goalCell} goalValid={this.state.goalValid}
                           cellSize={this.state.cellSize} />
