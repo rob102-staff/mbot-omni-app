@@ -2,6 +2,8 @@
  * DRAWING HELPERS
  *******************/
 
+import config from "./config";
+
  function colourStringToRGB(colour_str) {
   var rgb = [parseInt(colour_str.substring(1, 3), 16),
              parseInt(colour_str.substring(3, 5), 16),
@@ -64,16 +66,18 @@ class GridCellCanvas {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
-  drawCell(cell, size, color, scale=1) {
+  // This function is set to use a cell size of 4 (from the config file)
+  // However, while mapping the cursor gets erased on every update anyways
+  // So this function may not be useful
+  drawCell(cell, color) {
     var i = cell[1];
     var j = cell[0];
-    var shift = size * (1 - scale) / 2;
-    var start_x = i * size + shift;
-    var start_y = j * size + shift;
+    var start_x = i * config.CELL_SIZE;
+    var start_y = j * config.CELL_SIZE;
 
     this.ctx.beginPath();
     this.ctx.fillStyle = color;
-    this.ctx.fillRect(start_x, start_y, size * scale, size * scale);
+    this.ctx.fillRect(start_x, start_y, config.CELL_SIZE, config.CELL_SIZE);
   }
 
   drawCells(cells, colour_low, colour_high, alpha="ff") {
