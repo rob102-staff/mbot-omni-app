@@ -487,6 +487,7 @@ class MBotApp extends React.Component {
    ***************************/
 
    handleWindowChange(evt) {
+     // Get this to update on Zoom
     this.rect = this.clickCanvas.current.getBoundingClientRect();
     config.CANVAS_DISPLAY_WIDTH = document.documentElement.clientWidth * config.CANVAS_WIDTH_MODIFIER;  
     config.CANVAS_DISPLAY_HEIGHT = document.documentElement.clientHeight * config.CANVAS_HEIGHT_MODIFIER;
@@ -495,7 +496,7 @@ class MBotApp extends React.Component {
 
   handleMapClick(event) {
     if (!this.state.mapLoaded) return;
-
+    // Possible error in that rect is not updated on zoom
     var x = event.clientX - this.rect.left;
     var y = this.rect.bottom - event.clientY;
     this.setState({ clickedCell: this.pixelsToCell(x, y) });
