@@ -66,18 +66,15 @@ class GridCellCanvas {
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
   }
 
-  // This function is set to use a cell size of 4 (from the config file)
-  // However, while mapping the cursor gets erased on every update anyways
-  // So this function may not be useful
-  drawCell(cell, color) {
+  drawCell(cell, color, size = config.CELL_SIZE) {
     var i = cell[1];
     var j = cell[0];
-    var start_x = i * config.CELL_SIZE;
-    var start_y = j * config.CELL_SIZE;
+    var start_x = i * size;
+    var start_y = j * size;
 
     this.ctx.beginPath();
     this.ctx.fillStyle = color;
-    this.ctx.fillRect(start_x, start_y, config.CELL_SIZE, config.CELL_SIZE);
+    this.ctx.fillRect(start_x, start_y, size, size);
   }
 
   drawCells(cells, colour_low, colour_high, alpha="ff") {
@@ -93,7 +90,7 @@ class GridCellCanvas {
       for (var j = 0; j < this.height; j++) {
         var prob = cells[this.getCellIdx(i, j)];
         var color = getColor(prob, colour_low, colour_high);
-        this.drawCell([j, i], this.cellSize, color + alpha);
+        this.drawCell([j, i], color + alpha, this.cellSize);
       }
     }
   }
