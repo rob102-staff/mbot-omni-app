@@ -144,8 +144,7 @@ class DrawCells extends React.Component {
 
   drawPath() {
     for (var i in this.props.path) {
-      this.cellGrid.drawCell(this.props.path[i], this.props.cellSize,
-                             config.PATH_COLOUR, config.SMALL_CELL_SCALE);
+      this.cellGrid.drawCell(this.props.path[i], config.PATH_COLOUR, this.props.cellSize);
     }
   }
 
@@ -178,16 +177,17 @@ class DrawCells extends React.Component {
 
       // If there's a clicked cell, draw it.
       if (this.props.clickedCell.length > 0) {
-        this.cellGrid.drawCell(this.props.clickedCell, this.props.cellSize,
-                               config.CLICKED_CELL_COLOUR, config.SMALL_CELL_SCALE);
+        let scale = this.props.cellSize * 0.2
+        this.cellGrid.drawCell(this.props.clickedCell,
+                               config.CLICKED_CELL_COLOUR, this.props.cellSize);
       }
 
       // If there's a goal cell, clear it in case it was clicked then draw it.
       if (this.props.goalCell.length > 0) {
         this.cellGrid.clearCell(this.props.goalCell, this.props.cellSize);
         var colour = this.props.goalValid ? config.GOAL_CELL_COLOUR : config.BAD_GOAL_COLOUR;
-        this.cellGrid.drawCell(this.props.goalCell, this.props.cellSize,
-                               colour, config.SMALL_CELL_SCALE);
+        this.cellGrid.drawCell(this.props.goalCell,
+                               colour, this.props.cellSize);
       }
     }
   }
@@ -487,7 +487,6 @@ class MBotApp extends React.Component {
    ***************************/
 
    handleWindowChange(evt) {
-     // Get this to update on Zoom
     this.rect = this.clickCanvas.current.getBoundingClientRect();
     config.CANVAS_DISPLAY_WIDTH = document.documentElement.clientWidth * config.CANVAS_WIDTH_MODIFIER;  
     config.CANVAS_DISPLAY_HEIGHT = document.documentElement.clientHeight * config.CANVAS_HEIGHT_MODIFIER;
@@ -496,10 +495,16 @@ class MBotApp extends React.Component {
 
   handleMapClick(event) {
     if (!this.state.mapLoaded) return;
-    // Possible error in that rect is not updated on zoom
+
+    this.rect = this.clickCanvas.current.getBoundingClientRect();
+    
     var x = event.clientX - this.rect.left;
     var y = this.rect.bottom - event.clientY;
-    this.setState({ clickedCell: this.pixelsToCell(x, y) });
+    let cs = this.rect.width / this.state.width;
+    let col = Math.floor(x / cs);
+    let row = Math.floor(y / cs);
+
+    this.setState({clickedCell: [row, col] });
   }
 
   handleMouseDown(event) {
@@ -830,7 +835,8 @@ class MBotApp extends React.Component {
                 <canvas ref={this.clickCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
                         onMouseDown={(e) => this.handleMouseDown(e)}
                         onMouseMove={(e) => this.handleMouseMove(e)}
-                        onMouseUp={() => this.handleMouseUp()}>
+                        onMouseUp={() => this.handleMouseUp()}
+                        onScroll={() => this.handleZoom()}>
                 </canvas>
               </div>
             </TransformComponent>

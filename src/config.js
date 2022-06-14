@@ -31,6 +31,7 @@ var config = {
     GOAL_CELL_COLOUR: "#00ff00",
     BAD_GOAL_COLOUR: "#ff0000",
     SMALL_CELL_SCALE: 0.8,
+    CELL_SIZE: 4
 };
 
 export default config;
