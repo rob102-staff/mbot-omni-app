@@ -392,20 +392,6 @@ input:checked + .slider:before {
   transform: rotate(63deg);
 }
 
-/* Container to organize drive features */
-.flex-container {
-  display: flex;
-  margin: 0px;
-}
-
-.flex-child {
-  flex: 1;
-}  
-
-.flex-child:first-child {
-  margin-right: 10px;
-}
-
 /* Inverts colors*/
 .invert{
   -webkit-filter: invert(1);
