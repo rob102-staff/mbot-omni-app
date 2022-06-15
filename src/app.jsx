@@ -62,18 +62,18 @@ function ConnectionStatus(connection) {
 function DriveControlPanel(props) {
   return (
     <div className="row px-5 text-center pt-3">
-      <div className="button-wrapper flex-child">
+      <div className="button-wrapper col-lg-4">
         <span>Speed: {props.speed}</span> <br />
         <input type="range" min="1" max="100" value={props.speed}
                onChange={(evt) => props.onSpeedChange(evt)}></input>
       </div>
-      <div className="button-wrapper flex-child top-spacing">
+      <div className="button-wrapper top-spacing col-lg-4">
         <button className="button start-color" id="drive-start"
                 onClick={() => props.driveControls.start()}>Start</button>
         <button className="button stop-color" id="drive-stop"
                 onClick={() => props.driveControls.stop()}>Stop</button>
       </div>
-      <div className="button-wrapper flex-child">
+      <div className="button-wrapper col-lg-4">
         <button className="button drive-turn drive-ctrl" id="turn-left"
                 onClick={() => props.driveControls.newDrive(0, 0, -1, props.speed)}></button>
         <button className="button drive-move drive-ctrl" id="move-str"
@@ -574,6 +574,13 @@ class MBotApp extends React.Component {
   checkThePoses(evt){
     this.setState({xPose: evt.x, yPose: evt.y});
     this.setState({theta: evt.theta})
+
+    //Sets the robot position
+    if(this.state.metersPerCell > 0) {
+      this.setRobotPos(400 + this.state.xPose/this.state.metersPerCell, 400 + this.state.yPose/this.state.metersPerCell)
+    }
+    else this.setRobotPos(400, 400)
+    
   }
 
   handleTheLasers(evt) {
