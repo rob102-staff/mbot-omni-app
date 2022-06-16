@@ -58,7 +58,6 @@ class RobotPathFollower {
 class DrawRobot extends React.Component {
   constructor(props) {
     super(props);
-    console.log("Initializing ROBOT");
 
     this.robotCanvas = React.createRef();
     this.robotCtx = null;
@@ -96,9 +95,11 @@ class DrawRobot extends React.Component {
 
   drawRobot() {
     var robotSize = this.robotSize();
+    
     if(robotSize === 100){
       return;
     }
+
     // Clear the robot position.
     this.robotCtx.clearRect(-robotSize / 2, -robotSize / 2, robotSize, robotSize);
 

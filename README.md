@@ -104,7 +104,7 @@ Note: Any other Python requirements should be added to `requirements.txt`.
 
 To install LCM, get the source and unzip it, then do:
 ```bash
-cd lcm-1.4.0/lcm-python
+cd lcm-1.4.0/lcm-pythoninst
 python setup.py install
 ```
 

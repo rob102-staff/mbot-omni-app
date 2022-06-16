@@ -30,7 +30,7 @@ class LcmCommunicationManager:
         
         ###################################
         # TODO: VERIFY AND FIX - ENSURE DATA IS SAVED
-        self.__subscribe(lcm_settings.SLAM_MAP_CHANNEL, self._occupancy_grid_handler)
+        self.__subscribe(lcm_settings.SLAM_MAP_CHANNEL, self._occupancy_grid_listener)
         self.__subscribe(lcm_settings.ODOMETRY_CHANNEL, self._position_listener)
         self.__subscribe(lcm_settings.EXPLORATION_STATUS_CHANNEL, self._exploration_status_listener)
         self.__subscribe(lcm_settings.FULL_STATE_CHANNEL, self.mbot_state_listener)
@@ -66,7 +66,6 @@ class LcmCommunicationManager:
         cmd.theta=0.0
 
         self._lcm.publish(lcm_settings.RESET_ODOMETRY_CHANNEL, cmd.encode())
-        print("Resetted odometry.") # TODO: Remove. For testing.
 
     # TODO: Implement start mapping publisher. 
     def start_mapping_publisher(self): 
@@ -81,31 +80,26 @@ class LcmCommunicationManager:
         decoded_data=exploration_status_t.decode(data)
         if channel in self._callback_dict.keys(): 
             self._callback_dict[channel](decoded_data)
-        print("Received exploration status!")  # TODO: remove
 
     def mbot_state_listener(self, channel, data): 
         decoded_data=mbot_state_t.decode(data)
         if channel in self._callback_dict.keys(): 
             self._callback_dict[channel](decoded_data)
-        print("Received full state!")  # TODO: remove
 
-    def _occupancy_grid_handler(self, channel, data):
+    def _occupancy_grid_listener(self, channel, data):
         decoded_data = occupancy_grid_t.decode(data)
         if channel in self._callback_dict.keys(): 
             self._callback_dict[channel](decoded_data)
-        # print("Received map!")  # TODO: remove
 
     def lidar_listener(self, channel, data):
         decoded_data = lidar_t.decode(data)
         if channel in self._callback_dict.keys(): 
             self._callback_dict[channel](decoded_data)
-        # print("Lidar is Listening")
         
     def pose_listener(self, channel, data):
         decoded_data = pose_xyt_t.decode(data)
         if channel in self._callback_dict.keys(): 
             self._callback_dict[channel](decoded_data)
-        # print("Pose is Supposing")
 
     def __del__(self):
         print("joined thread")

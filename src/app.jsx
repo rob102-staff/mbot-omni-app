@@ -75,19 +75,19 @@ function DriveControlPanel(props) {
       </div>
       <div className="button-wrapper col-lg-4">
         <button className="button drive-turn drive-ctrl" id="turn-left"
-                onClick={() => props.driveControls.newDrive(0, 0, -1, props.speed)}></button>
+                onClick={() => props.driveControls.drive(0, 0, -1, props.speed)}></button>
         <button className="button drive-move drive-ctrl" id="move-str"
-                onClick={() => props.driveControls.newDrive(1, 0, 0, props.speed)}></button>
+                onClick={() => props.driveControls.drive(1, 0, 0, props.speed)}></button>
         <button className="button drive-turn drive-ctrl" id="turn-right"
-                onClick={() => props.driveControls.newDrive(0, 0, 1, props.speed)}></button>
+                onClick={() => props.driveControls.drive(0, 0, 1, props.speed)}></button>
         <div className="drive-middle">
           <button className="button drive-move drive-ctrl" id="move-left"
-                  onClick={() => props.driveControls.newDrive(0, -1, 0, props.speed)}></button>
+                  onClick={() => props.driveControls.drive(0, -1, 0, props.speed)}></button>
           <button className="button drive-move drive-ctrl" id="move-right"
-                  onClick={() => props.driveControls.newDrive(0, 1, 0, props.speed)}></button>
+                  onClick={() => props.driveControls.drive(0, 1, 0, props.speed)}></button>
         </div>
         <button className="button drive-move drive-ctrl drive-bottom" id="move-back"
-                onClick={() => props.driveControls.newDrive(-1, 0, 0, props.speed)}></button>
+                onClick={() => props.driveControls.drive(-1, 0, 0, props.speed)}></button>
       </div>
     </div>
   );
@@ -311,7 +311,7 @@ class MBotApp extends React.Component {
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
     this.ws.handleLaser = (evt) => { this.handleTheLasers(evt)};
-    this.ws.checkPose = (evt) => { this.checkThePoses(evt)};
+    this.ws.handlePose = (evt) => { this.checkThePoses(evt)};
 
 
     this.driveControls = new DriveControls(this.ws);
@@ -366,7 +366,7 @@ class MBotApp extends React.Component {
         }
 
         //Updates drive commands to robot
-        this.driveControls.newDrive(x, y, t, this.state.speed)
+        this.driveControls.drive(x, y, t, this.state.speed)
 
       }
 
@@ -397,7 +397,7 @@ class MBotApp extends React.Component {
         if(reset) {x = 0; y = 0; t = 0;}
 
         //code to update drive speeds
-        this.driveControls.newDrive(x, y, t, this.state.speed)
+        this.driveControls.drive(x, y, t, this.state.speed)
       }
 
     }, false);
@@ -591,8 +591,8 @@ class MBotApp extends React.Component {
     let mPC;
 
     //sets a default value if metersPerCell isn't initialized yet (because mapping isn't engaged)
-    if(!(this.state.metersPerCell) > 0) mPC = 0.025
-    else mPC = this.state.metersPerCell
+    if(!(this.state.metersPerCell) > 0) mPC = config.CELL_START_SIZE;
+    else mPC = this.state.metersPerCell;
 
     for(let i = 0; i < this.state.lidarLength; i++) {
       a[i] = ((evt.ranges[i] * Math.cos(evt.thetas[i] - this.state.theta))) / mPC;

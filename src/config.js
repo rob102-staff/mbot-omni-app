@@ -8,6 +8,11 @@ var config = {
     ENDPOINT: "",
     CONNECT_PERIOD: 5000,     // ms
 
+    //Default Values
+    ROBOT_START_X: 400,
+    ROBOT_START_Y: 400,
+    CELL_START_SIZE: 0.025,
+
     // Sim info
     MAP_DISPLAY_WIDTH: 800,      // px
     MAP_DISPLAY_HEIGHT: 800,    // px
