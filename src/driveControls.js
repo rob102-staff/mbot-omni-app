@@ -36,6 +36,7 @@
     btn_element.classList.remove("keydown-drivecolor");
   }
 
+
   //Currently "Start" is here for asthetic purposes, as it serves no functional purpose at the moment.
   start(){
     console.log("Start robot");

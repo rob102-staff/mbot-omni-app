@@ -21,3 +21,4 @@ lcm_callback_dict = {
 lcm_manager = LcmCommunicationManager(lcm_callback_dict)
 
 from app import routes
+

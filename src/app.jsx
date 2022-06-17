@@ -126,6 +126,17 @@ function DriveControlPanel(props) {
   }
 }
 
+class DrawLasers extends React.Component{
+  constructor(props){
+    super(props)
+  }
+
+  render(){
+    return null;
+  }
+
+}
+
 class DrawCells extends React.Component {
   constructor(props) {
     super(props);
@@ -304,6 +315,8 @@ class MBotApp extends React.Component {
       y_values: [],
       lasers: {},
       isRobotClicked: false
+      ranges: [],
+      thetas: [],
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
@@ -312,7 +325,6 @@ class MBotApp extends React.Component {
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
     this.ws.handleLaser = (evt) => { this.handleTheLasers(evt)};
     this.ws.handlePose = (evt) => { this.checkThePoses(evt)};
-
 
     this.driveControls = new DriveControls(this.ws);
     this.visitGrid = new GridCellCanvas();
@@ -367,12 +379,12 @@ class MBotApp extends React.Component {
 
         //Updates drive commands to robot
         this.driveControls.drive(x, y, t, this.state.speed)
-
       }
 
     }, false);
 
     document.addEventListener('keyup', (evt) => {
+
 
       //First checks if the drive State is active, then substracts speed values in rx, ry, and theta
       if(this.state.drivingMode){
@@ -388,7 +400,6 @@ class MBotApp extends React.Component {
 
         //animation for color change
         this.driveControls.stopKeyUp(evt.key);
-
         //Stops robot if it finds that all keys have been lifted up, acts as a failsafe to above logic
         let reset = true;
         for (const [key, value] of Object.entries(controller)) {
@@ -551,6 +562,7 @@ class MBotApp extends React.Component {
     if (name == "m") this.setState({drivingMode: !this.state.drivingMode});
   }
 
+
  /********************
    *   WS HANDLERS
    ********************/
@@ -624,8 +636,8 @@ class MBotApp extends React.Component {
                    num_cells: result.num_cells,
                    origin: result.origin,
                    metersPerCell: result.meters_per_cell,
-                   cellSize: config.MAP_DISPLAY_WIDTH / result.width,
-                   pixelsPerMeter: config.MAP_DISPLAY_WIDTH / (result.width * result.meters_per_cell),
+                   cellSize: widthBody-20 / result.width,
+                   pixelsPerMeter: widthBody-20 / (result.width * result.meters_per_cell),
                    mapLoaded: loaded,
                    path: [],
                    clickedCell: [],
@@ -801,7 +813,8 @@ class MBotApp extends React.Component {
         </div>
 
 
-        <div className="container pt-3">
+        <div className="pt-3">
+
           {this.state.mappingMode &&
             <div className="button-wrapper top-spacing d-flex justify-content-center">
               <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
@@ -816,6 +829,7 @@ class MBotApp extends React.Component {
                                 speed={this.state.speed}
                                 onSpeedChange={(evt) => this.onSpeedChange(evt)} />
           }
+
         </div>
 
         <div className="status-wrapper mx-5 py-3">

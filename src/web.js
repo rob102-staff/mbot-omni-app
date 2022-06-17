@@ -35,6 +35,7 @@ class WSHelper {
     this.socket.on('lidar', (evt) => this.handleLaser(evt));
     this.socket.on('pose', (evt) => this.handlePose(evt))
 
+
     console.log("Connection status: ", this.status())
     return this.status();
   }
