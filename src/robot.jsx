@@ -62,7 +62,8 @@ class DrawRobot extends React.Component {
     this.robotCanvas = React.createRef();
     this.robotCtx = null;
 
-    this.lastRobotPos = [400, 400];
+    // Robot should begin in center of map
+    this.lastRobotPos = [config.MAP_DISPLAY_WIDTH * 0.5, config.MAP_DISPLAY_HEIGHT * .5];
     this.lastRobotSize = config.ROBOT_DEFAULT_SIZE;
     this.lastRobotAngle = 0;
 
@@ -96,7 +97,7 @@ class DrawRobot extends React.Component {
   drawRobot() {
     var robotSize = this.robotSize();
     
-    if(robotSize === 100){
+    if(robotSize === config.ROBOT_DEFAULT_SIZE){
       return;
     }
 
