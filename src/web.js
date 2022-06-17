@@ -15,6 +15,7 @@ class WSHelper {
     this.statusCallback = (status) => {console.warn("statusCallback is not yet set up.")};
     this.userHandleMap = (evt) => {console.warn("userHandleMap is not yet set up.")};
     this.handleLaser = (evt) => {console.warn("handleLaser is not yet set up.")};
+    this.handlePose = (evt) => {console.warn("handlePose is not yet set up.")}
   }
 
   connect() {
@@ -32,6 +33,8 @@ class WSHelper {
     this.socket.on('error', (evt) => { this.statusCallback(this.status()); });
     this.socket.on('map', (evt) => this.userHandleMap(evt));
     this.socket.on('lidar', (evt) => this.handleLaser(evt));
+    this.socket.on('pose', (evt) => this.handlePose(evt))
+
 
     console.log("Connection status: ", this.status())
     return this.status();
