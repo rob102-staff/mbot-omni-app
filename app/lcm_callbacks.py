@@ -1,7 +1,7 @@
 import time
 import threading
 
-class OccupancyGridReader():
+class OccupancyGridEmitter():
     def __init__(self, socket, event_name, period):
         self.__socket           = socket
         self.__event_name       = event_name
@@ -45,7 +45,7 @@ class OccupancyGridReader():
         self.__thread.join()
 
 
-class LidarReader():
+class LidarEmitter():
     def __init__(self, socket, event_name, period):
         self.__socket           = socket
         self.__event_name       = event_name
@@ -87,7 +87,7 @@ class LidarReader():
         self.__stop_thread = True
         self.__thread.join()
 
-class PoseReader():
+class PoseEmitter():
     def __init__(self, socket, event_name, period):
         self.__socket           = socket
         self.__event_name       = event_name
