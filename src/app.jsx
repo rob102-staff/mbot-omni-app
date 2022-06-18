@@ -314,7 +314,7 @@ class MBotApp extends React.Component {
       x_values: [],
       y_values: [],
       lasers: {},
-      isRobotClicked: false
+      isRobotClicked: false,
       ranges: [],
       thetas: [],
     };
@@ -516,6 +516,7 @@ class MBotApp extends React.Component {
     let row = Math.floor(y / cs);
 
     this.setState({clickedCell: [row, col] });
+    this.onPlan();
   }
 
   handleMouseDown(event) {
@@ -686,6 +687,7 @@ class MBotApp extends React.Component {
                         algo: config.ALGO_TYPES[this.state.algo].label
                       }
                     };
+    console.log("Sending planned data");
     this.ws.send(plan_data);
   }
 
