@@ -314,7 +314,7 @@ class MBotApp extends React.Component {
       x_values: [],
       y_values: [],
       lasers: {},
-      isRobotClicked: false
+      isRobotClicked: false,
       ranges: [],
       thetas: [],
     };
