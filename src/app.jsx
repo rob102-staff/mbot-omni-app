@@ -126,17 +126,6 @@ function DriveControlPanel(props) {
   }
 }
 
-class DrawLasers extends React.Component{
-  constructor(props){
-    super(props)
-  }
-
-  render(){
-    return null;
-  }
-
-}
-
 class DrawCells extends React.Component {
   constructor(props) {
     super(props);
@@ -314,7 +303,7 @@ class MBotApp extends React.Component {
       x_values: [],
       y_values: [],
       lasers: {},
-      isRobotClicked: false
+      isRobotClicked: false,
       ranges: [],
       thetas: [],
     };
@@ -636,8 +625,8 @@ class MBotApp extends React.Component {
                    num_cells: result.num_cells,
                    origin: result.origin,
                    metersPerCell: result.meters_per_cell,
-                   cellSize: widthBody-20 / result.width,
-                   pixelsPerMeter: widthBody-20 / (result.width * result.meters_per_cell),
+                   cellSize: config.MAP_DISPLAY_WIDTH / result.width,
+                   pixelsPerMeter: config.MAP_DISPLAY_WIDTH / (result.width * result.meters_per_cell),
                    mapLoaded: loaded,
                    path: [],
                    clickedCell: [],
