@@ -1,0 +1,14 @@
+Downloading https://nodejs.org/dist/v17.7.1/node-v17.7.1-linux-armv7l.tar.xz...
+######                                                                          8.6%
+curl: (56) OpenSSL SSL_read: SSL_ERROR_SYSCALL, errno 104
+Binary download from https://nodejs.org/dist/v17.7.1/node-v17.7.1-linux-armv7l.tar.xz failed, trying source.
+grep: /home/pi/.nvm/.cache/bin/node-v17.7.1-linux-armv7l/node-v17.7.1-linux-armv7l.tar.xz: No such file or directory
+Provided file to checksum does not exist.
+Binary download failed, trying source.
+Additional options while compiling: --without-snapshot
+Downloading https://nodejs.org/dist/v17.7.1/node-v17.7.1.tar.xz...
+#=#=-#                                                                             
+curl: (22) The requested URL returned error: 500 
+Binary download from https://nodejs.org/dist/v17.7.1/node-v17.7.1.tar.xz failed, trying source.
+grep: /home/pi/.nvm/.cache/src/node-v17.7.1/node-v17.7.1.tar.xz: No such file or directory
+Provided file to checksum does not exist.
