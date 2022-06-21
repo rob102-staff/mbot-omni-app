@@ -313,7 +313,8 @@ class MBotApp extends React.Component {
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
     this.ws.handleLaser = (evt) => { this.handleTheLasers(evt)};
-    this.ws.handlePose = (evt) => { this.checkThePoses(evt)};
+    this.ws.handlePose = (evt) => { this.handleThePoses(evt)};
+    this.ws.handlePath = (evt) => { this.handleThePaths(evt)}
 
     this.driveControls = new DriveControls(this.ws);
     this.visitGrid = new GridCellCanvas();
@@ -573,7 +574,7 @@ class MBotApp extends React.Component {
     }
   }
 
-  checkThePoses(evt){
+  handleThePoses(evt){
     this.setState({xPose: evt.x, yPose: evt.y});
     this.setState({theta: evt.theta})
 
@@ -604,6 +605,9 @@ class MBotApp extends React.Component {
     this.setState({x_values : a, y_values : b})
   }
 
+  handleThePaths(evt){
+    console.log(evt);
+  }
 
   /**********************
    *   STATE SETTERS
