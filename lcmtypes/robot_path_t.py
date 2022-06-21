@@ -9,7 +9,7 @@ except ImportError:
     from io import BytesIO
 import struct
 
-import pose_xyt_t
+import pose_xyt_t as pose
 
 class robot_path_t(object):
     __slots__ = ["utime", "path_length", "path"]
@@ -32,7 +32,7 @@ class robot_path_t(object):
     def _encode_one(self, buf):
         buf.write(struct.pack(">qi", self.utime, self.path_length))
         for i0 in range(self.path_length):
-            assert self.path[i0]._get_packed_fingerprint() == pose_xyt_t._get_packed_fingerprint()
+            assert self.path[i0]._get_packed_fingerprint() == pose._get_packed_fingerprint()
             self.path[i0]._encode_one(buf)
 
     def decode(data):
@@ -50,7 +50,7 @@ class robot_path_t(object):
         self.utime, self.path_length = struct.unpack(">qi", buf.read(12))
         self.path = []
         for i0 in range(self.path_length):
-            self.path.append(pose_xyt_t._decode_one(buf))
+            self.path.append(pose._decode_one(buf))
         return self
     _decode_one = staticmethod(_decode_one)
 
@@ -58,7 +58,7 @@ class robot_path_t(object):
     def _get_hash_recursive(parents):
         if robot_path_t in parents: return 0
         newparents = parents + [robot_path_t]
-        tmphash = (0xd8a57fd0b3392990+ pose_xyt_t._get_hash_recursive(newparents)) & 0xffffffffffffffff
+        tmphash = (0xd8a57fd0b3392990+ pose._get_hash_recursive(newparents)) & 0xffffffffffffffff
         tmphash  = (((tmphash<<1)&0xffffffffffffffff) + (tmphash>>63)) & 0xffffffffffffffff
         return tmphash
     _get_hash_recursive = staticmethod(_get_hash_recursive)
