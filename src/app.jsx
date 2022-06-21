@@ -506,7 +506,8 @@ class MBotApp extends React.Component {
     let row = Math.floor(y / cs);
 
     this.setState({clickedCell: [row, col] });
-    this.onPlan();
+    console.log("Plan")
+    this.onPlan(row, col);
   }
 
   handleMouseDown(event) {
@@ -516,6 +517,7 @@ class MBotApp extends React.Component {
     // if click is near robot, set isDown as true
     if (x < this.state.x + robotRadius && x > this.state.x - robotRadius &&
         y < this.state.y + robotRadius && y > this.state.y - robotRadius) {
+      console.log("This is true")
       this.setState({ isRobotClicked: true });
     }
     else {
@@ -656,6 +658,7 @@ class MBotApp extends React.Component {
   }
 
   setGoal(goal) {
+    console.log(goal)
     if (goal.length === 0) return false;
 
     var idx = goal[1] + goal[0] * this.state.width;
@@ -666,21 +669,34 @@ class MBotApp extends React.Component {
     return valid;
   }
 
-  onPlan() {
+  onPlan(row, col, fileName = "default") {
+    fileName += ".map"
     // If goal isn't valid, don't plan.
-    if (!this.setGoal(this.state.clickedCell)) return;
+    //if (!this.setGoal(this.state.clickedCell)) return;
+    if (!this.setGoal([row, col])) return;
+    console.log("3")
     // Clear visted canvas
     this.visitGrid.clear();
     var start_cell = this.pixelsToCell(this.state.x, this.state.y);
-    var plan_data = {type: "plan",
+    this.setState({mapfile: fileName });
+    /*var plan_data = {type: "plan",
                      data: {
-                        map_name: this.state.mapfile.name,
+                        map_name: fileName,
                         goal: "[" + this.state.clickedCell[0] + " " + this.state.clickedCell[1] + "]",
-                        start: "[" + start_cell[0] + " " + start_cell[1] + "]",
-                        algo: config.ALGO_TYPES[this.state.algo].label
+                        start: "[" + start_cell[0] + " " + start_cell[1] + "]"
+                        //algo: config.ALGO_TYPES[this.state.algo].label
                       }
-                    };
+                    }; */
+    var plan_data = {type: "plan",
+                    data: {
+                       map_name: fileName,
+                       goal: "[" + row + " " + col + "]",
+                       start: "[" + start_cell[0] + " " + start_cell[1] + "]"
+                       //algo: config.ALGO_TYPES[this.state.algo].label
+                     }
+                   };
     console.log("Sending planned data");
+    console.log(plan_data)
     this.ws.send(plan_data);
   }
 
