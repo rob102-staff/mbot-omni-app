@@ -14,6 +14,11 @@ import { parseMapFromSocket, parseMapFromLcm, normalizeList } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControls } from "./driveControls.js";
 
+const express = require('express')
+const app = express();
+
+// start capture
+const videoStream = require('./videoStream');
 
 /*******************
  *     BUTTONS
@@ -326,6 +331,9 @@ class MBotApp extends React.Component {
    ********************/
 
   componentDidMount() {
+
+    videoStream.acceptConnections(app, {}, '/../stream.mjpg', true);
+
     this.visitGrid.init(this.visitCellsCanvas.current);
 
     // Get the window size and watch for resize events.
