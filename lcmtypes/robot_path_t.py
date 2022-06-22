@@ -9,7 +9,7 @@ except ImportError:
     from io import BytesIO
 import struct
 
-import pose_xyt_t
+from lcmtypes.pose_xyt_t import pose_xyt_t
 
 class robot_path_t(object):
     __slots__ = ["utime", "path_length", "path"]
