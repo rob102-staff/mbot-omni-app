@@ -607,8 +607,20 @@ class MBotApp extends React.Component {
     this.setState({x_values : a, y_values : b})
   }
 
-  handleThePaths(evt){
+  handleThePaths(evt) {
+    console.log("Path received")
     console.log(evt);
+    let coords;
+    let cells;
+    // Write code to extract the (x, y, t) array from the path message
+    coords = [["x", "y", "t"]]
+    //
+    for(let i = 0; i < length(coords); i++) {
+      let arr = [coords[i][1], coords[i][2]];
+      this.mapGrid.drawCell(arr, config.PATH_COLOUR, this.props.cellSize)
+      cells.push(arr)
+    }
+
   }
 
   /**********************
@@ -690,13 +702,14 @@ class MBotApp extends React.Component {
     var plan_data = {type: "plan",
                     data: {
                        map_name: fileName,
-                       goal: "[" + row + " " + col + "]",
-                       start: "[" + start_cell[0] + " " + start_cell[1] + "]"
+                       goal: [row, col],
+                       start: [start_cell[0], start_cell[1]]
                        //algo: config.ALGO_TYPES[this.state.algo].label
                      }
                    };
     console.log("Sending planned data");
     console.log(plan_data)
+    this.ws.socket.emit("plan", {map_name: fileName, goal: [row, col], start: [start_cell[0], start_cell[1]]})
     this.ws.send(plan_data);
   }
 

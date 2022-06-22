@@ -26,6 +26,17 @@ def send_map(data):
         app.logger.info("Error. Cannot open file.")
 
 
+@socket.on('plan')
+def plan_cb(data):
+    fileName = data["map_name"]
+    goal = data["goal"]
+    start = data["start"]
+    # print("Plan Route Hit")
+
+    lcm_manager.publish_plan_data(fileName, goal, start)
+
+    app.logger.info(data)
+
 @socket.on('move')
 def test_message(data):
     spd = int(data["speed"])/100
