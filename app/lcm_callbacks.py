@@ -126,3 +126,84 @@ class PoseEmitter():
     def __del__(self):
         self.__stop_thread = True
         self.__thread.join()
+
+class LidarEmitter():
+    def __init__(self, socket, event_name, period):
+        self.__socket           = socket
+        self.__event_name       = event_name
+        self.__period           = period
+        self.__lidar_available  = False
+        self.__lidar            = None
+
+        self.__lock   = threading.Lock()
+        self.__thread = threading.Thread(target=self.__run)
+        self.__stop_thread = False
+        self.__thread.start()
+
+    def __lcm_lidar_to_dict(self):
+        return {
+            "utime" : self.__lidar.utime, 
+            "num_ranges" : self.__lidar.num_ranges,
+            "ranges" : self.__lidar.ranges,
+            "thetas" : self.__lidar.thetas,
+            "times" : self.__lidar.times,
+            "intensities" : self.__lidar.intensities,
+        }
+
+    def __run(self):
+        while not self.__stop_thread:
+            time.sleep(self.__period)
+            if self.__lidar_available:
+                self.__lock.acquire()
+                self.__socket.emit(self.__event_name, self.__lcm_lidar_to_dict())
+                self.__lidar_available = False
+                self.__lock.release()
+
+    def __call__(self, data):
+        self.__lock.acquire()
+        self.__lidar = data
+        self.__lidar_available = True
+        self.__lock.release()
+
+    def __del__(self):
+        self.__stop_thread = True
+        self.__thread.join()
+
+class ParticleEmitter():
+    def __init__(self, socket, event_name, period):
+        self.__socket           = socket
+        self.__event_name       = event_name
+        self.__period           = period
+        self.__particle_available   = False
+        self.__particle             = None
+
+        self.__lock   = threading.Lock()
+        self.__thread = threading.Thread(target=self.__run)
+        self.__stop_thread = False
+        self.__thread.start()
+
+    def __lcm_particle_to_dict(self):
+        return {
+            "utime" : self.__particle.utime, 
+            "num_particles" : self.__particle.num_particles,
+            "particles" : self.__particle.particles["num_particles"],
+        }
+
+    def __run(self):
+        while not self.__stop_thread:
+            time.sleep(self.__period)
+            if self.__particle_available:
+                self.__lock.acquire()
+                self.__socket.emit(self.__event_name, self.__lcm_particle_to_dict())
+                self.__particle_available = False
+                self.__lock.release()
+
+    def __call__(self, data):
+        self.__lock.acquire()
+        self.__particle = data
+        self.__particle_available = True
+        self.__lock.release()
+
+    def __del__(self):
+        self.__stop_thread = True
+        self.__thread.join()

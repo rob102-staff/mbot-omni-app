@@ -1,6 +1,7 @@
 import lcm
 from lcmtypes.omni_motor_command_t import omni_motor_command_t
 from lcmtypes.occupancy_grid_t import occupancy_grid_t
+from lcmtypes.particles_t import particles_t
 from lcmtypes.pose_xyt_t import pose_xyt_t
 from lcmtypes.exploration_status_t import exploration_status_t
 from lcmtypes.reset_odometry_t import reset_odometry_t
@@ -36,6 +37,7 @@ class LcmCommunicationManager:
         self.__subscribe(lcm_settings.FULL_STATE_CHANNEL, self.mbot_state_listener)
         self.__subscribe(lcm_settings.LIDAR_CHANNEL, self.lidar_listener)
         self.__subscribe(lcm_settings.SLAM_POSE_CHANNEL, self.pose_listener)
+        self.__subscribe(lcm_settings.SLAM_PARTICLES_CHANNEL, self.particle_listener)        
         ###################################
 
         self.__lcm_thread = threading.Thread(target=self.__run_handle_loop)
@@ -101,6 +103,10 @@ class LcmCommunicationManager:
         if channel in self._callback_dict.keys(): 
             self._callback_dict[channel](decoded_data)
         
+    def particle_listener(self, channel, data):
+        decoded_data = particles_t.decode(data)
+        if channel in self._callback_dict.keys(): 
+            self._callback_dict[channel](decoded_data)
 
     def __del__(self):
         print("joined thread")

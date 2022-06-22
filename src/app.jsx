@@ -314,6 +314,7 @@ class MBotApp extends React.Component {
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
     this.ws.handleLaser = (evt) => { this.handleLasers(evt)};
     this.ws.handlePose = (evt) => { this.handlePoses(evt)};
+    this.ws.handleParticle = (evt) => { this.handleParticles(evt)};
 
     this.driveControls = new DriveControls(this.ws);
     this.visitGrid = new GridCellCanvas();
@@ -603,6 +604,9 @@ class MBotApp extends React.Component {
     this.setState({x_values : a, y_values : b})
   }
 
+  handleParticles(evt){
+    console.log(evt);
+  }
 
   /**********************
    *   STATE SETTERS
