@@ -37,7 +37,6 @@ class WSHelper {
     this.socket.on('pose', (evt) => this.handlePose(evt))
     this.socket.on('particle', (evt) => this.handleParticle(evt))
 
-
     console.log("Connection status: ", this.status())
     return this.status();
   }
