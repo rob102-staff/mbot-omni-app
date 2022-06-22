@@ -60,14 +60,11 @@
     if(name == "d") this.animation("move-right");
     if(name == "q") this.animation("turn-left");
     if(name == "e") this.animation("turn-right");
-
   }
 
   // This function does the same thing as stop(), expect that it is meant for the drive-keys when pressed with a key. 
   // When the key is lifted up, this function is called, which then removes the color change from that corresponding drive-button
   stopKeyUp(name){
-    console.log("STOP robot it was about run into Popeye");
-
     if(name == "w") this.removeAnimationKey("move-str");
     if(name == "a") this.removeAnimationKey("move-left");
     if(name == "s") this.removeAnimationKey("move-back");
