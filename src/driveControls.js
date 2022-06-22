@@ -54,53 +54,23 @@
   }
 
   goKeyDown(name){
-    switch(name){
-      case "w":
-        this.animation("move-str");
-      case "a":
-        this.animation("move-left");
-      case "s":
-        this.animation("move-back");
-      case "d":
-        this.animation("move-right")
-      case "q":
-        this.animation("turn-left")
-      case "e":
-        this.animation("turn-right")
-    }
-
-    // if(name == "w") this.animation("move-str");
-    // if(name == "a") this.animation("move-left");
-    // if(name == "s") this.animation("move-back");
-    // if(name == "d") this.animation("move-right");
-    // if(name == "q") this.animation("turn-left");
-    // if(name == "e") this.animation("turn-right");
+    if(name == "w") this.animation("move-str");
+    if(name == "a") this.animation("move-left");
+    if(name == "s") this.animation("move-back");
+    if(name == "d") this.animation("move-right");
+    if(name == "q") this.animation("turn-left");
+    if(name == "e") this.animation("turn-right");
   }
 
   // This function does the same thing as stop(), expect that it is meant for the drive-keys when pressed with a key. 
   // When the key is lifted up, this function is called, which then removes the color change from that corresponding drive-button
   stopKeyUp(name){
-    console.log("STOP robot it was about run into Popeye");
-    switch(name){
-      case "w":
-        this.removeAnimationKey("move-str");
-      case "a":
-        this.removeAnimationKey("move-left");
-      case "s":
-        this.removeAnimationKey("move-back");
-      case "d":
-        this.removeAnimationKey("move-right")
-      case "q":
-        this.removeAnimationKey("turn-left")
-      case "e":
-        this.removeAnimationKey("turn-right")
-    }
-    // if(name == "w") this.removeAnimationKey("move-str");
-    // if(name == "a") this.removeAnimationKey("move-left");
-    // if(name == "s") this.removeAnimationKey("move-back");
-    // if(name == "d") this.removeAnimationKey("move-right");
-    // if(name == "q") this.removeAnimationKey("turn-left");
-    // if(name == "e") this.removeAnimationKey("turn-right");
+    if(name == "w") this.removeAnimationKey("move-str");
+    if(name == "a") this.removeAnimationKey("move-left");
+    if(name == "s") this.removeAnimationKey("move-back");
+    if(name == "d") this.removeAnimationKey("move-right");
+    if(name == "q") this.removeAnimationKey("turn-left");
+    if(name == "e") this.removeAnimationKey("turn-right");
   }
 }
 

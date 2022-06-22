@@ -312,8 +312,8 @@ class MBotApp extends React.Component {
     this.ws.userHandleMessage = (evt) => { this.handleMessage(evt); };
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
-    this.ws.handleLaser = (evt) => { this.handleTheLasers(evt)};
-    this.ws.handlePose = (evt) => { this.checkThePoses(evt)};
+    this.ws.handleLaser = (evt) => { this.handleLasers(evt)};
+    this.ws.handlePose = (evt) => { this.handlePoses(evt)};
 
     this.driveControls = new DriveControls(this.ws);
     this.visitGrid = new GridCellCanvas();
@@ -572,7 +572,7 @@ class MBotApp extends React.Component {
     }
   }
 
-  checkThePoses(evt){
+  handlePoses(evt){
     this.setState({xPose: evt.x, yPose: evt.y});
     this.setState({theta: evt.theta})
 
@@ -584,7 +584,7 @@ class MBotApp extends React.Component {
     
   }
 
-  handleTheLasers(evt) {
+  handleLasers(evt) {
     this.setState({lidarLength: evt.ranges.length})
     
     let a = [];

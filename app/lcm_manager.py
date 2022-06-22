@@ -100,11 +100,6 @@ class LcmCommunicationManager:
         decoded_data = pose_xyt_t.decode(data)
         if channel in self._callback_dict.keys(): 
             self._callback_dict[channel](decoded_data)
-
-    def lidar_listener(self, channel, data):
-        decoded_data = lidar_t.decode(data)
-        if channel in self._callback_dict.keys(): 
-            self._callback_dict[channel](decoded_data)
         
 
     def __del__(self):

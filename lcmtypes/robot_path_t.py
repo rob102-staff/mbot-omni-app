@@ -69,4 +69,3 @@ class robot_path_t(object):
             robot_path_t._packed_fingerprint = struct.pack(">Q", robot_path_t._get_hash_recursive([]))
         return robot_path_t._packed_fingerprint
     _get_packed_fingerprint = staticmethod(_get_packed_fingerprint)
-
