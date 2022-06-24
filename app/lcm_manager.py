@@ -83,7 +83,7 @@ class LcmCommunicationManager:
         total_pose.goal = goal_pose
         total_pose.require_plan = plan
 
-        self._lcm.publish(lcm_settings.topic_name, total_pose.encode())
+        self._lcm.publish(lcm_settings.PATH_REQUEST, total_pose.encode())
         print("Finished published planning path")
 
     def reset_odometry_publisher(self):
