@@ -496,6 +496,7 @@ class MBotApp extends React.Component {
 
   handleMapClick(event) {
     if (!this.state.mapLoaded) return;
+    let plan = false;
 
     this.rect = this.clickCanvas.current.getBoundingClientRect();
     
@@ -506,8 +507,8 @@ class MBotApp extends React.Component {
     let row = Math.floor(y / cs);
 
     this.setState({clickedCell: [row, col] });
-    console.log("Plan")
-    this.onPlan(row, col);
+    if(event.type === "mousedown") plan = true;
+    this.onPlan(row, col, plan);
   }
 
   handleMouseDown(event) {
@@ -517,7 +518,6 @@ class MBotApp extends React.Component {
     // if click is near robot, set isDown as true
     if (x < this.state.x + robotRadius && x > this.state.x - robotRadius &&
         y < this.state.y + robotRadius && y > this.state.y - robotRadius) {
-      console.log("This is true")
       this.setState({ isRobotClicked: true });
     }
     else {
@@ -681,12 +681,11 @@ class MBotApp extends React.Component {
     return valid;
   }
 
-  onPlan(row, col, fileName = "default") {
+  onPlan(row, col, plan, fileName = "default") {
     fileName += ".map"
     // If goal isn't valid, don't plan.
     //if (!this.setGoal(this.state.clickedCell)) return;
     if (!this.setGoal([row, col])) return;
-    console.log("3")
     // Clear visted canvas
     this.visitGrid.clear();
     var start_cell = this.pixelsToCell(this.state.x, this.state.y);
@@ -703,13 +702,11 @@ class MBotApp extends React.Component {
                     data: {
                        map_name: fileName,
                        goal: [row, col],
-                       start: [start_cell[0], start_cell[1]]
-                       //algo: config.ALGO_TYPES[this.state.algo].label
+                       start: [start_cell[0], start_cell[1]],
+                       plan: plan
                      }
                    };
-    console.log("Sending planned data");
-    console.log(plan_data)
-    this.ws.socket.emit("plan", {map_name: fileName, goal: [row, col], start: [start_cell[0], start_cell[1]]})
+    this.ws.socket.emit("plan", {map_name: fileName, goal: [row, col], start: [start_cell[0], start_cell[1]], plan: plan})
     this.ws.send(plan_data);
   }
 
@@ -879,6 +876,7 @@ class MBotApp extends React.Component {
                           pixelsPerMeter={this.state.pixelsPerMeter} />
                 <canvas ref={this.clickCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
                         onMouseDown={(e) => this.handleMouseDown(e)}
+                        onContextMenu={(e) => this.handleMouseDown(e)}
                         onMouseMove={(e) => this.handleMouseMove(e)}
                         onMouseUp={() => this.handleMouseUp()}
                         onScroll={() => this.handleZoom()}>
