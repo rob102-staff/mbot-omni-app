@@ -22,25 +22,13 @@
     <div id="app-root" class="">
     </div>
 
-    <img src="stream.mjpg" style="position: fixed; top: 0px; left: 0px; right: 0px; height: 100%; width: calc(100% + 2px); object-fit: contain;">
+    
+
+    <img src="stream.mjpg">
       
 
     <!-- scripts -->
     <script type="module" src="/src/main.jsx"></script>
-    <script>
-      const express = require('express')
-      const app = express()
-      const videoStream = require('raspberrypi-node-camera-web-streamer');
-      videoStream.acceptConnections(app, {
-          width: 1280,
-          height: 720,
-          fps: 16,
-          encoding: 'JPEG',
-          quality: 7 //lower is faster
-      }, '/stream.mjpg', true);
-
-      app.listen(3000, () => console.log(`Listening on port ${port}!`));
-    </script>
 
   </body>
 </html>

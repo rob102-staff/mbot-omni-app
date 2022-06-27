@@ -326,8 +326,6 @@ class MBotApp extends React.Component {
 
   componentDidMount() {
 
-    videoStream.acceptConnections(app, {}, '/../stream.mjpg', true);
-
     this.visitGrid.init(this.visitCellsCanvas.current);
 
     // Get the window size and watch for resize events.
@@ -733,7 +731,7 @@ class MBotApp extends React.Component {
         </div>
 
         <div id="mySidenav" className="sidenav" style = {{width: this.state.sideBarWidth}}>
-          <a href="#" className = "text-right" onClick={() => this.onSideBar()}>X</a>
+          <a href="#" className = "text-right close-sidebar" onClick={() => this.onSideBar()}>X</a>
           <div className="row field-toggle-wrapper top-spacing text-white mx-3 mt-4">
             <div className="col">
               <div className="row">
@@ -795,9 +793,12 @@ class MBotApp extends React.Component {
                 </div>
               </div>
               <div className="row text-center">
-                <div className="button-wrapper">
-                  <button className="button" onClick={() => this.onGrabMap()}>Grab Map</button>
-                </div>
+                  <div className="col-md-6">
+                    <button className="button" onClick={() => this.onGrabMap()}>Grab Map</button>
+                  </div>
+                  <div className="col-md-6">
+                    <button className="button btn-warning btn-small"><a target = "_blank" href = "http://192.168.3.1:7000" >Camera Stream</a></button>
+                  </div>
               </div>
             </div>
           </div>
