@@ -14,12 +14,6 @@ import { parseMapFromSocket, parseMapFromLcm, normalizeList } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControls } from "./driveControls.js";
 
-const express = require('express')
-const app = express();
-
-// start capture
-const videoStream = require('./videoStream');
-
 /*******************
  *     BUTTONS
  *******************/
