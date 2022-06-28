@@ -101,6 +101,12 @@ canvas {
   padding-top: 0.5em;
 }
 
+.rotated{
+  transform: rotate(180deg);
+  width: 100%;
+  background-color: black;
+}
+
 .status-wrapper {
   position: relative;
   overflow: hidden;
