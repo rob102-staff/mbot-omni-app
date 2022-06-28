@@ -797,7 +797,7 @@ class MBotApp extends React.Component {
                     <button className="button" onClick={() => this.onGrabMap()}>Grab Map</button>
                   </div>
                   <div className="col-md-6">
-                    <button className="button btn-warning btn-small"><a target = "_blank" href = "http://192.168.3.1:7000" >Camera Stream</a></button>
+                    <button className="button btn-yellow btn-small"><a target = "_blank" href = "http://192.168.3.1:7000" >Camera Stream</a></button>
                   </div>
               </div>
             </div>

@@ -89,6 +89,10 @@ canvas {
   margin-right: 20px;
 }
 
+.btn-yellow {
+  background-color: #dddd23f5;
+}
+
 .button:hover {
   background-color: #D86018;
 }
