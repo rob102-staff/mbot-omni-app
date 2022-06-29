@@ -13,6 +13,7 @@ import { DrawRobot } from "./robot";
 import { parseMapFromSocket, parseMapFromLcm, normalizeList } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControls } from "./driveControls.js";
+import * as fs from 'node:fs';
 
 
 /*******************
@@ -51,6 +52,14 @@ function ConnectionStatus(connection) {
   return (
     <div className="status" style={{backgroundColor: colour}}>
       {msg}
+    </div>
+  );
+}
+
+function MapFileSelect(props) {
+  return (
+    <div className="file-input-wrapper">
+      <input className="file-input" type="file" id = "file-input" onChange={props.onChange} />
     </div>
   );
 }
@@ -252,14 +261,6 @@ class DrawLasers extends React.Component {
   }
 }
 
-function MapFileSelect(props) {
-  return (
-    <div className="file-input-wrapper">
-      <input className="file-input" type="file" onChange={props.onChange} />
-    </div>
-  );
-}
-
 /*******************
  *   WHOLE PAGE
  *******************/
@@ -411,6 +412,18 @@ class MBotApp extends React.Component {
 
   onFileChange(event) {
     this.setState({ mapfile: event.target.files[0] });
+
+    const fileSelector = document.getElementById('file-input');
+    
+    fileSelector.addEventListener('change', (e) => {
+      console.log(fileSelector.files)
+      const reader = new FileReader()
+      reader.onload = () =>{
+        console.log(JSON.parse(reader.result))
+      }
+      reader.readAsText(event.target.files[0])
+    });
+
   }
 
   onFileUpload() {
@@ -714,6 +727,31 @@ class MBotApp extends React.Component {
     console.log("Setting start point")
   }
 
+  saveAsJSON() {
+    let exampleObj = [
+      {
+        name: "Samuel",
+        age: 23,
+      },
+      {
+        name: "Axel",
+        age: 15,
+      },
+    ];
+
+    this.downloadObjectAsJson(exampleObj, "hallo")
+  }
+
+  downloadObjectAsJson(exportObj, exportName){
+    var dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+    var downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href",     dataStr);
+    downloadAnchorNode.setAttribute("download", exportName + ".json");
+    document.body.appendChild(downloadAnchorNode); // required for firefox
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+  }
+
   render() {
     var canvasStyle = {
       width: config.CANVAS_DISPLAY_WIDTH,
@@ -731,6 +769,8 @@ class MBotApp extends React.Component {
             <i className="fa-solid fa-bars fa-2xl pf" onClick={() => this.onSideBar()}></i>
           </div>
         </div>
+
+        <MapFileSelect onChange={(event) => this.onFileChange(event)}/>
 
         <div id="mySidenav" className="sidenav" style = {{width: this.state.sideBarWidth}}>
           <a href="#" className = "text-right" onClick={() => this.onSideBar()}>X</a>
@@ -808,7 +848,7 @@ class MBotApp extends React.Component {
 
           {this.state.mappingMode &&
             <div className="button-wrapper top-spacing d-flex justify-content-center">
-              <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
+              <button className="button start-color2" onClick={() => this.saveAsJSON()}>Start Mapping</button>
               <button className="button stop-color2 me-3" onClick={() => this.stopmap()}>Stop Mapping</button>
               <button className="button" onClick={() => this.restartmap()}>Restart Mapping</button>
               <button className="button" onClick={() => this.setpoint()}>Start Point</button>
