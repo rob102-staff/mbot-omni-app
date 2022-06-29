@@ -559,6 +559,8 @@ class MBotApp extends React.Component {
   handleMap(mapmsg) {
     var map = parseMapFromLcm(mapmsg)
     this.updateMap(map);
+    
+    console.log(map);
   }
 
   handleMessage(msg) {
