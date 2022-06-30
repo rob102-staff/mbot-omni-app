@@ -15,6 +15,7 @@ import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControls } from "./driveControls.js";
 import * as fs from 'node:fs';
 
+var map_things;
 
 /*******************
  *     BUTTONS
@@ -52,14 +53,6 @@ function ConnectionStatus(connection) {
   return (
     <div className="status" style={{backgroundColor: colour}}>
       {msg}
-    </div>
-  );
-}
-
-function MapFileSelect(props) {
-  return (
-    <div className="file-input-wrapper">
-      <input className="file-input" type="file" id = "file-input" onChange={props.onChange} />
     </div>
   );
 }
@@ -307,6 +300,8 @@ class MBotApp extends React.Component {
       isRobotClicked: false,
       ranges: [],
       thetas: [],
+      newMap: null,
+      b: null
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
@@ -413,17 +408,20 @@ class MBotApp extends React.Component {
   onFileChange(event) {
     this.setState({ mapfile: event.target.files[0] });
 
-    const fileSelector = document.getElementById('file-input');
-    
-    fileSelector.addEventListener('change', (e) => {
-      console.log(fileSelector.files)
-      const reader = new FileReader()
-      reader.onload = () =>{
-        console.log(JSON.parse(reader.result))
-      }
-      reader.readAsText(event.target.files[0])
-    });
+    const fileSelector = document.querySelector('input[type="file"]');
+    const reader = new FileReader()
+    reader.onload = () => {
+      this.onMapChange(JSON.parse(reader.result));
+    }
+    reader.readAsText(event.target.files[0])
+  }
 
+  onMapChange(map_upload){
+    if(map_upload == null) return;
+
+    var map = parseMapFromLcm(map_upload)
+    this.setState({newMap: map})
+    this.updateMap(map);
   }
 
   onFileUpload() {
@@ -488,7 +486,7 @@ class MBotApp extends React.Component {
     let temp;
     if(this.state.sideBarMode) {
       if(widthBody <= 400) temp = 100 + "%"
-      else if(widthBody <= 770) temp = 80 + "%"
+      else if(widthBody <= 850) temp = 80 + "%"
       else temp = 35 + "%"
       this.setState({sideBarWidth: temp});
     }
@@ -572,8 +570,8 @@ class MBotApp extends React.Component {
   handleMap(mapmsg) {
     var map = parseMapFromLcm(mapmsg)
     this.updateMap(map);
-    
-    console.log(map);
+    this.setState({newMap: map})
+    // console.log(map);
   }
 
   handleMessage(msg) {
@@ -728,18 +726,8 @@ class MBotApp extends React.Component {
   }
 
   saveAsJSON() {
-    let exampleObj = [
-      {
-        name: "Samuel",
-        age: 23,
-      },
-      {
-        name: "Axel",
-        age: 15,
-      },
-    ];
-
-    this.downloadObjectAsJson(exampleObj, "hallo")
+    var name = prompt("What do you want to name the map? (.json will automatically be added to the end)");
+    this.downloadObjectAsJson(this.state.newMap, name)
   }
 
   downloadObjectAsJson(exportObj, exportName){
@@ -770,7 +758,6 @@ class MBotApp extends React.Component {
           </div>
         </div>
 
-        <MapFileSelect onChange={(event) => this.onFileChange(event)}/>
 
         <div id="mySidenav" className="sidenav" style = {{width: this.state.sideBarWidth}}>
           <a href="#" className = "text-right" onClick={() => this.onSideBar()}>X</a>
@@ -798,6 +785,15 @@ class MBotApp extends React.Component {
                   </label>
                 </div>
               </div>
+              {this.state.mappingMode &&
+              <div className="row mb-5 d-flex justify-content-center text-center">
+                <label htmlFor="file-upload" className="custom-file-upload">
+                  <i className="fa fa-cloud-upload"></i> Upload a Map
+                </label>
+                <input id="file-upload" type="file" onChange = {(event) => this.onFileChange(event)}/>
+              </div>
+              }
+
               <div className="row">
                 <div className="col-8">
                   <span className = "">Drive Mode</span>
@@ -834,24 +830,20 @@ class MBotApp extends React.Component {
                   </label>
                 </div>
               </div>
-              <div className="row text-center">
-                <div className="button-wrapper">
-                  <button className="button" onClick={() => this.onGrabMap()}>Grab Map</button>
-                </div>
-              </div>
             </div>
           </div>
         </div>
+
 
 
         <div className="pt-3">
 
           {this.state.mappingMode &&
             <div className="button-wrapper top-spacing d-flex justify-content-center">
-              <button className="button start-color2" onClick={() => this.saveAsJSON()}>Start Mapping</button>
+              <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
               <button className="button stop-color2 me-3" onClick={() => this.stopmap()}>Stop Mapping</button>
               <button className="button" onClick={() => this.restartmap()}>Restart Mapping</button>
-              <button className="button" onClick={() => this.setpoint()}>Start Point</button>
+              <button className="button map-color" onClick={() => this.saveAsJSON()}>Save Map</button>
             </div>
           }
 
