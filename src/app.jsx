@@ -10,12 +10,10 @@ import Select from '@mui/material/Select';
 import config from "./config.js";
 import { WSHelper } from "./web.js";
 import { DrawRobot } from "./robot";
-import { parseMapFromSocket, parseMapFromLcm, normalizeList } from "./map.js";
+import { parseMapFromSocket, parseMapFromLcm, normalizeList, downloadObjectAsJson } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControls } from "./driveControls.js";
-import * as fs from 'node:fs';
 
-var map_things;
 
 /*******************
  *     BUTTONS
@@ -301,7 +299,6 @@ class MBotApp extends React.Component {
       ranges: [],
       thetas: [],
       newMap: null,
-      b: null
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
@@ -422,6 +419,11 @@ class MBotApp extends React.Component {
     var map = parseMapFromLcm(map_upload)
     this.setState({newMap: map})
     this.updateMap(map);
+  }
+
+  saveMap() {
+    var name = prompt("What do you want to name the map? (.json will automatically be added to the end)");
+    downloadObjectAsJson(this.state.newMap, name)
   }
 
   onFileUpload() {
@@ -571,12 +573,10 @@ class MBotApp extends React.Component {
     var map = parseMapFromLcm(mapmsg)
     this.updateMap(map);
     this.setState({newMap: map})
-    // console.log(map);
   }
 
   handleMessage(msg) {
     // TODO: Handle messages from the websocket.
-    // console.log("Received message: ", msg)
   }
 
   updateSocketStatus(status) {
@@ -725,21 +725,6 @@ class MBotApp extends React.Component {
     console.log("Setting start point")
   }
 
-  saveAsJSON() {
-    var name = prompt("What do you want to name the map? (.json will automatically be added to the end)");
-    this.downloadObjectAsJson(this.state.newMap, name)
-  }
-
-  downloadObjectAsJson(exportObj, exportName){
-    var dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
-    var downloadAnchorNode = document.createElement('a');
-    downloadAnchorNode.setAttribute("href",     dataStr);
-    downloadAnchorNode.setAttribute("download", exportName + ".json");
-    document.body.appendChild(downloadAnchorNode); // required for firefox
-    downloadAnchorNode.click();
-    downloadAnchorNode.remove();
-  }
-
   render() {
     var canvasStyle = {
       width: config.CANVAS_DISPLAY_WIDTH,
@@ -843,7 +828,7 @@ class MBotApp extends React.Component {
               <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
               <button className="button stop-color2 me-3" onClick={() => this.stopmap()}>Stop Mapping</button>
               <button className="button" onClick={() => this.restartmap()}>Restart Mapping</button>
-              <button className="button map-color" onClick={() => this.saveAsJSON()}>Save Map</button>
+              <button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>
             </div>
           }
 
