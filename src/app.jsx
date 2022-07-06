@@ -505,8 +505,9 @@ class MBotApp extends React.Component {
     let cs = this.rect.width / this.state.width;
     let col = Math.floor(x / cs);
     let row = Math.floor(y / cs);
-
-    this.setState({clickedCell: [row, col] });
+    console.log("ROW: " + row);
+    console.log("COL: " + col);
+    this.setState({clickedCell: [col, row] });
     if(event.type === "mousedown") plan = true;
     this.onPlan(row, col, plan);
   }
