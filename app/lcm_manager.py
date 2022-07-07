@@ -108,7 +108,7 @@ class LcmCommunicationManager:
         if channel in self._callback_dict.keys(): 
             self._callback_dict[channel](decoded_data)
 
-    def __del__(self):
+    def __del__(self): 
         print("joined thread")
         self.__lcm_thread.join()
         for s in self.subscriptions: self._lcm.unsubscribe(s)

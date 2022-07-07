@@ -252,6 +252,19 @@ class DrawLasers extends React.Component {
   }
 }
 
+class DrawParticles extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render(){
+    return(
+      <canvas id="mapParticles" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+      </canvas>
+    );
+  }
+}
+
 function MapFileSelect(props) {
   return (
     <div className="file-input-wrapper">
@@ -605,7 +618,16 @@ class MBotApp extends React.Component {
   }
 
   handleParticles(evt){
-    console.log(evt);
+    const canvas = document.getElementById("mapParticles");
+    this.ctx = canvas.getContext('2d');
+    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+    for (let index = 0; index < evt.num_particles; index+=20) {
+      this.ctx.beginPath();
+      this.ctx.lineWidth = "1";
+      this.ctx.strokeStyle = "red";
+      this.ctx.rect(400 - (evt.particles[index][0]/0.01), 400 - (evt.particles[index][1]/0.01), 1, 1)
+      this.ctx.stroke();      
+    }
   }
 
   /**********************
@@ -840,6 +862,7 @@ class MBotApp extends React.Component {
                 
                 <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
                 </canvas>
+                <DrawParticles/>
                 <DrawLasers state = {this.state}/>
                 <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                           goalCell={this.state.goalCell} goalValid={this.state.goalValid}
