@@ -186,7 +186,7 @@ class ParticleEmitter():
         return {
             "utime" : self.__particle.utime, 
             "num_particles" : self.__particle.num_particles,
-            "particles[num_particles]" : self.__particle.particles["num_particles"],
+            "particles" : self.__particle.particles,
         }
 
     def __run(self):
