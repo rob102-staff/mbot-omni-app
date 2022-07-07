@@ -186,8 +186,17 @@ class ParticleEmitter():
         return {
             "utime" : self.__particle.utime, 
             "num_particles" : self.__particle.num_particles,
-            "particles" : self.__particle.particles,
+            "particles" : self.__extract_particle_poses(self.__particle.num_particles, self.__particle.particles),
         }
+
+    def __extract_particle_poses(self, num_particles, particles):
+        parts = []
+        for i in range(num_particles):
+            x = particles[i].pose.x
+            y = particles[i].pose.y
+            parts.append((x,y))
+        return parts
+
 
     def __run(self):
         while not self.__stop_thread:
