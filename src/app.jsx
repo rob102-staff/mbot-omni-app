@@ -10,7 +10,7 @@ import Select from '@mui/material/Select';
 import config from "./config.js";
 import { WSHelper } from "./web.js";
 import { DrawRobot } from "./robot";
-import { parseMapFromSocket, parseMapFromLcm, normalizeList } from "./map.js";
+import { parseMapFromSocket, parseMapFromLcm, normalizeList, downloadObjectAsJson } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControls } from "./driveControls.js";
 
@@ -252,14 +252,6 @@ class DrawLasers extends React.Component {
   }
 }
 
-function MapFileSelect(props) {
-  return (
-    <div className="file-input-wrapper">
-      <input className="file-input" type="file" onChange={props.onChange} />
-    </div>
-  );
-}
-
 /*******************
  *   WHOLE PAGE
  *******************/
@@ -306,12 +298,14 @@ class MBotApp extends React.Component {
       isRobotClicked: false,
       ranges: [],
       thetas: [],
+      newMap: null,
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
     this.ws.userHandleMessage = (evt) => { this.handleMessage(evt); };
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
+    //TODO: remove The when done
     this.ws.handleLaser = (evt) => { this.handleTheLasers(evt)};
     this.ws.handlePose = (evt) => { this.handleThePoses(evt)};
     this.ws.handlePath = (evt) => { this.handleThePaths(evt)}
@@ -412,6 +406,26 @@ class MBotApp extends React.Component {
 
   onFileChange(event) {
     this.setState({ mapfile: event.target.files[0] });
+
+    const fileSelector = document.querySelector('input[type="file"]');
+    const reader = new FileReader()
+    reader.onload = () => {
+      this.onMapChange(JSON.parse(reader.result));
+    }
+    reader.readAsText(event.target.files[0])
+  }
+
+  onMapChange(map_upload){
+    if(map_upload == null) return;
+
+    var map = parseMapFromLcm(map_upload)
+    this.setState({newMap: map})
+    this.updateMap(map);
+  }
+
+  saveMap() {
+    var name = prompt("What do you want to name the map? (.json will automatically be added to the end)");
+    downloadObjectAsJson(this.state.newMap, name)
   }
 
   onFileUpload() {
@@ -476,7 +490,7 @@ class MBotApp extends React.Component {
     let temp;
     if(this.state.sideBarMode) {
       if(widthBody <= 400) temp = 100 + "%"
-      else if(widthBody <= 770) temp = 80 + "%"
+      else if(widthBody <= 850) temp = 80 + "%"
       else temp = 35 + "%"
       this.setState({sideBarWidth: temp});
     }
@@ -564,11 +578,11 @@ class MBotApp extends React.Component {
   handleMap(mapmsg) {
     var map = parseMapFromLcm(mapmsg)
     this.updateMap(map);
+    this.setState({newMap: map})
   }
 
   handleMessage(msg) {
     // TODO: Handle messages from the websocket.
-    // console.log("Received message: ", msg)
   }
 
   updateSocketStatus(status) {
@@ -589,7 +603,7 @@ class MBotApp extends React.Component {
     
   }
 
-  handleTheLasers(evt) {
+  handleLasers(evt) {
     this.setState({lidarLength: evt.ranges.length})
     
     let a = [];
@@ -772,6 +786,7 @@ class MBotApp extends React.Component {
           </div>
         </div>
 
+
         <div id="mySidenav" className="sidenav" style = {{width: this.state.sideBarWidth}}>
           <a href="#" className = "text-right" onClick={() => this.onSideBar()}>X</a>
           <div className="row field-toggle-wrapper top-spacing text-white mx-3 mt-4">
@@ -798,6 +813,15 @@ class MBotApp extends React.Component {
                   </label>
                 </div>
               </div>
+              {this.state.mappingMode &&
+              <div className="row mb-5 d-flex justify-content-center text-center">
+                <label htmlFor="file-upload" className="custom-file-upload">
+                  <i className="fa fa-cloud-upload"></i> Upload a Map
+                </label>
+                <input id="file-upload" type="file" onChange = {(event) => this.onFileChange(event)}/>
+              </div>
+              }
+
               <div className="row">
                 <div className="col-8">
                   <span className = "">Drive Mode</span>
@@ -834,14 +858,10 @@ class MBotApp extends React.Component {
                   </label>
                 </div>
               </div>
-              <div className="row text-center">
-                <div className="button-wrapper">
-                  <button className="button" onClick={() => this.onGrabMap()}>Grab Map</button>
-                </div>
-              </div>
             </div>
           </div>
         </div>
+
 
 
         <div className="pt-3">
@@ -851,7 +871,7 @@ class MBotApp extends React.Component {
               <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
               <button className="button stop-color2 me-3" onClick={() => this.stopmap()}>Stop Mapping</button>
               <button className="button" onClick={() => this.restartmap()}>Restart Mapping</button>
-              <button className="button" onClick={() => this.setpoint()}>Start Point</button>
+              <button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>
             </div>
           }
 

@@ -145,7 +145,7 @@ class PathEmitter():
         return {
             "utime" : self.__path.utime, 
             "path_length" : self.__path.path_length,
-            "path" : self.__path.__extract__path(self.__path.path_length, self.__path.path),
+            "path" : self.__extract_path(self.__path.path_length, self.__path.path),
         }
 
     def __extract_path(self, path_length, path):
