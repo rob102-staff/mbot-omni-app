@@ -32,7 +32,7 @@ def plan_cb(data):
     goal = data["goal"]
     start = data["start"]
     plan = data["plan"]
-    # print("Plan Route Hit")
+    print("Plan Route Hit")
 
     lcm_manager.publish_plan_data(fileName, goal, start, plan)
 

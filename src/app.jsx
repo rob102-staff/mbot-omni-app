@@ -609,17 +609,25 @@ class MBotApp extends React.Component {
 
   handleThePaths(evt) {
     console.log("Path received")
-    console.log(evt);
-    let coords;
-    let cells;
+    console.log(evt, "hallo");
+
+    // for(let i = 0; i < evt.path.length; i++)
+    // {
+    //   this.ctx.beginPath();
+    //   this.ctx.fillStyle = color;
+    //   this.ctx.fillRect(start_x, start_y, size, size);
+    // }
+
+    // let coords;
+    // let cells;
     // Write code to extract the (x, y, t) array from the path message
-    coords = [["x", "y", "t"]]
-    //
-    for(let i = 0; i < length(coords); i++) {
-      let arr = [coords[i][1], coords[i][2]];
-      this.mapGrid.drawCell(arr, config.PATH_COLOUR, this.props.cellSize)
-      cells.push(arr)
-    }
+    // coords = [["x", "y", "t"]]
+    // //
+    // for(let i = 0; i < length(coords); i++) {
+    //   let arr = [coords[i][1], coords[i][2]];
+    //   this.mapGrid.drawCell(arr, config.PATH_COLOUR, this.props.cellSize)
+    //   cells.push(arr)
+    // }
 
   }
 
@@ -678,7 +686,7 @@ class MBotApp extends React.Component {
 
     this.setState({goalCell: goal, goalValid: valid});
 
-    return valid;
+    return true;
   }
 
   onPlan(row, col, plan, fileName = "default") {
@@ -687,6 +695,7 @@ class MBotApp extends React.Component {
     //if (!this.setGoal(this.state.clickedCell)) return;
     if (!this.setGoal([row, col])) return;
     // Clear visted canvas
+    console.log("hallo")
     this.visitGrid.clear();
     var start_cell = this.pixelsToCell(this.state.x, this.state.y);
     this.setState({mapfile: fileName });
