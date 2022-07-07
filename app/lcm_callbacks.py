@@ -145,8 +145,16 @@ class PathEmitter():
         return {
             "utime" : self.__path.utime, 
             "path_length" : self.__path.path_length,
-            "path" : self.__path.path,
+            "path" : self.__path.__extract__path(self.__path.path_length, self.__path.path),
         }
+
+    def __extract_path(self, path_length, path):
+        parts = []
+        for i in range(path_length):
+            x = path[i].x
+            y = path[i].y
+            parts.append((x, y))
+        return parts
 
     def __run(self):
         while not self.__stop_thread:

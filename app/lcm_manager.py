@@ -7,6 +7,7 @@ from lcmtypes.reset_odometry_t import reset_odometry_t
 from lcmtypes.mbot_state_t import mbot_state_t
 from lcmtypes.lidar_t import lidar_t
 from lcmtypes.planner_request_t import planner_request_t
+from lcmtypes.robot_path_t import robot_path_t
 from app import lcm_settings
 
 import time
@@ -14,7 +15,6 @@ import sys
 import threading
 from copy import deepcopy
 
-from lcmtypes.robot_path_t import robot_path_t
 
 
 class LcmCommunicationManager:
