@@ -252,6 +252,19 @@ class DrawLasers extends React.Component {
   }
 }
 
+class DrawLines extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render(){
+    return(
+      <canvas id="mapLine" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+      </canvas>
+    );
+  }
+}
+
 /*******************
  *   WHOLE PAGE
  *******************/
@@ -306,7 +319,7 @@ class MBotApp extends React.Component {
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
     //TODO: remove The when done
-    this.ws.handleLaser = (evt) => { this.handleTheLasers(evt)};
+    this.ws.handleLaser = (evt) => { this.handleLasers(evt)};
     this.ws.handlePose = (evt) => { this.handleThePoses(evt)};
     this.ws.handlePath = (evt) => { this.handleThePaths(evt)}
 
@@ -626,12 +639,16 @@ class MBotApp extends React.Component {
     console.log("Path received")
     console.log(evt, "hallo");
 
-    // for(let i = 0; i < evt.path.length; i++)
-    // {
-    //   this.ctx.beginPath();
-    //   this.ctx.fillStyle = color;
-    //   this.ctx.fillRect(start_x, start_y, size, size);
-    // }
+    const canvas = document.getElementById("mapLine");
+    this.ctx = canvas.getContext('2d');
+
+    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for(let i = 0; i < evt.path.length; i++) {  
+      this.ctx.beginPath();
+      this.ctx.fillStyle = "rgb(171, 219, 227)";
+      this.ctx.fillRect(400+(evt.path[i][0]/0.025), 400-(evt.path[i][1]/0.025), 3, 3);
+    }
 
     // let coords;
     // let cells;
@@ -898,6 +915,7 @@ class MBotApp extends React.Component {
                 
                 <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
                 </canvas>
+                <DrawLines />
                 <DrawLasers state = {this.state}/>
                 <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                           goalCell={this.state.goalCell} goalValid={this.state.goalValid}
