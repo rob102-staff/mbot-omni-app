@@ -743,12 +743,10 @@ class MBotApp extends React.Component {
                     data: {
                        map_name: fileName,
                        goal: [row, col],
-                       start: [start_cell[0], start_cell[1]],
                        plan: plan
                      }
                    };
-    this.ws.socket.emit("plan", {map_name: fileName, goal: [row, col], start: [start_cell[0], start_cell[1]], plan: plan})
-    this.ws.send(plan_data);
+    this.ws.socket.emit("plan", {map_name: fileName, goal: [row, col], plan: plan})
   }
 
   anExamplePost() {

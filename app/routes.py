@@ -30,11 +30,10 @@ def send_map(data):
 def plan_cb(data):
     fileName = data["map_name"]
     goal = data["goal"]
-    start = data["start"]
     plan = data["plan"]
     print("Plan Route Hit")
 
-    lcm_manager.publish_plan_data(fileName, goal, start, plan)
+    lcm_manager.publish_plan_data(fileName, goal, plan)
 
     app.logger.info(data)
 
