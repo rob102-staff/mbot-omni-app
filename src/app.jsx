@@ -637,7 +637,7 @@ class MBotApp extends React.Component {
 
   handleThePaths(evt) {
     console.log("Path received")
-    console.log(evt, "hallo");
+    console.log(evt, "hi");
 
     const canvas = document.getElementById("mapLine");
     this.ctx = canvas.getContext('2d');
@@ -647,20 +647,20 @@ class MBotApp extends React.Component {
     for(let i = 0; i < evt.path.length; i++) {  
       this.ctx.beginPath();
       this.ctx.fillStyle = "rgb(171, 219, 227)";
-      this.ctx.fillRect(400+(evt.path[i][0]/0.025), 400-(evt.path[i][1]/0.025), 3, 3);
+      this.ctx.arc(400+(evt.path[i][0]/0.025), 400-(evt.path[i][1]/0.025), 4, 0, 2 * Math.PI);
+
+      this.ctx.beginPath();
+      if(i==0){
+        this.ctx.moveTo(400, 400);
+        this.ctx.lineTo(400+(evt.path[i][0]/0.025), 400-(evt.path[i][1]/0.025))
+        this.ctx.stroke();
+      }
+      else{
+        this.ctx.moveTo(400+(evt.path[i-1][0]/0.025), 400-(evt.path[i-1][1]/0.025));
+        this.ctx.lineTo(400+(evt.path[i][0]/0.025), 400-(evt.path[i][1]/0.025))
+        this.ctx.stroke();
+      }
     }
-
-    // let coords;
-    // let cells;
-    // Write code to extract the (x, y, t) array from the path message
-    // coords = [["x", "y", "t"]]
-    // //
-    // for(let i = 0; i < length(coords); i++) {
-    //   let arr = [coords[i][1], coords[i][2]];
-    //   this.mapGrid.drawCell(arr, config.PATH_COLOUR, this.props.cellSize)
-    //   cells.push(arr)
-    // }
-
   }
 
   /**********************
