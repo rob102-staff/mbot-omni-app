@@ -306,7 +306,7 @@ class MBotApp extends React.Component {
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
     //TODO: remove The when done
-    this.ws.handleLaser = (evt) => { this.handleTheLasers(evt)};
+    this.ws.handleLaser = (evt) => { this.handleLasers(evt)};
     this.ws.handlePose = (evt) => { this.handleThePoses(evt)};
     this.ws.handlePath = (evt) => { this.handleThePaths(evt)}
 
@@ -726,12 +726,10 @@ class MBotApp extends React.Component {
                     data: {
                        map_name: fileName,
                        goal: [row, col],
-                       start: [start_cell[0], start_cell[1]],
                        plan: plan
                      }
                    };
-    this.ws.socket.emit("plan", {map_name: fileName, goal: [row, col], start: [start_cell[0], start_cell[1]], plan: plan})
-    this.ws.send(plan_data);
+    this.ws.socket.emit("plan", {map_name: fileName, goal: [row, col], plan: plan})
   }
 
   anExamplePost() {
