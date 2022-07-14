@@ -84,8 +84,6 @@ class GridCellCanvas {
       console.log("Error. Cannot render canvas: " + String(cells.length) + " != " + String(this.width*this.height));
       return;
     }
-
-    // this.clear();
     for (var i = 0; i < this.width; i++) {
       for (var j = 0; j < this.height; j++) {
         var prob = cells[this.getCellIdx(i, j)];
