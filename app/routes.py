@@ -28,12 +28,10 @@ def send_map(data):
 
 @socket.on('plan')
 def plan_cb(data):
-    fileName = data["map_name"]
     goal = data["goal"]
     plan = data["plan"]
-    print("Plan Route Hit")
 
-    lcm_manager.publish_plan_data(fileName, goal, plan)
+    lcm_manager.publish_plan_data(goal, plan)
 
     app.logger.info(data)
 

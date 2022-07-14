@@ -175,13 +175,6 @@ class DrawCells extends React.Component {
         this.drawPath();
       }
 
-      // If there's a clicked cell, draw it.
-      if (this.props.clickedCell.length > 0) {
-        let scale = this.props.cellSize * 0.2
-        this.cellGrid.drawCell(this.props.clickedCell,
-                               config.CLICKED_CELL_COLOUR, this.props.cellSize);
-      }
-
       // If there's a goal cell, clear it in case it was clicked then draw it.
       if (this.props.goalCell.length > 0) {
         this.cellGrid.clearCell(this.props.goalCell, this.props.cellSize);
@@ -318,10 +311,9 @@ class MBotApp extends React.Component {
     this.ws.userHandleMessage = (evt) => { this.handleMessage(evt); };
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
-    //TODO: remove The when done
     this.ws.handleLaser = (evt) => { this.handleLasers(evt)};
-    this.ws.handlePose = (evt) => { this.handleThePoses(evt)};
-    this.ws.handlePath = (evt) => { this.handleThePaths(evt)}
+    this.ws.handlePose = (evt) => { this.handlePoses(evt)};
+    this.ws.handlePath = (evt) => { this.handlePaths(evt)}
 
     this.driveControls = new DriveControls(this.ws);
     this.visitGrid = new GridCellCanvas();
@@ -523,7 +515,7 @@ class MBotApp extends React.Component {
 
   handleMapClick(event) {
     if (!this.state.mapLoaded) return;
-    let plan = false;
+    let plan = true;
 
     this.rect = this.clickCanvas.current.getBoundingClientRect();
     
@@ -532,10 +524,9 @@ class MBotApp extends React.Component {
     let cs = this.rect.width / this.state.width;
     let col = Math.floor(x / cs);
     let row = Math.floor(y / cs);
-    console.log("ROW: " + row);
-    console.log("COL: " + col);
     this.setState({clickedCell: [col, row] });
-    if(event.type === "mousedown") plan = true;
+    // Implement check for ctrl-click and whether an a* plan is required
+    // if(event.type === "mousedown") plan = true;
     this.onPlan(row, col, plan);
   }
 
@@ -604,7 +595,7 @@ class MBotApp extends React.Component {
     }
   }
 
-  handleThePoses(evt){
+  handlePoses(evt){
     this.setState({xPose: evt.x, yPose: evt.y});
     this.setState({theta: evt.theta})
 
@@ -635,10 +626,7 @@ class MBotApp extends React.Component {
     this.setState({x_values : a, y_values : b})
   }
 
-  handleThePaths(evt) {
-    console.log("Path received")
-    console.log(evt, "hi");
-
+  handlePaths(evt) {
     const canvas = document.getElementById("mapLine");
     this.ctx = canvas.getContext('2d');
 
@@ -710,7 +698,6 @@ class MBotApp extends React.Component {
   }
 
   setGoal(goal) {
-    console.log(goal)
     if (goal.length === 0) return false;
 
     var idx = goal[1] + goal[0] * this.state.width;
@@ -718,35 +705,23 @@ class MBotApp extends React.Component {
 
     this.setState({goalCell: goal, goalValid: valid});
 
-    return true;
+    return valid;
   }
 
-  onPlan(row, col, plan, fileName = "default") {
-    fileName += ".map"
-    // If goal isn't valid, don't plan.
-    //if (!this.setGoal(this.state.clickedCell)) return;
+  onPlan(row, col, plan, name = "default") {
+    let fileName = name + ".json"
     if (!this.setGoal([row, col])) return;
     // Clear visted canvas
-    console.log("hallo")
     this.visitGrid.clear();
     var start_cell = this.pixelsToCell(this.state.x, this.state.y);
     this.setState({mapfile: fileName });
-    /*var plan_data = {type: "plan",
-                     data: {
-                        map_name: fileName,
-                        goal: "[" + this.state.clickedCell[0] + " " + this.state.clickedCell[1] + "]",
-                        start: "[" + start_cell[0] + " " + start_cell[1] + "]"
-                        //algo: config.ALGO_TYPES[this.state.algo].label
-                      }
-                    }; */
     var plan_data = {type: "plan",
                     data: {
-                       map_name: fileName,
                        goal: [row, col],
                        plan: plan
                      }
                    };
-    this.ws.socket.emit("plan", {map_name: fileName, goal: [row, col], plan: plan})
+    this.ws.socket.emit("plan", {goal: [row, col], plan: plan})
   }
 
   anExamplePost() {

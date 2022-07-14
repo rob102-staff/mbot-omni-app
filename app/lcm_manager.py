@@ -64,7 +64,7 @@ class LcmCommunicationManager:
         self._lcm.publish(lcm_settings.MBOT_MOTOR_COMMAND_CHANNEL, cmd.encode())
         print(f"published: {vx}, {vy}, {wz} to the channel {lcm_settings.MBOT_MOTOR_COMMAND_CHANNEL}")  # TODO: remove. For testing
 
-    def publish_plan_data(self, name, goal, plan):
+    def publish_plan_data(self, goal:pose_xyt_t, plan:bool):
         goal_pose = pose_xyt_t()
         goal_pose.utime = int(time.time() * 1000)
         goal_pose.x = float(goal[0])
@@ -77,7 +77,6 @@ class LcmCommunicationManager:
         total_pose.require_plan = plan
 
         self._lcm.publish(lcm_settings.PATH_REQUEST, total_pose.encode())
-        print("Finished published planning path")
 
     def reset_odometry_publisher(self):
         cmd=reset_odometry_t()
