@@ -317,8 +317,8 @@ class MBotApp extends React.Component {
       y_values: [],
       lasers: {},
       isRobotClicked: false,
-      ranges: [],
-      thetas: [],
+      robot: true,
+      particles: true
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
@@ -618,17 +618,19 @@ class MBotApp extends React.Component {
   }
 
   handleParticles(evt){
-    const canvas = document.getElementById("mapParticles");
-    this.ctx = canvas.getContext('2d');
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-    for (let index = 0; index < evt.num_particles; index+=20) {
-      this.ctx.beginPath();
-      this.ctx.arc(400 + (evt.particles[index][0]/0.025), 400 - (evt.particles[index][1]/0.025), 1, 0, 2 * Math.PI)
-      this.ctx.fillStyle = 'green';
-      this.ctx.fill();
-      this.ctx.lineWidth = 1;
-      this.ctx.strokeStyle = 'green'
-      this.ctx.stroke();      
+    if(this.state.particles){
+      const canvas = document.getElementById("mapParticles");
+      this.ctx = canvas.getContext('2d');
+      this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (let index = 0; index < evt.num_particles; index+=20) {
+        this.ctx.beginPath();
+        this.ctx.arc(400 + (evt.particles[index][0]/0.025), 400 - (evt.particles[index][1]/0.025), 1, 0, 2 * Math.PI)
+        this.ctx.fillStyle = 'green';
+        this.ctx.fill();
+        this.ctx.lineWidth = 1;
+        this.ctx.strokeStyle = 'green'
+        this.ctx.stroke();      
+      }
     }
   }
 
@@ -798,11 +800,11 @@ class MBotApp extends React.Component {
               { this.state.drivingMode &&
               <div className="row mt-5 text-left mx-2">
                 <div className="col-6 text-small">Omni-Drive
-                <input type="checkbox" className="mx-2" checked={this.omni}
+                <input type="checkbox" className="mx-2" checked={this.state.omni}
                   onChange={() => this.changeOnmi()}/>
                 </div>
                 <div className="col-6"> Diff-Drive
-                  <input type="checkbox" className="mx-2" checked={this.diff}
+                  <input type="checkbox" className="mx-2" checked={this.state.diff}
                   onChange={() => this.changeDiff()} />
                 </div>
               </div>
@@ -869,8 +871,12 @@ class MBotApp extends React.Component {
                 <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                           goalCell={this.state.goalCell} goalValid={this.state.goalValid}
                           cellSize={this.state.cellSize} />
-                <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
-                          pixelsPerMeter={this.state.pixelsPerMeter} />
+                
+                {this.state.robot &&
+                  <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
+                      pixelsPerMeter={this.state.pixelsPerMeter} /> 
+                }
+
                 <canvas ref={this.clickCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
                         onMouseDown={(e) => this.handleMouseDown(e)}
                         onMouseMove={(e) => this.handleMouseMove(e)}
