@@ -10,7 +10,7 @@ import Select from '@mui/material/Select';
 import config from "./config.js";
 import { WSHelper } from "./web.js";
 import { DrawRobot } from "./robot";
-import { parseMapFromSocket, parseMapFromLcm, normalizeList } from "./map.js";
+import { parseMapFromSocket, parseMapFromLcm, normalizeList, downloadObjectAsJson } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControls } from "./driveControls.js";
 
@@ -115,7 +115,7 @@ function DriveControlPanel(props) {
 
   componentDidUpdate() {
     this.mapGrid.setSize(this.props.width, this.props.height);
-    this.mapGrid.drawCells(this.props.cells, config.MAP_COLOUR_LOW, config.MAP_COLOUR_HIGH);
+    this.mapGrid.drawCells(this.props.cells, this.props.prev_cells, config.MAP_COLOUR_LOW, config.MAP_COLOUR_HIGH);
   }
 
   render() {
@@ -265,14 +265,6 @@ class DrawParticles extends React.Component {
   }
 }
 
-function MapFileSelect(props) {
-  return (
-    <div className="file-input-wrapper">
-      <input className="file-input" type="file" onChange={props.onChange} />
-    </div>
-  );
-}
-
 /*******************
  *   WHOLE PAGE
  *******************/
@@ -285,6 +277,7 @@ class MBotApp extends React.Component {
     this.state = {
       connection: false,
       cells: [],
+      prev_cells: [],
       width: 0,
       height: 0,
       num_cells: 0,
@@ -318,7 +311,8 @@ class MBotApp extends React.Component {
       lasers: {},
       isRobotClicked: false,
       robot: true,
-      particles: true
+      particles: true,
+      newMap: null,
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
@@ -387,8 +381,6 @@ class MBotApp extends React.Component {
     }, false);
 
     document.addEventListener('keyup', (evt) => {
-
-
       //First checks if the drive State is active, then substracts speed values in rx, ry, and theta
       if(this.state.drivingMode){
         if(controller[evt.key]){
@@ -425,6 +417,26 @@ class MBotApp extends React.Component {
 
   onFileChange(event) {
     this.setState({ mapfile: event.target.files[0] });
+
+    const fileSelector = document.querySelector('input[type="file"]');
+    const reader = new FileReader()
+    reader.onload = () => {
+      this.onMapChange(JSON.parse(reader.result));
+    }
+    reader.readAsText(event.target.files[0])
+  }
+
+  onMapChange(map_upload){
+    if(map_upload == null) return;
+
+    var map = parseMapFromLcm(map_upload)
+    this.setState({newMap: map})
+    this.updateMap(map);
+  }
+
+  saveMap() {
+    var name = prompt("What do you want to name the map? (.json will automatically be added to the end)");
+    downloadObjectAsJson(this.state.newMap, name)
   }
 
   onFileUpload() {
@@ -489,7 +501,7 @@ class MBotApp extends React.Component {
     let temp;
     if(this.state.sideBarMode) {
       if(widthBody <= 400) temp = 100 + "%"
-      else if(widthBody <= 770) temp = 80 + "%"
+      else if(widthBody <= 850) temp = 80 + "%"
       else temp = 35 + "%"
       this.setState({sideBarWidth: temp});
     }
@@ -573,11 +585,11 @@ class MBotApp extends React.Component {
   handleMap(mapmsg) {
     var map = parseMapFromLcm(mapmsg)
     this.updateMap(map);
+    this.setState({newMap: map})
   }
 
   handleMessage(msg) {
     // TODO: Handle messages from the websocket.
-    // console.log("Received message: ", msg)
   }
 
   updateSocketStatus(status) {
@@ -618,11 +630,14 @@ class MBotApp extends React.Component {
   }
 
   handleParticles(evt){
+    const canvas = document.getElementById("mapParticles");
+    this.ctx = canvas.getContext('2d');
+    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    //Checks if Particle Checkbox is ticked
     if(this.state.particles){
-      const canvas = document.getElementById("mapParticles");
-      this.ctx = canvas.getContext('2d');
-      this.ctx.clearRect(0, 0, canvas.width, canvas.height);
       for (let index = 0; index < evt.num_particles; index+=20) {
+        //Draws Particle for each instance
         this.ctx.beginPath();
         this.ctx.arc(400 + (evt.particles[index][0]/0.025), 400 - (evt.particles[index][1]/0.025), 1, 0, 2 * Math.PI)
         this.ctx.fillStyle = 'green';
@@ -649,7 +664,8 @@ class MBotApp extends React.Component {
    updateMap(result) {
     this.visitGrid.clear();
     var loaded = result.cells.length > 0;
-    this.setState({cells: result.cells,
+    this.setState({prev_cells: this.state.cells,
+                   cells: result.cells,
                    width: result.width,
                    height: result.height,
                    num_cells: result.num_cells,
@@ -673,6 +689,15 @@ class MBotApp extends React.Component {
     if(this.state.omni && !this.state.diff) {
       this.setState({omni: !this.state.omni});
     }
+  }
+
+  changeRobot(){
+    this.setState({robot: !this.state.robot})
+  }
+
+  changeParticles(){
+    this.setState({particles: !this.state.particles})
+    console.log("sdf")
   }
 
   onGoalClear() {
@@ -760,6 +785,7 @@ class MBotApp extends React.Component {
           </div>
         </div>
 
+
         <div id="mySidenav" className="sidenav" style = {{width: this.state.sideBarWidth}}>
           <a href="#" className = "text-right" onClick={() => this.onSideBar()}>X</a>
           <div className="row field-toggle-wrapper top-spacing text-white mx-3 mt-4">
@@ -786,6 +812,27 @@ class MBotApp extends React.Component {
                   </label>
                 </div>
               </div>
+              {this.state.mappingMode &&
+              <>
+              <div className="row d-flex justify-content-center text-center">
+                <label htmlFor="file-upload" className="custom-file-upload">
+                  <i className="fa fa-cloud-upload"></i> Upload a Map
+                </label>
+                <input id="file-upload" type="file" onChange = {(event) => this.onFileChange(event)}/>
+              </div>
+              <div className="row mt-4 mb-5 text-left mx-2 text-center">
+                <div className="col-6 text-small"> Draw Particles
+                <input type="checkbox" className="mx-2" checked = {this.state.particles}
+                  onChange={() => this.changeParticles()}/>
+                </div>
+                <div className="col-6"> Draw Robot
+                  <input type="checkbox" className="mx-2" checked = {this.state.robot}
+                  onChange={() => this.changeRobot()} />
+                </div>
+              </div>
+              </>
+              }
+
               <div className="row">
                 <div className="col-8">
                   <span className = "">Drive Mode</span>
@@ -822,14 +869,10 @@ class MBotApp extends React.Component {
                   </label>
                 </div>
               </div>
-              <div className="row text-center">
-                <div className="button-wrapper">
-                  <button className="button" onClick={() => this.onGrabMap()}>Grab Map</button>
-                </div>
-              </div>
             </div>
           </div>
         </div>
+
 
 
         <div className="pt-3">
@@ -839,7 +882,7 @@ class MBotApp extends React.Component {
               <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
               <button className="button stop-color2 me-3" onClick={() => this.stopmap()}>Stop Mapping</button>
               <button className="button" onClick={() => this.restartmap()}>Restart Mapping</button>
-              <button className="button" onClick={() => this.setpoint()}>Start Point</button>
+              <button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>
             </div>
           }
 
@@ -862,7 +905,7 @@ class MBotApp extends React.Component {
           <TransformWrapper>
             <TransformComponent>
               <div style={canvasStyle}>
-                <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
+                <DrawMap cells={this.state.cells} prev_cells={this.state.prev_cells} width={this.state.width} height={this.state.height} />
                 
                 <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
                 </canvas>
