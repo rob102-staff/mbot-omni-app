@@ -623,9 +623,11 @@ class MBotApp extends React.Component {
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
     for (let index = 0; index < evt.num_particles; index+=20) {
       this.ctx.beginPath();
-      this.ctx.lineWidth = "1";
-      this.ctx.strokeStyle = "red";
-      this.ctx.rect(400 - (evt.particles[index][0]/0.01), 400 - (evt.particles[index][1]/0.01), 1, 1)
+      this.ctx.arc(400 + (evt.particles[index][0]/0.025), 400 - (evt.particles[index][1]/0.025), 1, 0, 2 * Math.PI)
+      this.ctx.fillStyle = 'green';
+      this.ctx.fill();
+      this.ctx.lineWidth = 1;
+      this.ctx.strokeStyle = 'green'
       this.ctx.stroke();      
     }
   }
