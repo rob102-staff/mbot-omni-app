@@ -697,7 +697,6 @@ class MBotApp extends React.Component {
 
   changeParticles(){
     this.setState({particles: !this.state.particles})
-    console.log("sdf")
   }
 
   onGoalClear() {
