@@ -9,7 +9,7 @@ except ImportError:
     from io import BytesIO
 import struct
 
-import particle_t
+from lcmtypes.particle_t import particle_t
 
 class particles_t(object):
     __slots__ = ["utime", "num_particles", "particles"]

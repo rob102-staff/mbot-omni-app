@@ -9,7 +9,7 @@ except ImportError:
     from io import BytesIO
 import struct
 
-import pose_xyt_t
+from lcmtypes.pose_xyt_t import pose_xyt_t
 
 class particle_t(object):
     __slots__ = ["pose", "parent_pose", "weight"]
