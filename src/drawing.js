@@ -77,20 +77,20 @@ class GridCellCanvas {
     this.ctx.fillRect(start_x, start_y, size, size);
   }
 
-  drawCells(cells, colour_low, colour_high, alpha="ff") {
+  drawCells(cells, prev_cells, colour_low, colour_high, alpha="ff") {
 
     // Bug: sometimes this happens for some reason. 
     if (cells.length !== this.width * this.height) {
       console.log("Error. Cannot render canvas: " + String(cells.length) + " != " + String(this.width*this.height));
       return;
     }
-
-    this.clear();
     for (var i = 0; i < this.width; i++) {
       for (var j = 0; j < this.height; j++) {
         var prob = cells[this.getCellIdx(i, j)];
-        var color = getColor(prob, colour_low, colour_high);
-        this.drawCell([j, i], color + alpha, this.cellSize);
+        if (prob != prev_cells[this.getCellIdx(i, j)]){
+          var color = getColor(prob, colour_low, colour_high);
+          this.drawCell([j, i], color + alpha, this.cellSize);
+        }
       }
     }
   }

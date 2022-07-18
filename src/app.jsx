@@ -115,7 +115,7 @@ function DriveControlPanel(props) {
 
   componentDidUpdate() {
     this.mapGrid.setSize(this.props.width, this.props.height);
-    this.mapGrid.drawCells(this.props.cells, config.MAP_COLOUR_LOW, config.MAP_COLOUR_HIGH);
+    this.mapGrid.drawCells(this.props.cells, this.props.prev_cells, config.MAP_COLOUR_LOW, config.MAP_COLOUR_HIGH);
   }
 
   render() {
@@ -270,6 +270,7 @@ class MBotApp extends React.Component {
     this.state = {
       connection: false,
       cells: [],
+      prev_cells: [],
       width: 0,
       height: 0,
       num_cells: 0,
@@ -666,7 +667,8 @@ class MBotApp extends React.Component {
    updateMap(result) {
     this.visitGrid.clear();
     var loaded = result.cells.length > 0;
-    this.setState({cells: result.cells,
+    this.setState({prev_cells: this.state.cells,
+                   cells: result.cells,
                    width: result.width,
                    height: result.height,
                    num_cells: result.num_cells,
@@ -884,7 +886,7 @@ class MBotApp extends React.Component {
           <TransformWrapper>
             <TransformComponent>
               <div style={canvasStyle}>
-                <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
+                <DrawMap cells={this.state.cells} prev_cells={this.state.prev_cells} width={this.state.width} height={this.state.height} />
                 
                 <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
                 </canvas>
