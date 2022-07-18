@@ -10,7 +10,7 @@ import Select from '@mui/material/Select';
 import config from "./config.js";
 import { WSHelper } from "./web.js";
 import { DrawRobot } from "./robot";
-import { parseMapFromSocket, parseMapFromLcm, normalizeList } from "./map.js";
+import { parseMapFromSocket, parseMapFromLcm, normalizeList, downloadObjectAsJson } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControls } from "./driveControls.js";
 
@@ -114,13 +114,31 @@ function DriveControlPanel(props) {
 
   componentDidUpdate() {
     this.mapGrid.setSize(this.props.width, this.props.height);
-    this.mapGrid.drawCells(this.props.cells, config.MAP_COLOUR_LOW, config.MAP_COLOUR_HIGH);
+    this.mapGrid.drawCells(this.props.cells, this.props.prev_cells, config.MAP_COLOUR_LOW, config.MAP_COLOUR_HIGH);
   }
 
   render() {
     return (
       <canvas id="mapCanvas" ref={this.mapCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
       </canvas>
+    );
+  }
+}
+
+class DrawImage extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  shouldComponentUpdate(){
+    console.log("DrawImage: Should update?");
+    return true;
+  }
+
+  render() {
+    console.log("gfd");
+    return (
+      <iframe src="../image.jpg" frameBorder="0"></iframe>
     );
   }
 }
@@ -172,13 +190,6 @@ class DrawCells extends React.Component {
       // Draw the found path.
       if (this.pathUpdated) {
         this.drawPath();
-      }
-
-      // If there's a clicked cell, draw it.
-      if (this.props.clickedCell.length > 0) {
-        let scale = this.props.cellSize * 0.2
-        this.cellGrid.drawCell(this.props.clickedCell,
-                               config.CLICKED_CELL_COLOUR, this.props.cellSize);
       }
 
       // If there's a goal cell, clear it in case it was clicked then draw it.
@@ -251,12 +262,17 @@ class DrawLasers extends React.Component {
   }
 }
 
-function MapFileSelect(props) {
-  return (
-    <div className="file-input-wrapper">
-      <input className="file-input" type="file" onChange={props.onChange} />
-    </div>
-  );
+class DrawLines extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render(){
+    return(
+      <canvas id="mapLine" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+      </canvas>
+    );
+  }
 }
 
 /*******************
@@ -271,6 +287,7 @@ class MBotApp extends React.Component {
     this.state = {
       connection: false,
       cells: [],
+      prev_cells: [],
       width: 0,
       height: 0,
       num_cells: 0,
@@ -305,14 +322,17 @@ class MBotApp extends React.Component {
       isRobotClicked: false,
       ranges: [],
       thetas: [],
+      newMap: null,
+      idx: 0,
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
     this.ws.userHandleMessage = (evt) => { this.handleMessage(evt); };
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
-    this.ws.handleLaser = (evt) => { this.handleTheLasers(evt)};
-    this.ws.handlePose = (evt) => { this.checkThePoses(evt)};
+    this.ws.handleLaser = (evt) => { this.handleLasers(evt)};
+    this.ws.handlePose = (evt) => { this.handlePoses(evt)};
+    this.ws.handlePath = (evt) => { this.handlePaths(evt)}
 
     this.driveControls = new DriveControls(this.ws);
     this.visitGrid = new GridCellCanvas();
@@ -411,6 +431,26 @@ class MBotApp extends React.Component {
 
   onFileChange(event) {
     this.setState({ mapfile: event.target.files[0] });
+
+    const fileSelector = document.querySelector('input[type="file"]');
+    const reader = new FileReader()
+    reader.onload = () => {
+      this.onMapChange(JSON.parse(reader.result));
+    }
+    reader.readAsText(event.target.files[0])
+  }
+
+  onMapChange(map_upload){
+    if(map_upload == null) return;
+
+    var map = parseMapFromLcm(map_upload)
+    this.setState({newMap: map})
+    this.updateMap(map);
+  }
+
+  saveMap() {
+    var name = prompt("What do you want to name the map? (.json will automatically be added to the end)");
+    downloadObjectAsJson(this.state.newMap, name)
   }
 
   onFileUpload() {
@@ -475,7 +515,7 @@ class MBotApp extends React.Component {
     let temp;
     if(this.state.sideBarMode) {
       if(widthBody <= 400) temp = 100 + "%"
-      else if(widthBody <= 770) temp = 80 + "%"
+      else if(widthBody <= 850) temp = 80 + "%"
       else temp = 35 + "%"
       this.setState({sideBarWidth: temp});
     }
@@ -495,6 +535,7 @@ class MBotApp extends React.Component {
 
   handleMapClick(event) {
     if (!this.state.mapLoaded) return;
+    let plan = true;
 
     this.rect = this.clickCanvas.current.getBoundingClientRect();
     
@@ -503,8 +544,10 @@ class MBotApp extends React.Component {
     let cs = this.rect.width / this.state.width;
     let col = Math.floor(x / cs);
     let row = Math.floor(y / cs);
-
-    this.setState({clickedCell: [row, col] });
+    this.setState({clickedCell: [col, row] });
+    // Implement check for ctrl-click and whether an a* plan is required
+    // if(event.type === "mousedown") plan = true;
+    this.onPlan(row, col, plan);
   }
 
   handleMouseDown(event) {
@@ -559,11 +602,11 @@ class MBotApp extends React.Component {
   handleMap(mapmsg) {
     var map = parseMapFromLcm(mapmsg)
     this.updateMap(map);
+    this.setState({newMap: map})
   }
 
   handleMessage(msg) {
-    // TODO: Handle messages from the websocket.
-    // console.log("Received message: ", msg)
+    console.log(msg)
   }
 
   updateSocketStatus(status) {
@@ -572,7 +615,7 @@ class MBotApp extends React.Component {
     }
   }
 
-  checkThePoses(evt){
+  handlePoses(evt){
     this.setState({xPose: evt.x, yPose: evt.y});
     this.setState({theta: evt.theta})
 
@@ -584,7 +627,7 @@ class MBotApp extends React.Component {
     
   }
 
-  handleTheLasers(evt) {
+  handleLasers(evt) {
     this.setState({lidarLength: evt.ranges.length})
     
     let a = [];
@@ -603,6 +646,32 @@ class MBotApp extends React.Component {
     this.setState({x_values : a, y_values : b})
   }
 
+  handlePaths(evt) {
+    const canvas = document.getElementById("mapLine");
+    this.ctx = canvas.getContext('2d');
+
+    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    for(let i = 0; i < evt.path.length; i++) {  
+      this.ctx.beginPath();
+      this.ctx.fillStyle = "rgb(209, 34, 15)";
+      this.ctx.arc(400+(evt.path[i][0]/0.025), 400-(evt.path[i][1]/0.025), 4, 0, 2 * Math.PI);
+
+      this.ctx.beginPath();
+      if(i==0){
+        this.ctx.moveTo(400, 400);
+        this.ctx.strokeStyle = "rgb(209, 34, 15)";
+        this.ctx.lineTo(400+(evt.path[i][0]/0.025), 400-(evt.path[i][1]/0.025))
+        this.ctx.stroke();
+      }
+      else{
+        this.ctx.moveTo(400+(evt.path[i-1][0]/0.025), 400-(evt.path[i-1][1]/0.025));
+        this.ctx.strokeStyle = "rgb(209, 34, 15)";
+        this.ctx.lineTo(400+(evt.path[i][0]/0.025), 400-(evt.path[i][1]/0.025))
+        this.ctx.stroke();
+      }
+    }
+  }
 
   /**********************
    *   STATE SETTERS
@@ -619,7 +688,8 @@ class MBotApp extends React.Component {
    updateMap(result) {
     this.visitGrid.clear();
     var loaded = result.cells.length > 0;
-    this.setState({cells: result.cells,
+    this.setState({prev_cells: this.state.cells,
+                   cells: result.cells,
                    width: result.width,
                    height: result.height,
                    num_cells: result.num_cells,
@@ -661,21 +731,20 @@ class MBotApp extends React.Component {
     return valid;
   }
 
-  onPlan() {
-    // If goal isn't valid, don't plan.
-    if (!this.setGoal(this.state.clickedCell)) return;
+  onPlan(row, col, plan, name = "default") {
+    let fileName = name + ".json"
+    if (!this.setGoal([row, col])) return;
     // Clear visted canvas
     this.visitGrid.clear();
     var start_cell = this.pixelsToCell(this.state.x, this.state.y);
+    this.setState({mapfile: fileName });
     var plan_data = {type: "plan",
-                     data: {
-                        map_name: this.state.mapfile.name,
-                        goal: "[" + this.state.clickedCell[0] + " " + this.state.clickedCell[1] + "]",
-                        start: "[" + start_cell[0] + " " + start_cell[1] + "]",
-                        algo: config.ALGO_TYPES[this.state.algo].label
-                      }
-                    };
-    this.ws.send(plan_data);
+                    data: {
+                       goal: [row, col],
+                       plan: plan
+                     }
+                   };
+    this.ws.socket.emit("plan", {goal: [row, col], plan: plan})
   }
 
   anExamplePost() {
@@ -702,6 +771,7 @@ class MBotApp extends React.Component {
 
   stopmap(){
     console.log("Stopping map")
+    this.setState({idx: this.state.idx++})
   }
 
   restartmap(){
@@ -718,6 +788,7 @@ class MBotApp extends React.Component {
       height: config.CANVAS_DISPLAY_HEIGHT
     };
 
+
     return (
       <>
         <div className="row mx-5">
@@ -729,6 +800,7 @@ class MBotApp extends React.Component {
             <i className="fa-solid fa-bars fa-2xl pf" onClick={() => this.onSideBar()}></i>
           </div>
         </div>
+
 
         <div id="mySidenav" className="sidenav" style = {{width: this.state.sideBarWidth}}>
           <a href="#" className = "text-right close-sidebar" onClick={() => this.onSideBar()}>X</a>
@@ -756,6 +828,15 @@ class MBotApp extends React.Component {
                   </label>
                 </div>
               </div>
+              {this.state.mappingMode &&
+              <div className="row mb-5 d-flex justify-content-center text-center">
+                <label htmlFor="file-upload" className="custom-file-upload">
+                  <i className="fa fa-cloud-upload"></i> Upload a Map
+                </label>
+                <input id="file-upload" type="file" onChange = {(event) => this.onFileChange(event)}/>
+              </div>
+              }
+
               <div className="row">
                 <div className="col-8">
                   <span className = "">Drive Mode</span>
@@ -792,18 +873,11 @@ class MBotApp extends React.Component {
                   </label>
                 </div>
               </div>
-              <div className="row text-center">
-                  <div className="col-md-6">
-                    <button className="button" onClick={() => this.onGrabMap()}>Grab Map</button>
-                  </div>
-                  <div className="col-md-6">
-                    <button className="button btn-yellow btn-small"><a target = "_blank" href = "http://192.168.3.1:7000" >Camera Stream</a></button>
-                  </div>
-              </div>
             </div>
           </div>
         </div>
 
+        <DrawImage idx={this.state.idx}/>
 
         <div className="pt-3">
 
@@ -812,7 +886,7 @@ class MBotApp extends React.Component {
               <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
               <button className="button stop-color2 me-3" onClick={() => this.stopmap()}>Stop Mapping</button>
               <button className="button" onClick={() => this.restartmap()}>Restart Mapping</button>
-              <button className="button" onClick={() => this.setpoint()}>Start Point</button>
+              <button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>
             </div>
           }
 
@@ -835,10 +909,11 @@ class MBotApp extends React.Component {
           <TransformWrapper>
             <TransformComponent>
               <div style={canvasStyle}>
-                <DrawMap cells={this.state.cells} width={this.state.width} height={this.state.height} />
+                <DrawMap cells={this.state.cells} prev_cells={this.state.prev_cells} width={this.state.width} height={this.state.height} />
                 
                 <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
                 </canvas>
+                <DrawLines />
                 <DrawLasers state = {this.state}/>
                 <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                           goalCell={this.state.goalCell} goalValid={this.state.goalValid}
@@ -847,6 +922,7 @@ class MBotApp extends React.Component {
                           pixelsPerMeter={this.state.pixelsPerMeter} />
                 <canvas ref={this.clickCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
                         onMouseDown={(e) => this.handleMouseDown(e)}
+                        onContextMenu={(e) => this.handleMouseDown(e)}
                         onMouseMove={(e) => this.handleMouseMove(e)}
                         onMouseUp={() => this.handleMouseUp()}
                         onScroll={() => this.handleZoom()}>
