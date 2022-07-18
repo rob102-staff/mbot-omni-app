@@ -126,6 +126,24 @@ function DriveControlPanel(props) {
   }
 }
 
+class DrawImage extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  shouldComponentUpdate(){
+    console.log("DrawImage: Should update?");
+    return true;
+  }
+
+  render() {
+    console.log("gfd");
+    return (
+      <iframe src="../image.jpg" frameBorder="0"></iframe>
+    );
+  }
+}
+
 class DrawCells extends React.Component {
   constructor(props) {
     super(props);
@@ -306,6 +324,7 @@ class MBotApp extends React.Component {
       ranges: [],
       thetas: [],
       newMap: null,
+      idx: 0,
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
@@ -587,7 +606,7 @@ class MBotApp extends React.Component {
   }
 
   handleMessage(msg) {
-    // TODO: Handle messages from the websocket.
+    console.log(msg)
   }
 
   updateSocketStatus(status) {
@@ -635,17 +654,19 @@ class MBotApp extends React.Component {
 
     for(let i = 0; i < evt.path.length; i++) {  
       this.ctx.beginPath();
-      this.ctx.fillStyle = "rgb(171, 219, 227)";
+      this.ctx.fillStyle = "rgb(209, 34, 15)";
       this.ctx.arc(400+(evt.path[i][0]/0.025), 400-(evt.path[i][1]/0.025), 4, 0, 2 * Math.PI);
 
       this.ctx.beginPath();
       if(i==0){
         this.ctx.moveTo(400, 400);
+        this.ctx.strokeStyle = "rgb(209, 34, 15)";
         this.ctx.lineTo(400+(evt.path[i][0]/0.025), 400-(evt.path[i][1]/0.025))
         this.ctx.stroke();
       }
       else{
         this.ctx.moveTo(400+(evt.path[i-1][0]/0.025), 400-(evt.path[i-1][1]/0.025));
+        this.ctx.strokeStyle = "rgb(209, 34, 15)";
         this.ctx.lineTo(400+(evt.path[i][0]/0.025), 400-(evt.path[i][1]/0.025))
         this.ctx.stroke();
       }
@@ -750,6 +771,7 @@ class MBotApp extends React.Component {
 
   stopmap(){
     console.log("Stopping map")
+    this.setState({idx: this.state.idx++})
   }
 
   restartmap(){
@@ -765,6 +787,7 @@ class MBotApp extends React.Component {
       width: config.CANVAS_DISPLAY_WIDTH,
       height: config.CANVAS_DISPLAY_HEIGHT
     };
+
 
     return (
       <>
@@ -854,7 +877,7 @@ class MBotApp extends React.Component {
           </div>
         </div>
 
-
+        <DrawImage idx={this.state.idx}/>
 
         <div className="pt-3">
 
