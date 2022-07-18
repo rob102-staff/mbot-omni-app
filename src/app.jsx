@@ -708,13 +708,11 @@ class MBotApp extends React.Component {
     return valid;
   }
 
-  onPlan(row, col, plan, name = "default") {
-    let fileName = name + ".json"
+  onPlan(row, col, plan) {
     if (!this.setGoal([row, col])) return;
     // Clear visted canvas
     this.visitGrid.clear();
     var start_cell = this.pixelsToCell(this.state.x, this.state.y);
-    this.setState({mapfile: fileName });
     var plan_data = {type: "plan",
                     data: {
                        goal: [row, col],
