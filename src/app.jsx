@@ -639,7 +639,9 @@ class MBotApp extends React.Component {
       for (let index = 0; index < evt.num_particles; index+=20) {
         //Draws Particle for each instance
         this.ctx.beginPath();
-        this.ctx.arc(400 + (evt.particles[index][0]/0.025), 400 - (evt.particles[index][1]/0.025), 1, 0, 2 * Math.PI)
+        this.ctx.arc(config.ROBOT_START_X + (evt.particles[index][0]/this.state.metersPerCell), 
+                     config.ROBOT_START_Y - (evt.particles[index][1]/this.state.metersPerCell), 
+                     1, 0, 2 * Math.PI)
         this.ctx.fillStyle = 'green';
         this.ctx.fill();
         this.ctx.lineWidth = 1;
