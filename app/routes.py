@@ -35,6 +35,10 @@ def plan_cb(data):
 
     app.logger.info(data)
 
+@socket.on('reset')
+def reset_slam(data):
+    lcm_manager.publish_slam_reset(3, "current.map")
+
 @socket.on('move')
 def test_message(data):
     spd = int(data["speed"])/100

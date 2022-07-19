@@ -758,6 +758,7 @@ class MBotApp extends React.Component {
 
   restartmap(){
     console.log("Resetting map")
+    this.ws.socket.emit('reset', {'test_key': "test_value"})
   }
 
   setpoint(){
@@ -866,7 +867,7 @@ class MBotApp extends React.Component {
             <div className="button-wrapper top-spacing d-flex justify-content-center">
               <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
               <button className="button stop-color2 me-3" onClick={() => this.stopmap()}>Stop Mapping</button>
-              <button className="button" onClick={() => this.restartmap()}>Restart Mapping</button>
+              <button className="button" onClick={() => this.restartmap()}>Reset Mapping</button>
               <button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>
             </div>
           }

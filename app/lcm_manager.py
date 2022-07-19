@@ -8,6 +8,7 @@ from lcmtypes.mbot_state_t import mbot_state_t
 from lcmtypes.lidar_t import lidar_t
 from lcmtypes.planner_request_t import planner_request_t
 from lcmtypes.robot_path_t import robot_path_t
+from lcmtypes.mbot_system_reset_t import mbot_system_reset_t
 from app import lcm_settings
 
 import time
@@ -78,8 +79,13 @@ class LcmCommunicationManager:
 
         self._lcm.publish(lcm_settings.PATH_REQUEST, total_pose.encode())
 
-    def publish_slam_reset(self):
-        self._lcm.publish(lcm_settings.SLAM_RESET)
+    def publish_slam_reset(self, mode, map):
+        slam_reset = mbot_system_reset_t()        
+        slam_reset.utime = int(time.time() * 1000)
+        slam_reset.slam_mode = mode
+        slam_reset.slam_map_location = map
+
+        self._lcm.publish(lcm_settings.MBOT_SYSTEM_RESET, slam_reset.encode())
 
     def reset_odometry_publisher(self):
         cmd=reset_odometry_t()
