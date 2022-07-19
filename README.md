@@ -20,7 +20,7 @@ with HTTP requests.
 The setup for the React app is based off
 [this tutorial](https://medium.com/@JedaiSaboteur/creating-a-react-app-from-scratch-f3c693b84658).
 
-#### Installation
+#### Installation on Linux
 
 The front end relies on NodeJS (to compile and run the JavaScript files), NPM (a
 package manager for NodeJS applications) and React, as well as some other
@@ -34,6 +34,8 @@ Now you should have the `npm` command installed. In the root directory of this
 repository, run:
 ```bash
 npm install
+npm i raspberrypi-node-camera-web-streamer
+npm i react-zoom-pan-pinch
 ```
 This will grab all the packages needed to run the React app.
 
@@ -61,6 +63,13 @@ To confirm that Nodejs is installed, run the commands below:
 
 `npm -v`
 
+Finally, you should have the npm command installed. In the root directory of this
+repository, run the following commands:
+```
+npm install
+npm i raspberrypi-node-camera-web-streamer
+npm i react-zoom-pan-pinch
+```
 
 #### Running
 
@@ -113,6 +122,11 @@ python setup.py install
 To run the Flask app, do:
 ```bash
 npm run start-api
+```
+
+To run the camera, do:
+```
+npm run camera
 ```
 
 Traffic on `http://localhost:8000` will be forwarded to `http://localhost:5000`,
