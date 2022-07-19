@@ -632,20 +632,28 @@ class MBotApp extends React.Component {
 
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
+    //Cycling through each path cell
     for(let i = 0; i < evt.path.length; i++) {  
+      //Draws the point for the path
       this.ctx.beginPath();
       this.ctx.fillStyle = "rgb(171, 219, 227)";
-      this.ctx.arc(400+(evt.path[i][0]/0.025), 400-(evt.path[i][1]/0.025), 4, 0, 2 * Math.PI);
+      this.ctx.arc(config.ROBOT_START_X + (evt.path[i][0]/this.state.metersPerCell), 
+                  (config.ROBOT_START_Y - (evt.path[i][1]/this.state.metersPerCell)), 
+                   4, 0, 2 * Math.PI);
 
+      //Draws a line between the points
       this.ctx.beginPath();
       if(i==0){
-        this.ctx.moveTo(400, 400);
-        this.ctx.lineTo(400+(evt.path[i][0]/0.025), 400-(evt.path[i][1]/0.025))
+        this.ctx.moveTo(config.ROBOT_START_X, config.ROBOT_START_Y);
+        this.ctx.lineTo(config.ROBOT_START_X + (evt.path[i][0]/this.state.metersPerCell), 
+                        config.ROBOT_START_Y - (evt.path[i][1]/this.state.metersPerCell))
         this.ctx.stroke();
       }
       else{
-        this.ctx.moveTo(400+(evt.path[i-1][0]/0.025), 400-(evt.path[i-1][1]/0.025));
-        this.ctx.lineTo(400+(evt.path[i][0]/0.025), 400-(evt.path[i][1]/0.025))
+        this.ctx.moveTo(config.ROBOT_START_X + (evt.path[i-1][0]/this.state.metersPerCell), 
+                        config.ROBOT_START_X - (evt.path[i-1][1]/this.state.metersPerCell));
+        this.ctx.lineTo(config.ROBOT_START_X + (evt.path[i][0]/this.state.metersPerCell), 
+                        config.ROBOT_START_X - (evt.path[i][1]/this.state.metersPerCell))
         this.ctx.stroke();
       }
     }
