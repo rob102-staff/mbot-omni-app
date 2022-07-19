@@ -125,7 +125,7 @@ function DriveControlPanel(props) {
   }
 }
 
-class DrawImage extends React.Component {
+class StreamCamera extends React.Component {
   constructor(props) {
     super(props);
   }
@@ -877,7 +877,8 @@ class MBotApp extends React.Component {
           </div>
         </div>
 
-        <DrawImage idx={this.state.idx}/>
+        {/* <StreamCamera/> */}
+        <video width="640" height="480" controls="controls" src="http://192.168.3.1:7000"></video>
 
         <div className="pt-3">
 
