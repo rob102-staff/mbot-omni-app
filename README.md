@@ -124,6 +124,11 @@ To run the Flask app, do:
 npm run start-api
 ```
 
+To run the camera, do:
+```
+npm run camera
+```
+
 Traffic on `http://localhost:8000` will be forwarded to `http://localhost:5000`,
 where the Flask server is running.
 
