@@ -78,6 +78,9 @@ class LcmCommunicationManager:
 
         self._lcm.publish(lcm_settings.PATH_REQUEST, total_pose.encode())
 
+    def publish_slam_reset(self):
+        self._lcm.publish(lcm_settings.SLAM_RESET)
+
     def reset_odometry_publisher(self):
         cmd=reset_odometry_t()
         cmd.x=0.0
