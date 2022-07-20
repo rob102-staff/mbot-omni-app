@@ -163,12 +163,60 @@ class PathEmitter():
                 self.__lock.acquire()
                 self.__socket.emit(self.__event_name, self.__lcm_path_to_dict())
                 self.__path_available = False
-                self.__lock.release()
 
     def __call__(self, data):
         self.__lock.acquire()
         self.__path = data
         self.__path_available = True
+        self.__lock.release()
+
+    def __del__(self):
+        self.__stop_thread = True
+        self.__thread.join()
+
+class ParticleEmitter():
+    def __init__(self, socket, event_name, period):
+        self.__socket           = socket
+        self.__event_name       = event_name
+        self.__period           = period
+        self.__particle_available   = False
+        self.__particle             = None
+
+        self.__lock   = threading.Lock()
+        self.__thread = threading.Thread(target=self.__run)
+        self.__stop_thread = False
+        self.__thread.start()
+
+    def __lcm_particle_to_dict(self):
+        return {
+            "utime" : self.__particle.utime, 
+            "num_particles" : self.__particle.num_particles,
+            "particles" : self.__extract_particle_poses(self.__particle.num_particles, self.__particle.particles),
+        }
+
+    def __extract_particle_poses(self, num_particles, particles):
+        parts = []
+        for i in range(num_particles):
+            x = particles[i].pose.x
+            y = particles[i].pose.y
+            parts.append((x,y))
+        return parts
+
+
+    def __run(self):
+        while not self.__stop_thread:
+            time.sleep(self.__period)
+            if self.__particle_available:
+                self.__lock.acquire()
+                self.__socket.emit(self.__event_name, self.__lcm_particle_to_dict())
+                self.__particle_available = False
+                self.__lock.release()
+
+
+    def __call__(self, data):
+        self.__lock.acquire()
+        self.__particle = data
+        self.__particle_available = True
         self.__lock.release()
 
     def __del__(self):
