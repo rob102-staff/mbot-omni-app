@@ -163,6 +163,7 @@ class PathEmitter():
                 self.__lock.acquire()
                 self.__socket.emit(self.__event_name, self.__lcm_path_to_dict())
                 self.__path_available = False
+                self.__lock.release()
 
     def __call__(self, data):
         self.__lock.acquire()

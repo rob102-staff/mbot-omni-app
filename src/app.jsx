@@ -643,13 +643,15 @@ class MBotApp extends React.Component {
     const canvas = document.getElementById("mapLine");
     this.ctx = canvas.getContext('2d');
 
+    console.log("khdf")
+
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     //Cycling through each path cell
     for(let i = 0; i < evt.path.length; i++) {  
       //Draws the point for the path
       this.ctx.beginPath();
-      this.ctx.fillStyle = "rgb(171, 219, 227)";
+      this.ctx.fillStyle = "rgb(255, 25, 25)";
       this.ctx.arc(config.ROBOT_START_X + (evt.path[i][0]/this.state.metersPerCell), 
                   (config.ROBOT_START_Y - (evt.path[i][1]/this.state.metersPerCell)), 
                    4, 0, 2 * Math.PI);
@@ -657,9 +659,10 @@ class MBotApp extends React.Component {
       //Draws a line between the points
       this.ctx.beginPath();
       if(i==0){
-        this.ctx.moveTo(config.ROBOT_START_X, config.ROBOT_START_Y);
+        this.ctx.moveTo(config.ROBOT_START_X+(this.state.xPose/this.state.metersPerCell), config.ROBOT_START_Y-(this.state.yPose/this.state.metersPerCell));
         this.ctx.lineTo(config.ROBOT_START_X + (evt.path[i][0]/this.state.metersPerCell), 
                         config.ROBOT_START_Y - (evt.path[i][1]/this.state.metersPerCell))
+        this.ctx.strokeStyle = 'rgb(255, 25, 25)'
         this.ctx.stroke();
       }
       else{
@@ -667,6 +670,7 @@ class MBotApp extends React.Component {
                         config.ROBOT_START_X - (evt.path[i-1][1]/this.state.metersPerCell));
         this.ctx.lineTo(config.ROBOT_START_X + (evt.path[i][0]/this.state.metersPerCell), 
                         config.ROBOT_START_X - (evt.path[i][1]/this.state.metersPerCell))
+        this.ctx.strokeStyle = 'rgb(255, 25, 25)'
         this.ctx.stroke();
       }
     }
@@ -682,7 +686,9 @@ class MBotApp extends React.Component {
       for (let index = 0; index < evt.num_particles; index+=20) {
         //Draws Particle for each instance
         this.ctx.beginPath();
-        this.ctx.arc(400 + (evt.particles[index][0]/0.025), 400 - (evt.particles[index][1]/0.025), 1, 0, 2 * Math.PI)
+        this.ctx.arc(config.ROBOT_START_X + (evt.particles[index][0]/this.state.metersPerCell), 
+                     config.ROBOT_START_Y - (evt.particles[index][1]/this.state.metersPerCell), 
+                     1, 0, 2 * Math.PI)
         this.ctx.fillStyle = 'green';
         this.ctx.fill();
         this.ctx.lineWidth = 1;
