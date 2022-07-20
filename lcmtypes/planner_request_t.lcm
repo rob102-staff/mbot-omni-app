@@ -1,0 +1,7 @@
+// planner_request_t request for planner
+struct planner_request_t
+{
+    int64_t utime;
+    pose_xyt_t goal;
+    boolean require_plan;
+}

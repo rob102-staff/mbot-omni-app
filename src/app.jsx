@@ -175,13 +175,6 @@ class DrawCells extends React.Component {
         this.drawPath();
       }
 
-      // If there's a clicked cell, draw it.
-      if (this.props.clickedCell.length > 0) {
-        let scale = this.props.cellSize * 0.2
-        this.cellGrid.drawCell(this.props.clickedCell,
-                               config.CLICKED_CELL_COLOUR, this.props.cellSize);
-      }
-
       // If there's a goal cell, clear it in case it was clicked then draw it.
       if (this.props.goalCell.length > 0) {
         this.cellGrid.clearCell(this.props.goalCell, this.props.cellSize);
@@ -247,6 +240,19 @@ class DrawLasers extends React.Component {
   render(){
     return(
       <canvas id="mapLasers" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+      </canvas>
+    );
+  }
+}
+
+class DrawPaths extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render(){
+    return(
+      <canvas id="mapLine" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
       </canvas>
     );
   }
@@ -321,6 +327,7 @@ class MBotApp extends React.Component {
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
     this.ws.handleLaser = (evt) => { this.handleLasers(evt)};
     this.ws.handlePose = (evt) => { this.handlePoses(evt)};
+    this.ws.handlePath = (evt) => { this.handlePaths(evt)}
     this.ws.handleParticle = (evt) => { this.handleParticles(evt)};
 
     this.driveControls = new DriveControls(this.ws);
@@ -521,6 +528,7 @@ class MBotApp extends React.Component {
 
   handleMapClick(event) {
     if (!this.state.mapLoaded) return;
+    let plan = true;
 
     this.rect = this.clickCanvas.current.getBoundingClientRect();
     
@@ -529,8 +537,10 @@ class MBotApp extends React.Component {
     let cs = this.rect.width / this.state.width;
     let col = Math.floor(x / cs);
     let row = Math.floor(y / cs);
-
-    this.setState({clickedCell: [row, col] });
+    this.setState({clickedCell: [col, row] });
+    // Implement check for ctrl-click and whether an a* plan is required
+    // if(event.type === "mousedown") plan = true;
+    this.onPlan(row, col, plan);
   }
 
   handleMouseDown(event) {
@@ -629,6 +639,43 @@ class MBotApp extends React.Component {
     this.setState({x_values : a, y_values : b})
   }
 
+  handlePaths(evt) {
+    const canvas = document.getElementById("mapLine");
+    this.ctx = canvas.getContext('2d');
+
+    console.log("khdf")
+
+    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    //Cycling through each path cell
+    for(let i = 0; i < evt.path.length; i++) {  
+      //Draws the point for the path
+      this.ctx.beginPath();
+      this.ctx.fillStyle = "rgb(255, 25, 25)";
+      this.ctx.arc(config.ROBOT_START_X + (evt.path[i][0]/this.state.metersPerCell), 
+                  (config.ROBOT_START_Y - (evt.path[i][1]/this.state.metersPerCell)), 
+                   4, 0, 2 * Math.PI);
+
+      //Draws a line between the points
+      this.ctx.beginPath();
+      if(i==0){
+        this.ctx.moveTo(config.ROBOT_START_X+(this.state.xPose/this.state.metersPerCell), config.ROBOT_START_Y-(this.state.yPose/this.state.metersPerCell));
+        this.ctx.lineTo(config.ROBOT_START_X + (evt.path[i][0]/this.state.metersPerCell), 
+                        config.ROBOT_START_Y - (evt.path[i][1]/this.state.metersPerCell))
+        this.ctx.strokeStyle = 'rgb(255, 25, 25)'
+        this.ctx.stroke();
+      }
+      else{
+        this.ctx.moveTo(config.ROBOT_START_X + (evt.path[i-1][0]/this.state.metersPerCell), 
+                        config.ROBOT_START_X - (evt.path[i-1][1]/this.state.metersPerCell));
+        this.ctx.lineTo(config.ROBOT_START_X + (evt.path[i][0]/this.state.metersPerCell), 
+                        config.ROBOT_START_X - (evt.path[i][1]/this.state.metersPerCell))
+        this.ctx.strokeStyle = 'rgb(255, 25, 25)'
+        this.ctx.stroke();
+      }
+    }
+  }
+  
   handleParticles(evt){
     const canvas = document.getElementById("mapParticles");
     this.ctx = canvas.getContext('2d');
@@ -639,7 +686,9 @@ class MBotApp extends React.Component {
       for (let index = 0; index < evt.num_particles; index+=20) {
         //Draws Particle for each instance
         this.ctx.beginPath();
-        this.ctx.arc(400 + (evt.particles[index][0]/0.025), 400 - (evt.particles[index][1]/0.025), 1, 0, 2 * Math.PI)
+        this.ctx.arc(config.ROBOT_START_X + (evt.particles[index][0]/this.state.metersPerCell), 
+                     config.ROBOT_START_Y - (evt.particles[index][1]/this.state.metersPerCell), 
+                     1, 0, 2 * Math.PI)
         this.ctx.fillStyle = 'green';
         this.ctx.fill();
         this.ctx.lineWidth = 1;
@@ -715,21 +764,18 @@ class MBotApp extends React.Component {
     return valid;
   }
 
-  onPlan() {
-    // If goal isn't valid, don't plan.
-    if (!this.setGoal(this.state.clickedCell)) return;
+  onPlan(row, col, plan) {
+    if (!this.setGoal([row, col])) return;
     // Clear visted canvas
     this.visitGrid.clear();
     var start_cell = this.pixelsToCell(this.state.x, this.state.y);
     var plan_data = {type: "plan",
-                     data: {
-                        map_name: this.state.mapfile.name,
-                        goal: "[" + this.state.clickedCell[0] + " " + this.state.clickedCell[1] + "]",
-                        start: "[" + start_cell[0] + " " + start_cell[1] + "]",
-                        algo: config.ALGO_TYPES[this.state.algo].label
-                      }
-                    };
-    this.ws.send(plan_data);
+                    data: {
+                       goal: [row, col],
+                       plan: plan
+                     }
+                   };
+    this.ws.socket.emit("plan", {goal: [row, col], plan: plan})
   }
 
   anExamplePost() {
@@ -908,6 +954,7 @@ class MBotApp extends React.Component {
                 
                 <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
                 </canvas>
+                <DrawPaths />
                 <DrawParticles/>
                 <DrawLasers state = {this.state}/>
                 <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
@@ -921,6 +968,7 @@ class MBotApp extends React.Component {
 
                 <canvas ref={this.clickCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
                         onMouseDown={(e) => this.handleMouseDown(e)}
+                        onContextMenu={(e) => this.handleMouseDown(e)}
                         onMouseMove={(e) => this.handleMouseMove(e)}
                         onMouseUp={() => this.handleMouseUp()}
                         onScroll={() => this.handleZoom()}>

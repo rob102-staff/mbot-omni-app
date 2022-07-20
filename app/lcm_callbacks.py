@@ -127,42 +127,48 @@ class PoseEmitter():
         self.__stop_thread = True
         self.__thread.join()
 
-class LidarEmitter():
+
+class PathEmitter():
     def __init__(self, socket, event_name, period):
         self.__socket           = socket
         self.__event_name       = event_name
         self.__period           = period
-        self.__lidar_available  = False
-        self.__lidar            = None
+        self.__path_available   = False
+        self.__path             = None
 
         self.__lock   = threading.Lock()
         self.__thread = threading.Thread(target=self.__run)
         self.__stop_thread = False
         self.__thread.start()
 
-    def __lcm_lidar_to_dict(self):
+    def __lcm_path_to_dict(self):
         return {
-            "utime" : self.__lidar.utime, 
-            "num_ranges" : self.__lidar.num_ranges,
-            "ranges" : self.__lidar.ranges,
-            "thetas" : self.__lidar.thetas,
-            "times" : self.__lidar.times,
-            "intensities" : self.__lidar.intensities,
+            "utime" : self.__path.utime, 
+            "path_length" : self.__path.path_length,
+            "path" : self.__extract_path(self.__path.path_length, self.__path.path),
         }
+
+    def __extract_path(self, path_length, path):
+        parts = []
+        for i in range(path_length):
+            x = path[i].x
+            y = path[i].y
+            parts.append((x, y))
+        return parts
 
     def __run(self):
         while not self.__stop_thread:
             time.sleep(self.__period)
-            if self.__lidar_available:
+            if self.__path_available:
                 self.__lock.acquire()
-                self.__socket.emit(self.__event_name, self.__lcm_lidar_to_dict())
-                self.__lidar_available = False
+                self.__socket.emit(self.__event_name, self.__lcm_path_to_dict())
+                self.__path_available = False
                 self.__lock.release()
 
     def __call__(self, data):
         self.__lock.acquire()
-        self.__lidar = data
-        self.__lidar_available = True
+        self.__path = data
+        self.__path_available = True
         self.__lock.release()
 
     def __del__(self):
@@ -206,6 +212,7 @@ class ParticleEmitter():
                 self.__socket.emit(self.__event_name, self.__lcm_particle_to_dict())
                 self.__particle_available = False
                 self.__lock.release()
+
 
     def __call__(self, data):
         self.__lock.acquire()
