@@ -424,8 +424,9 @@ class MBotApp extends React.Component {
     if(map_upload == null) return;
 
     var map = parseMapFromLcm(map_upload)
-    this.setState({newMap: map})
-    this.updateMap(map);
+    console.log(map)
+    this.ws.socket.emit('reset', {'slam_mode' : 2, 'map_file' : map})
+    // this.setState({newMap: map})
   }
 
   saveMap() {
@@ -758,7 +759,7 @@ class MBotApp extends React.Component {
 
   restartmap(){
     console.log("Resetting map")
-    this.ws.socket.emit('reset', {'test_key': "test_value"})
+    // let slam_mode = prompt("What slam mode do you want?")
   }
 
   setpoint(){
