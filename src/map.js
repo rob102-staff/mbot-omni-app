@@ -64,8 +64,8 @@ function normalizeList(list) {
   return list;
 }
 
-function downloadObjectAsJson(exportObj, exportName){
-  var dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+function downloadObjectAsJson(map, exportName){
+  var dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(map));
   var downloadAnchorNode = document.createElement('a');
   downloadAnchorNode.setAttribute("href",     dataStr);
   downloadAnchorNode.setAttribute("download", exportName + ".json");

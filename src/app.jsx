@@ -1,6 +1,7 @@
 import React from "react";
 import ReactDOM from "react-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
+import * as fs from 'fs';
 
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
@@ -443,7 +444,21 @@ class MBotApp extends React.Component {
 
   saveMap() {
     var name = prompt("What do you want to name the map? (.json will automatically be added to the end)");
-    downloadObjectAsJson(this.state.newMap, name)
+    let updatedCells = new Array(this.state.cells.length);
+    let cell_upscale;
+    for (let index = 0; index < this.state.cells.length; index++) {
+      if(this.state.cells[index]==0.5) 
+      {
+        updatedCells[index] = 0
+      }
+      else{
+        cell_upscale = (256*this.state.cells[index] - 128)
+        if (cell_upscale >= 127) cell_upscale = 127
+        updatedCells[index] = parseInt(cell_upscale.toFixed());
+      }
+      console.log(index, "/", this.state.cells.length)
+    }
+    downloadObjectAsJson(updatedCells, name)
   }
 
   onFileUpload() {
