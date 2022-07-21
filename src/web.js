@@ -27,7 +27,9 @@ class WSHelper {
       } 
     }
 
-    this.socket = io(this.uri);
+    this.socket = io(this.uri)(httpServer, {
+      maxHttpBufferSize: 1e8
+    });
 
     this.socket.on("message", (evt) => this.userHandleMessage(evt));
     this.socket.on("connect", (evt) => this.handleOpen(evt));
