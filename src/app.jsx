@@ -436,10 +436,13 @@ class MBotApp extends React.Component {
   onMapChange(map_upload){
     if(map_upload == null) return;
 
-    var map = parseMapFromLcm(map_upload)
-    console.log(map)
-    this.ws.socket.emit('reset', {'slam_mode' : 2, 'map_file' : map})
-    // this.setState({newMap: map})
+    // var map = parseMapFromLcm(map_upload)
+    console.log(map_upload)
+    let map_cells = map_upload.cells.slice(0,100);
+    console.log(map_upload.cells)
+
+    this.ws.socket.emit('reset', {'mode' : 2, 'width':map_upload.width, 'height':map_upload.height, 'num_cells':map_upload.num_cells, 'origin_x':map_upload.origin_x, 'origin_y':map_upload.origin_y, 'cells':map_cells})
+    // this.setState({newMap: map_upload})
   }
 
   saveMap() {

@@ -9,7 +9,7 @@ from app.lcm_callbacks import LidarEmitter, OccupancyGridEmitter, PoseEmitter, P
 # stored in the "src" folder.
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'development key'
-socket = SocketIO(app , cors_allowed_origins='*')
+socket = SocketIO(app , cors_allowed_origins='*', maxHttpBufferSize=1e8)
 CORS(app) 
 
 lcm_callback_dict = {

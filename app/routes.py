@@ -39,7 +39,7 @@ def plan_cb(data):
 def reset_slam(data):
     print("Socket received reset call")
     print("###############################")
-    lcm_manager.publish_slam_reset(data["slam_mode"], data["map_file"])
+    # lcm_manager.publish_slam_reset(data["slam_mode"], data["map_file"])
 
 @socket.on('move')
 def test_message(data):
