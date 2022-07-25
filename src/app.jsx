@@ -423,7 +423,6 @@ class MBotApp extends React.Component {
    *****************************/
 
   onFileChange(event) {
-    console.log("dfskjd")
     this.setState({ mapfile: event.target.files[0] });
     this.resetCanvas()
 
@@ -437,14 +436,7 @@ class MBotApp extends React.Component {
 
   onMapChange(map_upload){
     if(map_upload == null) return;
-
-    // var map = parseMapFromLcm(map_upload)
-    console.log(map_upload)
-    let map_cells = map_upload.cells;
-    console.log(map_upload.cells)
-
     this.ws.socket.emit('reset', {'mode' : 2, 'map':map_upload})
-    // this.setState({newMap: map_upload})
   }
 
   saveMap() {
@@ -816,11 +808,7 @@ class MBotApp extends React.Component {
   restartmap(){
     console.log("Resetting map")
     this.resetCanvas()
-    this.ws.socket.emit('full_reset', {'mode' : 3})
-  }
-
-  setpoint(){
-    console.log("Setting start point")
+    this.ws.socket.emit('reset', {'mode' : 3})
   }
 
   render() {

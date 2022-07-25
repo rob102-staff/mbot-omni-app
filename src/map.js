@@ -29,19 +29,14 @@ function parseMapFromSocket(data) {
   return map;
 }
 
-function parseMapFromLcm(msg, normalize=true){
+function parseMapFromLcm(msg){
   var map = {};
   map.origin = msg["origin"]
   map.width = msg["width"]
   map.height = msg["height"]
   map.meters_per_cell = msg["meters_per_cell"]
   map.num_cells = msg["num_cells"]
-  if(normalize){
-    map.cells = normalizeList(msg["cells"])
-  }else{
-    map.cells = msg["cells"]
-  }
-  
+  map.cells = normalizeList(msg["cells"])
   return map
 }
 

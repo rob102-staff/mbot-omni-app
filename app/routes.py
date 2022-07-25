@@ -37,15 +37,11 @@ def plan_cb(data):
 
 @socket.on('reset')
 def reset_slam(data):
-    print("Socket received reset call")
-    print("###############################")
-    lcm_manager.publish_slam_reset(data["mode"], data["map"])
-
-@socket.on('full_reset')
-def reset_full_slam(data):
-    print("Socket did in fact received reset call")
-    print("###############################")
-    lcm_manager.publish_full_slam_reset(data["mode"])
+    # Checks if the user wants to reset to localization mode (2) or reset Full SLAM
+    if(data["mode"] == 2):
+        lcm_manager.publish_slam_reset(data["mode"], data["map"])
+    else
+        lcm_manager.publish_slam_reset(data["mode"])
 
 @socket.on('move')
 def test_message(data):
