@@ -41,6 +41,12 @@ def reset_slam(data):
     print("###############################")
     lcm_manager.publish_slam_reset(data["mode"], data["map"])
 
+@socket.on('full_reset')
+def reset_full_slam(data):
+    print("Socket did in fact received reset call")
+    print("###############################")
+    lcm_manager.publish_full_slam_reset(data["mode"])
+
 @socket.on('move')
 def test_message(data):
     spd = int(data["speed"])/100

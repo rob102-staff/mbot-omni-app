@@ -107,6 +107,16 @@ class LcmCommunicationManager:
 
         self._lcm.publish(lcm_settings.MBOT_SYSTEM_RESET, slam_reset.encode())
 
+    def publish_full_slam_reset(self, mode):
+        slam_reset = mbot_system_reset_t()
+        slam_reset.utime = int(time.time() * 1000)
+        slam_reset.slam_mode = int(mode)
+
+        print("slam is here")
+        print("!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!")
+
+        self._lcm.publish(lcm_settings.MBOT_SYSTEM_RESET, slam_reset.encode())
+
     def reset_odometry_publisher(self):
         cmd=reset_odometry_t()
         cmd.x=0.0

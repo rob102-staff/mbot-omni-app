@@ -298,6 +298,10 @@ input:checked + .slider:before {
   background-color: #167541;
 }
 
+.upload-color{
+  background-color:rgb(122, 64, 136)
+}
+
 .new-background-color{
   background: #021f3a;
   color:#ccc;
