@@ -425,7 +425,7 @@ class MBotApp extends React.Component {
   onFileChange(event) {
     console.log("dfskjd")
     this.setState({ mapfile: event.target.files[0] });
-    // this.resetCanvas()
+    this.resetCanvas()
 
     const fileSelector = document.querySelector('input[type="file"]');
     const reader = new FileReader()
@@ -815,7 +815,7 @@ class MBotApp extends React.Component {
 
   restartmap(){
     console.log("Resetting map")
-    // this.resetCanvas()
+    this.resetCanvas()
     this.ws.socket.emit('full_reset', {'mode' : 3})
   }
 
