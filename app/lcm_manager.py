@@ -96,7 +96,7 @@ class LcmCommunicationManager:
             for i in range(map_obj.num_cells):
                 val = mapdata['cells'][i]
                 if val==0.5:
-                updated_val = 0
+                    updated_val = 0
                 else:
                     updated_val = min(int((val*256)-128), 127)
                 map_obj.cells.append(updated_val)
