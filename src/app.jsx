@@ -806,7 +806,6 @@ class MBotApp extends React.Component {
   }
 
   restartmap(){
-    console.log("Resetting map")
     this.resetCanvas()
     this.ws.socket.emit('reset', {'mode' : 3})
   }
