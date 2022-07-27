@@ -9,6 +9,7 @@ from lcmtypes.mbot_state_t import mbot_state_t
 from lcmtypes.lidar_t import lidar_t
 from lcmtypes.planner_request_t import planner_request_t
 from lcmtypes.robot_path_t import robot_path_t
+from lcmtypes.mbot_system_reset_t import mbot_system_reset_t
 from app import lcm_settings
 
 import time
@@ -78,6 +79,30 @@ class LcmCommunicationManager:
         total_pose.require_plan = plan
 
         self._lcm.publish(lcm_settings.PATH_REQUEST, total_pose.encode())
+
+    def publish_slam_reset(self, mode, mapdata = None):
+        slam_reset = mbot_system_reset_t()
+        slam_reset.utime = int(time.time() * 1000)
+        slam_reset.slam_mode = int(mode)
+
+        if mapdata is not None:
+            map_obj = occupancy_grid_t()
+            map_obj.origin_x = float(mapdata['origin'][0])
+            map_obj.origin_y = float(mapdata['origin'][1])
+            map_obj.meters_per_cell = float(mapdata['meters_per_cell'])
+            map_obj.width = int(mapdata['width'])
+            map_obj.height = int(mapdata['height'])
+            map_obj.num_cells = int(mapdata['num_cells'])
+            for i in range(map_obj.num_cells):
+                val = mapdata['cells'][i]
+                if val==0.5:
+                    updated_val = 0
+                else:
+                    updated_val = min(int((val*256)-128), 127)
+                map_obj.cells.append(updated_val)
+            slam_reset.map_obj = map_obj
+
+        self._lcm.publish(lcm_settings.MBOT_SYSTEM_RESET, slam_reset.encode())
 
     def reset_odometry_publisher(self):
         cmd=reset_odometry_t()

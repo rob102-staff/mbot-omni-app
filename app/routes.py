@@ -35,6 +35,14 @@ def plan_cb(data):
 
     app.logger.info(data)
 
+@socket.on('reset')
+def reset_slam(data):
+    # Checks if the user wants to reset to localization mode (2) or reset Full SLAM
+    if(data["mode"] == 2):
+        lcm_manager.publish_slam_reset(data["mode"], data["map"])
+    else:
+        lcm_manager.publish_slam_reset(data["mode"])
+
 @socket.on('move')
 def test_message(data):
     spd = int(data["speed"])/100

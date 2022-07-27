@@ -424,6 +424,7 @@ class MBotApp extends React.Component {
 
   onFileChange(event) {
     this.setState({ mapfile: event.target.files[0] });
+    this.resetCanvas()
 
     const fileSelector = document.querySelector('input[type="file"]');
     const reader = new FileReader()
@@ -435,10 +436,7 @@ class MBotApp extends React.Component {
 
   onMapChange(map_upload){
     if(map_upload == null) return;
-
-    var map = parseMapFromLcm(map_upload)
-    this.setState({newMap: map})
-    this.updateMap(map);
+    this.ws.socket.emit('reset', {'mode' : 2, 'map':map_upload})
   }
 
   saveMap() {
@@ -642,9 +640,6 @@ class MBotApp extends React.Component {
   handlePaths(evt) {
     const canvas = document.getElementById("mapLine");
     this.ctx = canvas.getContext('2d');
-
-    console.log("khdf")
-
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     //Cycling through each path cell
@@ -696,6 +691,12 @@ class MBotApp extends React.Component {
         this.ctx.stroke();      
       }
     }
+  }
+
+  resetCanvas(){
+    const pathCanvas = document.getElementById("mapLine");
+    this.ctx = pathCanvas.getContext('2d');
+    this.ctx.clearRect(0, 0, pathCanvas.width, pathCanvas.height);
   }
 
   /**********************
@@ -805,11 +806,8 @@ class MBotApp extends React.Component {
   }
 
   restartmap(){
-    console.log("Resetting map")
-  }
-
-  setpoint(){
-    console.log("Setting start point")
+    this.resetCanvas()
+    this.ws.socket.emit('reset', {'mode' : 3})
   }
 
   render() {
@@ -925,9 +923,14 @@ class MBotApp extends React.Component {
           {this.state.mappingMode &&
             <div className="button-wrapper top-spacing d-flex justify-content-center">
               <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
-              <button className="button stop-color2 me-3" onClick={() => this.stopmap()}>Stop Mapping</button>
-              <button className="button" onClick={() => this.restartmap()}>Restart Mapping</button>
+              <button className="button" onClick={() => this.restartmap()}>Reset Mapping</button>
+              <label htmlFor="file-upload" className="button upload-color">
+                  <i className="fa fa-cloud-upload"></i> Upload a Map
+              </label>
+              <input id="file-upload" type="file" onClick = {(event) => this.onFileChange(event)}/>
               <button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>
+              <button className="button stop-color2 me-3" onClick={() => this.stopmap()}>Stop Mapping</button>
+
             </div>
           }
 
