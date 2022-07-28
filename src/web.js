@@ -18,6 +18,7 @@ class WSHelper {
     this.handlePose = (evt) => {console.warn("handlePose is not yet set up.")};
     this.handlePath = (evt) => {console.warn("handlePath is not yet set up.")};
     this.handleParticle = (evt) => {console.warn("handleParticle is not yet set up.")}
+    this.handleObstacle = (evt) => {console.warn("handleObstacle is not yet set up.")}
   }
 
   connect() {
@@ -38,6 +39,7 @@ class WSHelper {
     this.socket.on('path', (evt) => this.handlePath(evt));
     this.socket.on('pose', (evt) => this.handlePose(evt))
     this.socket.on('particles', (evt) => this.handleParticle(evt))
+    this.socket.on('obstacles', (evt) => this.handleObstacle(evt))
 
     console.log("Connection status: ", this.status())
     return this.status();

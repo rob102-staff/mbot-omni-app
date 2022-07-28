@@ -43,6 +43,7 @@ class LcmCommunicationManager:
         self.__subscribe(lcm_settings.SLAM_POSE_CHANNEL, self.pose_listener)
         self.__subscribe(lcm_settings.CONTROLLER_PATH_CHANNEL, self.path_listener)
         self.__subscribe(lcm_settings.SLAM_PARTICLES_CHANNEL, self.particle_listener)        
+        self.__subscribe(lcm_settings.OBSTACLE_DISTANCES_CHANNEL, self.obstacle_listener)        
         ###################################
 
         self.__lcm_thread = threading.Thread(target=self.__run_handle_loop)
@@ -132,6 +133,11 @@ class LcmCommunicationManager:
             self._callback_dict[channel](decoded_data)
 
     def _occupancy_grid_listener(self, channel, data):
+        decoded_data = occupancy_grid_t.decode(data)
+        if channel in self._callback_dict.keys(): 
+            self._callback_dict[channel](decoded_data)
+
+    def obstacle_listener(self, channel, data):
         decoded_data = occupancy_grid_t.decode(data)
         if channel in self._callback_dict.keys(): 
             self._callback_dict[channel](decoded_data)

@@ -329,6 +329,7 @@ class MBotApp extends React.Component {
     this.ws.handlePose = (evt) => { this.handlePoses(evt)};
     this.ws.handlePath = (evt) => { this.handlePaths(evt)}
     this.ws.handleParticle = (evt) => { this.handleParticles(evt)};
+    this.ws.handleObstacle = (evt) => { this.handleObstacles(evt)};
 
     this.driveControls = new DriveControls(this.ws);
     this.visitGrid = new GridCellCanvas();
@@ -691,6 +692,10 @@ class MBotApp extends React.Component {
         this.ctx.stroke();      
       }
     }
+  }
+
+  handleObstacles(evt){
+    console.log(evt)
   }
 
   resetCanvas(){

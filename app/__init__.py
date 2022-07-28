@@ -17,7 +17,8 @@ lcm_callback_dict = {
     lcm_settings.LIDAR_CHANNEL: LidarEmitter(socket, 'lidar', period=0.5),
     lcm_settings.SLAM_POSE_CHANNEL: PoseEmitter(socket, 'pose', period=0.5),
     lcm_settings.CONTROLLER_PATH_CHANNEL: PathEmitter(socket, 'path', period=0.5),
-    lcm_settings.SLAM_PARTICLES_CHANNEL: ParticleEmitter(socket, 'particles', period=0.5)
+    lcm_settings.SLAM_PARTICLES_CHANNEL: ParticleEmitter(socket, 'particles', period=0.5),
+    lcm_settings.OBSTACLE_DISTANCES_CHANNEL: OccupancyGridEmitter(socket, 'obstacles', period=0.5)
 }
 
 lcm_manager = LcmCommunicationManager(lcm_callback_dict)
