@@ -1,0 +1,5 @@
+struct cell_coordinate_t
+{
+    int8_t x;
+    int8_t y;
+}

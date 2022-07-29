@@ -10,6 +10,7 @@ from lcmtypes.lidar_t import lidar_t
 from lcmtypes.planner_request_t import planner_request_t
 from lcmtypes.robot_path_t import robot_path_t
 from lcmtypes.mbot_system_reset_t import mbot_system_reset_t
+from lcmtypes.costmap_t import costmap_t
 from app import lcm_settings
 
 import time
@@ -138,7 +139,7 @@ class LcmCommunicationManager:
             self._callback_dict[channel](decoded_data)
 
     def obstacle_listener(self, channel, data):
-        decoded_data = occupancy_grid_t.decode(data)
+        decoded_data = costmap_t.decode(data)
         if channel in self._callback_dict.keys(): 
             self._callback_dict[channel](decoded_data)
 

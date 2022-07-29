@@ -1,0 +1,8 @@
+struct costmap_t
+{
+    int64_t utime;
+    
+    int32_t num_cells;
+    cell_coordinate_t pairs[num_cells];
+    int8_t distances[num_cells];
+}
