@@ -79,6 +79,14 @@ class LcmCommunicationManager:
         total_pose.require_plan = plan
 
         self._lcm.publish(lcm_settings.PATH_REQUEST, total_pose.encode())
+    
+    def publish_initial_pose(self, x, y, theta):
+        pose = pose_xyt_t()
+        pose.utime = int(time.time() * 1000)
+        pose.x = x
+        pose.y = y
+        pose.theta = theta
+        self._lcm.publish(lcm_settings.INITIAL_POSE_CHANNEL, pose.encode())
 
     def publish_slam_reset(self, mode, mapdata = None):
         slam_reset = mbot_system_reset_t()

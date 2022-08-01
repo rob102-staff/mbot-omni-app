@@ -302,6 +302,7 @@ class MBotApp extends React.Component {
       mappingMode: false,
       drivingMode: false,
       sideBarMode: false,
+      poseClickMode: false,
       sideBarWidth: 0,
       omni: false,
       diff: false,
@@ -526,19 +527,23 @@ class MBotApp extends React.Component {
 
   handleMapClick(event) {
     if (!this.state.mapLoaded) return;
-    let plan = true;
-
     this.rect = this.clickCanvas.current.getBoundingClientRect();
-    
     var x = event.clientX - this.rect.left;
     var y = this.rect.bottom - event.clientY;
     let cs = this.rect.width / this.state.width;
     let col = Math.floor(x / cs);
     let row = Math.floor(y / cs);
     this.setState({clickedCell: [col, row] });
-    // Implement check for ctrl-click and whether an a* plan is required
-    // if(event.type === "mousedown") plan = true;
-    this.onPlan(row, col, plan);
+    if(this.state.poseClickMode == 1){
+      this.setState({initalPoseFirstClick: [col, row], poseClickMode: 2})
+    }else if(this.state.poseClickMode == 2){
+      this.sendInitialPose(row, col);
+    }else{
+      let plan = true;
+      // Implement check for ctrl-click and whether an a* plan is required
+      // if(event.type === "mousedown") plan = true;
+      this.onPlan(row, col, plan);
+    }
   }
 
   handleMouseDown(event) {
@@ -546,7 +551,7 @@ class MBotApp extends React.Component {
     var y = this.rect.bottom - event.clientY;
     var robotRadius = config.ROBOT_SIZE *this.state.pixelsPerMeter / 2;
     // if click is near robot, set isDown as true
-    if (x < this.state.x + robotRadius && x > this.state.x - robotRadius &&
+    if (!this.state.poseClickMode && x < this.state.x + robotRadius && x > this.state.x - robotRadius &&
         y < this.state.y + robotRadius && y > this.state.y - robotRadius) {
       this.setState({ isRobotClicked: true });
     }
@@ -797,15 +802,26 @@ class MBotApp extends React.Component {
   }
 
   //TODO: emit message to backend when the running mode is changed.
-  startmap(){
-    console.log("Starting to map")
+  sendInitialPose(row, col){
+
+    var x = this.state.initalPoseFirstClick[0];
+    var y = this.state.initalPoseFirstClick[1];
+    var dx = col;
+    var dy = row;
+    var theta = Math.atan2(dy-y, dx-x);
+    this.setState({poseClickMode: 0}); // reset pose click mode
+    this.ws.socket.emit('initial_pose', {'x': start_cell[0], 'y':start_cell[1], 'theta':theta});
   }
 
-  stopmap(){
+  startInitialPoseMode(){
+    this.setState({poseClickMode: 1});
+  }
+
+  stopMap(){
     console.log("Stopping map")
   }
 
-  restartmap(){
+  restartMap(){
     this.resetCanvas()
     this.ws.socket.emit('reset', {'mode' : 3})
   }
@@ -922,14 +938,14 @@ class MBotApp extends React.Component {
 
           {this.state.mappingMode &&
             <div className="button-wrapper top-spacing d-flex justify-content-center">
-              <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
-              <button className="button" onClick={() => this.restartmap()}>Reset Mapping</button>
+              <button className="button start-color2" onClick={() => this.startInitialPoseMode()}>Send Initial Pose</button>
+              <button className="button" onClick={() => this.restartMap()}>Reset Mapping</button>
               <label htmlFor="file-upload" className="button upload-color">
                   <i className="fa fa-cloud-upload"></i> Upload a Map
               </label>
               <input id="file-upload" type="file" onClick = {(event) => this.onFileChange(event)}/>
               <button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>
-              <button className="button stop-color2 me-3" onClick={() => this.stopmap()}>Stop Mapping</button>
+              <button className="button stop-color2 me-3" onClick={() => this.stopMap()}>Stop Mapping</button>
 
             </div>
           }

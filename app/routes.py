@@ -63,3 +63,7 @@ def test_message(data):
     app.logger.info(data)
     lcm_manager.publish_motor_commands(0,0,0)
 
+@socket.on('initial_pose')
+def send_intial_pose(data):
+    lcm_manager.publish_initial_pose(data['x'], data['y'], data['theta'])
+
