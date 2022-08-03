@@ -97,7 +97,85 @@ function DriveControlPanel(props) {
  *     CANVAS
  *******************/
 
- class DrawMap extends React.Component {
+class DrawPoseEstimate extends React.Component{
+  constructor(props){
+    super(props);
+  }
+
+  // shouldComponentUpdate(nextProps, nextState){
+  //   var mouse_x_changed = (this.props.mouse_loc[0] != nextProps.mouse_loc[0])
+  //   var mouse_y_changed = (this.props.mouse_loc[1] != nextProps.mouse_loc[1])
+  //   console.log((mouse_x_changed || mouse_y_changed))
+  //   return (mouse_x_changed || mouse_y_changed)
+  // }
+  
+  componentDidUpdate(){
+    //checks if the mapping mode is engaged
+    if(this.props.poseClickMode==2){
+      // console.log("Drawing pose estimate");
+      var c = document.getElementById("poseEstimate");
+      var ctx = c.getContext("2d");
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      var fromx = this.props.start[1];
+      var fromy = this.props.start[0];
+      var tox = this.props.mouse_loc[0];
+      var toy = this.props.mouse_loc[1];
+
+      // console.log("From: (", fromx, ", ", fromy, ")");
+      // console.log("To: (", tox, ", ", toy,")");
+
+
+      var dx = fromx - tox;
+      var dy = fromy - toy;
+      var angle = Math.atan2(dy, dx);
+
+      const width = 10;
+      var headlen = 10;
+      // This makes it so the end of the arrow head is located at tox, toy, don't ask where 1.15 comes from
+      tox -= Math.cos(angle) * ((width*1.15));
+      toy -= Math.sin(angle) * ((width*1.15));
+
+      var angle = Math.atan2(toy-fromy,tox-fromx);
+      
+      //starting path of the arrow from the start square to the end square and drawing the stroke
+      ctx.beginPath();
+      ctx.moveTo(fromx, fromy);
+      ctx.lineTo(tox, toy);
+      ctx.strokeStyle = "#cc0000";
+      ctx.lineWidth = width;
+      ctx.stroke();
+      
+      //starting a new path from the head of the arrow to one of the sides of the point
+      ctx.beginPath();
+      ctx.moveTo(tox, toy);
+      ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),toy-headlen*Math.sin(angle-Math.PI/7));
+      
+      //path from the side point of the arrow, to the other side point
+      ctx.lineTo(tox-headlen*Math.cos(angle+Math.PI/7),toy-headlen*Math.sin(angle+Math.PI/7));
+      
+      //path from the side point back to the tip of the arrow, and then again to the opposite side point
+      ctx.lineTo(tox, toy);
+      ctx.lineTo(tox-headlen*Math.cos(angle-Math.PI/7),toy-headlen*Math.sin(angle-Math.PI/7));
+
+      //draws the paths created above
+      ctx.strokeStyle = "#cc0000";
+      ctx.lineWidth = width;
+      ctx.stroke();
+      ctx.fillStyle = "#cc0000";
+      ctx.fill();
+    }
+  }
+
+  render(){
+    return(
+      <canvas id="poseEstimate" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+      </canvas>
+    );
+  }
+
+}
+
+class DrawMap extends React.Component {
   constructor(props) {
     super(props);
 
@@ -303,6 +381,7 @@ class MBotApp extends React.Component {
       drivingMode: false,
       sideBarMode: false,
       poseClickMode: false,
+      initalPoseFirstClick: [],
       sideBarWidth: 0,
       omni: false,
       diff: false,
@@ -320,6 +399,7 @@ class MBotApp extends React.Component {
       robot: true,
       particles: true,
       newMap: null,
+      mouse_loc: []
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
@@ -561,10 +641,13 @@ class MBotApp extends React.Component {
   }
 
   handleMouseMove(event) {
-    if (!this.state.showField && !this.state.isRobotClicked) return;
-
+    // console.log("Handle mouse move");
     var x = event.clientX - this.rect.left;
     var y = this.rect.bottom - event.clientY;
+    // console.log("Mouse loc (", x, ", ", y, ")");
+    this.setState({mouse_loc:[x,y]});
+    if (!this.state.showField && !this.state.isRobotClicked) return;
+
 
     if (this.state.isRobotClicked) {
       this.setState({ x: x, y: y });
@@ -810,7 +893,7 @@ class MBotApp extends React.Component {
     var dy = row;
     var theta = Math.atan2(dy-y, dx-x);
     this.setState({poseClickMode: 0}); // reset pose click mode
-    this.ws.socket.emit('initial_pose', {'x': start_cell[0], 'y':start_cell[1], 'theta':theta});
+    this.ws.socket.emit('initial_pose', {'x': x, 'y':y, 'theta':theta});
   }
 
   startInitialPoseMode(){
@@ -983,6 +1066,9 @@ class MBotApp extends React.Component {
                 {this.state.robot &&
                   <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
                       pixelsPerMeter={this.state.pixelsPerMeter} /> 
+                }
+                {this.state.poseClickMode!=0 &&
+                  <DrawPoseEstimate start={this.state.initalPoseFirstClick} mouse_loc={this.state.mouse_loc} poseClickMode={this.state.poseClickMode}/>
                 }
 
                 <canvas ref={this.clickCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
