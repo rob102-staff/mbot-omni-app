@@ -248,6 +248,8 @@ class ObstacleEmitter():
     def __extract_pairs(self, num_cells, pairs):
         parts = []
         for i in range(num_cells):
+            if pairs[i].x < 0 or pairs[i].y < 0:
+                print("brother rice")
             x = pairs[i].x
             y = pairs[i].y
             parts.append((x,y))
