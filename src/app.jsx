@@ -713,13 +713,22 @@ class MBotApp extends React.Component {
     this.ctx = canvas.getContext('2d');
     this.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-    
+    for (let index = 0; index < evt.num_cells; index++) {
+      this.ctx.beginPath()
+      this.ctx.strokeStyle = "rgba(37, 150, 190, 0.2)";
+      this.ctx.rect(evt.pairs[index][0], evt.pairs[index][1], 1, 1)
+      this.ctx.stroke()
+    }
   }
 
   resetCanvas(){
     const pathCanvas = document.getElementById("mapLine");
     this.ctx = pathCanvas.getContext('2d');
     this.ctx.clearRect(0, 0, pathCanvas.width, pathCanvas.height);
+
+    const canvas = document.getElementById("mapObstacles");
+    this.ctx = canvas.getContext('2d');
+    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
   }
 
   /**********************
@@ -980,6 +989,7 @@ class MBotApp extends React.Component {
                 
                 <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
                 </canvas>
+                <DrawObstacle />
                 <DrawPaths />
                 <DrawParticles/>
                 <DrawLasers state = {this.state}/>
