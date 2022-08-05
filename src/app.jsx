@@ -271,6 +271,19 @@ class DrawParticles extends React.Component {
   }
 }
 
+class DrawObstacle extends React.Component {
+  constructor(props) {
+    super(props);
+  }
+
+  render(){
+    return(
+      <canvas id="mapObstacles" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+      </canvas>
+    );
+  }
+}
+
 /*******************
  *   WHOLE PAGE
  *******************/
@@ -696,6 +709,11 @@ class MBotApp extends React.Component {
 
   handleObstacles(evt){
     console.log(evt)
+    const canvas = document.getElementById("mapObstacles");
+    this.ctx = canvas.getContext('2d');
+    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    
   }
 
   resetCanvas(){
