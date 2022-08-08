@@ -332,6 +332,7 @@ class MBotApp extends React.Component {
       robot: true,
       particles: true,
       newMap: null,
+      costmap: true 
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
@@ -708,17 +709,21 @@ class MBotApp extends React.Component {
   }
 
   handleObstacles(evt){
-    console.log(evt)
-    const canvas = document.getElementById("mapObstacles");
-    this.ctx = canvas.getContext('2d');
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    for (let index = 0; index < evt.num_cells; index++) {
-      this.ctx.beginPath()
-      this.ctx.strokeStyle = "rgba(37, 150, 190, 0.2)";
-      this.ctx.rect(evt.pairs[index][0], evt.pairs[index][1], 1, 1)
-      this.ctx.stroke()
+    if(this.state.costmap)
+    {
+      console.log(evt)
+      const canvas = document.getElementById("mapObstacles");
+      this.ctx = canvas.getContext('2d');
+      this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+      for (let index = 0; index < evt.num_cells; index++) {
+        this.ctx.beginPath()
+        this.ctx.strokeStyle = "rgba(37, 150, 190, 0.2)";
+        this.ctx.rect(evt.pairs[index][1], -evt.pairs[index][0] + 800, 1, 1)
+        this.ctx.stroke()
+      }
     }
+
   }
 
   resetCanvas(){
@@ -779,6 +784,10 @@ class MBotApp extends React.Component {
 
   changeParticles(){
     this.setState({particles: !this.state.particles})
+  }
+
+  changeCostMap(){
+    this.setState({costmap: !this.state.costmap})
   }
 
   onGoalClear() {
@@ -903,6 +912,12 @@ class MBotApp extends React.Component {
                 <div className="col-6"> Draw Robot
                   <input type="checkbox" className="mx-2" checked = {this.state.robot}
                   onChange={() => this.changeRobot()} />
+                </div>
+              </div>
+              <div className="row mt-4 mb-5 text-left mx-2 text-center">
+                <div className="text-small"> Draw Costmap
+                <input type="checkbox" className="mx-2" checked = {this.state.costmap}
+                  onChange={() => this.changeCostMap()}/>
                 </div>
               </div>
               </>
