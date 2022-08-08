@@ -1,3 +1,5 @@
+package mbot_lcm_msgs;
+
 // Receive Confirmation of a particular lcm message
 struct message_received_t
 {
