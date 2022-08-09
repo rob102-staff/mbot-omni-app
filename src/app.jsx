@@ -714,11 +714,14 @@ class MBotApp extends React.Component {
         this.ctx = canvas.getContext('2d');
         this.ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
-      for (let index = 0; index < evt.num_cells; index++) {
-        this.ctx.beginPath()
-        this.ctx.strokeStyle = "rgba(249, 79, 53, 0.35)";
-        this.ctx.rect(evt.pairs[index][1], -evt.pairs[index][0] + 800, 1, 1)
-        this.ctx.stroke()
+
+      if(this.state.costmap){
+        for (let index = 0; index < evt.num_cells; index++) {
+          this.ctx.beginPath()
+          this.ctx.strokeStyle = "rgba(249, 79, 53, 0.35)";
+          this.ctx.rect(evt.pairs[index][1], -evt.pairs[index][0] + 800, 1, 1)
+          this.ctx.stroke()
+        }
       }
   }
 
