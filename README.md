@@ -120,6 +120,8 @@ Install the LCM messages by running:
 cd mbot-omni-app
 ./install_lcm.sh
 ```
+If you want to install the LCM message package as root (only recommended on the
+RPi), run the script with `sudo`.
 
 #### Running
 
