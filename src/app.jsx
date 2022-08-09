@@ -329,10 +329,11 @@ class MBotApp extends React.Component {
       y_values: [],
       lasers: {},
       isRobotClicked: false,
+      laserDisplay:false, 
       robot: true,
       particles: true,
       newMap: null,
-      costmap: true 
+      costmap: false 
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
@@ -433,21 +434,6 @@ class MBotApp extends React.Component {
     this.ws.attemptConnection();
   }
 
-  /*****************************  onFileUpload() {
-    if (this.state.mapfile === null) return;
-
-    var fr = new FileReader();
-    fr.onload = (evt) => {
-      var map = parseMap(fr.result);
-      this.updateMap(map);
-    }
-    fr.readAsText(this.state.mapfile);
-
-    var map_data = {type: "map_file",
-                    data: { file_name: this.state.mapfile.name } };
-    this.ws.send(map_data);
-  }
-   *****************************/
 
   onFileChange(event) {
     this.setState({ mapfile: event.target.files[0] });
@@ -781,6 +767,10 @@ class MBotApp extends React.Component {
     this.setState({robot: !this.state.robot})
   }
 
+  changeLasers(){
+    this.setState({laserDisplay: !this.state.laserDisplay})
+  }
+
   changeParticles(){
     this.setState({particles: !this.state.particles})
   }
@@ -914,9 +904,13 @@ class MBotApp extends React.Component {
                 </div>
               </div>
               <div className="row mt-4 mb-5 text-left mx-2 text-center">
-                <div className="text-small"> Draw Costmap
+                <div className="col-6 text-small"> Draw Costmap
                 <input type="checkbox" className="mx-2" checked = {this.state.costmap}
                   onChange={() => this.changeCostMap()}/>
+                </div>
+                <div className="col-6"> Draw Lasers
+                  <input type="checkbox" className="mx-2" checked = {this.state.laserDisplay}
+                  onChange={() => this.changeLasers()} />
                 </div>
               </div>
               </>
@@ -933,18 +927,6 @@ class MBotApp extends React.Component {
                   </label>
                 </div>
               </div>
-              { this.state.drivingMode &&
-              <div className="row mt-5 text-left mx-2">
-                <div className="col-6 text-small">Omni-Drive
-                <input type="checkbox" className="mx-2" checked={this.state.omni}
-                  onChange={() => this.changeOnmi()}/>
-                </div>
-                <div className="col-6"> Diff-Drive
-                  <input type="checkbox" className="mx-2" checked={this.state.diff}
-                  onChange={() => this.changeDiff()} />
-                </div>
-              </div>
-              }
               <div className="row my-5">
                 <div className="col-8">
                   <span className = "field-toggle-wrapper">
@@ -1009,7 +991,7 @@ class MBotApp extends React.Component {
                 <DrawPaths />
                 {this.state.particles && <DrawParticles/>}
   
-                <DrawLasers state = {this.state}/>
+                {this.state.laserDisplay && <DrawLasers state = {this.state}/>}
                 <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                           goalCell={this.state.goalCell} goalValid={this.state.goalValid}
                           cellSize={this.state.cellSize} />
