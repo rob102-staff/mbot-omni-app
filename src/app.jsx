@@ -433,8 +433,20 @@ class MBotApp extends React.Component {
     this.ws.attemptConnection();
   }
 
-  /*****************************
-   *  COMPONENT EVENT HANDLERS
+  /*****************************  onFileUpload() {
+    if (this.state.mapfile === null) return;
+
+    var fr = new FileReader();
+    fr.onload = (evt) => {
+      var map = parseMap(fr.result);
+      this.updateMap(map);
+    }
+    fr.readAsText(this.state.mapfile);
+
+    var map_data = {type: "map_file",
+                    data: { file_name: this.state.mapfile.name } };
+    this.ws.send(map_data);
+  }
    *****************************/
 
   onFileChange(event) {
@@ -451,27 +463,13 @@ class MBotApp extends React.Component {
 
   onMapChange(map_upload){
     if(map_upload == null) return;
-    this.ws.socket.emit('reset', {'mode' : 2, 'map':map_upload})
+    //Sends a message to the backend to start SLAM in localization mode, with the passes map
+    this.ws.socket.emit('reset', {'mode' : 2, 'map': map_upload})
   }
 
   saveMap() {
     var name = prompt("What do you want to name the map? (.json will automatically be added to the end)");
     downloadObjectAsJson(this.state.newMap, name)
-  }
-
-  onFileUpload() {
-    if (this.state.mapfile === null) return;
-
-    var fr = new FileReader();
-    fr.onload = (evt) => {
-      var map = parseMap(fr.result);
-      this.updateMap(map);
-    }
-    fr.readAsText(this.state.mapfile);
-
-    var map_data = {type: "map_file",
-                    data: { file_name: this.state.mapfile.name } };
-    this.ws.send(map_data);
   }
 
   onFieldCheck() {
@@ -688,11 +686,12 @@ class MBotApp extends React.Component {
   
   handleParticles(evt){
     const canvas = document.getElementById("mapParticles");
-    this.ctx = canvas.getContext('2d');
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
 
     //Checks if Particle Checkbox is ticked
-    if(this.state.particles){
+    if(canvas != null) {
+      this.ctx = canvas.getContext('2d');
+      this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+
       for (let index = 0; index < evt.num_particles; index+=20) {
         //Draws Particle for each instance
         this.ctx.beginPath();
@@ -709,21 +708,18 @@ class MBotApp extends React.Component {
   }
 
   handleObstacles(evt){
-    if(this.state.costmap)
-    {
       console.log(evt)
       const canvas = document.getElementById("mapObstacles");
-      this.ctx = canvas.getContext('2d');
-      this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
+      if(canvas != null) {
+        this.ctx = canvas.getContext('2d');
+        this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+      }
       for (let index = 0; index < evt.num_cells; index++) {
         this.ctx.beginPath()
-        this.ctx.strokeStyle = "rgba(37, 150, 190, 0.2)";
+        this.ctx.strokeStyle = "rgba(249, 79, 53, 0.35)";
         this.ctx.rect(evt.pairs[index][1], -evt.pairs[index][0] + 800, 1, 1)
         this.ctx.stroke()
       }
-    }
-
   }
 
   resetCanvas(){
@@ -1004,9 +1000,12 @@ class MBotApp extends React.Component {
                 
                 <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
                 </canvas>
-                <DrawObstacle />
+
+                {this.state.costmap && <DrawObstacle />}
+
                 <DrawPaths />
-                <DrawParticles/>
+                {this.state.particles && <DrawParticles/>}
+  
                 <DrawLasers state = {this.state}/>
                 <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                           goalCell={this.state.goalCell} goalValid={this.state.goalValid}
