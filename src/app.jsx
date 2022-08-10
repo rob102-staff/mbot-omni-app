@@ -101,29 +101,22 @@ class DrawPoseEstimate extends React.Component{
   constructor(props){
     super(props);
   }
-
-  // shouldComponentUpdate(nextProps, nextState){
-  //   var mouse_x_changed = (this.props.mouse_loc[0] != nextProps.mouse_loc[0])
-  //   var mouse_y_changed = (this.props.mouse_loc[1] != nextProps.mouse_loc[1])
-  //   console.log((mouse_x_changed || mouse_y_changed))
-  //   return (mouse_x_changed || mouse_y_changed)
-  // }
   
   componentDidUpdate(){
     //checks if the mapping mode is engaged
+
     if(this.props.poseClickMode==2){
-      // console.log("Drawing pose estimate");
       var c = document.getElementById("poseEstimate");
       var ctx = c.getContext("2d");
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      var fromx = this.props.start[1];
-      var fromy = this.props.start[0];
+      ctx.clearRect(0, 0, c.width, c.height);
+
+      var fromx = this.props.start[0];
+      var fromy = -this.props.start[1] + 800;
       var tox = this.props.mouse_loc[0];
-      var toy = this.props.mouse_loc[1];
+      var toy = -this.props.mouse_loc[1] + 800;
 
       // console.log("From: (", fromx, ", ", fromy, ")");
       // console.log("To: (", tox, ", ", toy,")");
-
 
       var dx = fromx - tox;
       var dy = fromy - toy;
@@ -380,7 +373,7 @@ class MBotApp extends React.Component {
       mappingMode: false,
       drivingMode: false,
       sideBarMode: false,
-      poseClickMode: false,
+      poseClickMode: 0,
       initalPoseFirstClick: [],
       sideBarWidth: 0,
       omni: false,
@@ -1067,6 +1060,7 @@ class MBotApp extends React.Component {
                   <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
                       pixelsPerMeter={this.state.pixelsPerMeter} /> 
                 }
+
                 {this.state.poseClickMode!=0 &&
                   <DrawPoseEstimate start={this.state.initalPoseFirstClick} mouse_loc={this.state.mouse_loc} poseClickMode={this.state.poseClickMode}/>
                 }
