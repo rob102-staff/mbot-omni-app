@@ -330,10 +330,10 @@ class MBotApp extends React.Component {
       lasers: {},
       isRobotClicked: false,
       laserDisplay:false, 
-      robot: true,
-      particles: true,
-      newMap: null,
-      costmap: false 
+      robotDisplay: true,
+      particleDisplay: true,
+      costmapDisplay: false, 
+      newMap: null
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
@@ -694,14 +694,13 @@ class MBotApp extends React.Component {
   }
 
   handleObstacles(evt){
-      console.log(evt)
       const canvas = document.getElementById("mapObstacles");
       if(canvas != null) {
         this.ctx = canvas.getContext('2d');
         this.ctx.clearRect(0, 0, canvas.width, canvas.height);
       }
 
-      if(this.state.costmap){
+      if(this.state.costmapDisplay){
         for (let index = 0; index < evt.num_cells; index++) {
           this.ctx.beginPath()
           this.ctx.strokeStyle = "rgba(249, 79, 53, 0.35)";
@@ -764,7 +763,7 @@ class MBotApp extends React.Component {
   }
 
   changeRobot(){
-    this.setState({robot: !this.state.robot})
+    this.setState({robotDisplay: !this.state.robotDisplay})
   }
 
   changeLasers(){
@@ -772,11 +771,11 @@ class MBotApp extends React.Component {
   }
 
   changeParticles(){
-    this.setState({particles: !this.state.particles})
+    this.setState({particleDisplay: !this.state.particleDisplay})
   }
 
   changeCostMap(){
-    this.setState({costmap: !this.state.costmap})
+    this.setState({costmapDisplay: !this.state.costmapDisplay})
   }
 
   onGoalClear() {
@@ -895,17 +894,17 @@ class MBotApp extends React.Component {
               </div>
               <div className="row mt-4 mb-5 text-left mx-2 text-center">
                 <div className="col-6 text-small"> Draw Particles
-                <input type="checkbox" className="mx-2" checked = {this.state.particles}
+                <input type="checkbox" className="mx-2" checked = {this.state.particleDisplay}
                   onChange={() => this.changeParticles()}/>
                 </div>
                 <div className="col-6"> Draw Robot
-                  <input type="checkbox" className="mx-2" checked = {this.state.robot}
+                  <input type="checkbox" className="mx-2" checked = {this.state.robotDisplay}
                   onChange={() => this.changeRobot()} />
                 </div>
               </div>
               <div className="row mt-4 mb-5 text-left mx-2 text-center">
                 <div className="col-6 text-small"> Draw Costmap
-                <input type="checkbox" className="mx-2" checked = {this.state.costmap}
+                <input type="checkbox" className="mx-2" checked = {this.state.costmapDisplay}
                   onChange={() => this.changeCostMap()}/>
                 </div>
                 <div className="col-6"> Draw Lasers
@@ -986,17 +985,17 @@ class MBotApp extends React.Component {
                 <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
                 </canvas>
 
-                {this.state.costmap && <DrawObstacle />}
+                {this.state.costmapDisplay && <DrawObstacle />}
 
                 <DrawPaths />
-                {this.state.particles && <DrawParticles/>}
+                {this.state.particleDisplay && <DrawParticles/>}
   
                 {this.state.laserDisplay && <DrawLasers state = {this.state}/>}
                 <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                           goalCell={this.state.goalCell} goalValid={this.state.goalValid}
                           cellSize={this.state.cellSize} />
                 
-                {this.state.robot &&
+                {this.state.robotDisplay &&
                   <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
                       pixelsPerMeter={this.state.pixelsPerMeter} /> 
                 }

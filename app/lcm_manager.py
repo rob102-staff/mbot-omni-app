@@ -44,7 +44,7 @@ class LcmCommunicationManager:
         self.__subscribe(lcm_settings.SLAM_POSE_CHANNEL, self.pose_listener)
         self.__subscribe(lcm_settings.CONTROLLER_PATH_CHANNEL, self.path_listener)
         self.__subscribe(lcm_settings.SLAM_PARTICLES_CHANNEL, self.particle_listener)        
-        self.__subscribe(lcm_settings.OBSTACLE_DISTANCES_CHANNEL, self.obstacle_listener)        
+        self.__subscribe(lcm_settings.COSTMAP_CHANNEL, self.obstacle_listener)        
         ###################################
 
         self.__lcm_thread = threading.Thread(target=self.__run_handle_loop)
@@ -66,7 +66,6 @@ class LcmCommunicationManager:
         cmd.vx = vx; cmd.vy = vy; cmd.wz = wz 
         cmd.utime = int(time.time() * 1000)
         self._lcm.publish(lcm_settings.MBOT_MOTOR_COMMAND_CHANNEL, cmd.encode())
-        print(f"published: {vx}, {vy}, {wz} to the channel {lcm_settings.MBOT_MOTOR_COMMAND_CHANNEL}")  # TODO: remove. For testing
 
     def publish_plan_data(self, goal:pose_xyt_t, plan:bool):
         goal_pose = pose_xyt_t()
