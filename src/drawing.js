@@ -122,51 +122,36 @@ class GridCellCanvas {
     this.ctx.stroke();
   }
 
-  drawPath(path, robotPos, color = "rgb(255, 25, 25)", line_width = 5) {
-    var pt1, pt2;
+  drawPath(path, robotPos, color = "rgb(255, 25, 25)", line_width = 2) {
 
-    for(let i = 0; i < path.length; i++) {  
-      //Draws the point for the path
-      this.ctx.beginPath();
-      this.ctx.fillStyle = "rgb(255, 25, 25)";
-      var start1 = posToPixels(path[i][0], path[i][1])
-      this.ctx.arc(config.ROBOT_START_X + (start1[0]), 
-                  (config.ROBOT_START_Y - (start1[1])), 
-                   4, 0, 2 * Math.PI);
-
+    for(let i = 1; i < path.length; i++) {  
       //Draws a line between the points
       this.ctx.beginPath();
-      // TODO: For this to work, need to use GridCellCanvas, which maintains
-      // consistent transforms for the canvas. Use the drawPath() function.
-      if(i==0){
-        pt1 = this.posToPixels(this.state.x, this.state.y);
-        pt2 = this.posToPixels(evt.path[i][0], evt.path[i][1]);
-      }
-      else{
-        pt1 = this.posToPixels(evt.path[i-1][0], evt.path[i-1][1]);
-        pt2 = this.posToPixels(evt.path[i][0], evt.path[i][1]);
-      }
 
-      this.ctx.moveTo(pt1[0], pt1[1]);
-      this.ctx.lineTo(pt2[0], pt2[1]);
+      console.log(path[i][0], path[i][1])
 
-      this.ctx.line_width = line_width;
+      this.ctx.moveTo(path[i-1][0], path[i-1][1]);
+      this.ctx.lineTo(path[i][0], path[i][1]);
+      
+      this.ctx.lineWidth = line_width;
       this.ctx.strokeStyle = color
       this.ctx.stroke();
     }
   }
 
-  drawCostMap (obstacleCells, color = "rgba(249, 79, 53, 0.35)"){
-    for (let index = 0; index < obstacleCells[0].length; index++) {
+  drawCostMap (obstacleCells, color = "rgba(249, 79, 53, 1)"){
+
+    for (let index = 0; index < obstacleCells.length; index++) {
       this.ctx.beginPath()
       this.ctx.strokeStyle = color;
-      this.ctx.rect(obstacleCells[index][1], obstacleCells[index][0], 1, 1)
+      // console.log(obstacleCells[index][0], obstacleCells[index][1])
+      this.ctx.rect(obstacleCells[index][0], obstacleCells[index][1], 1, 1)
       this.ctx.stroke()
     }
   }
 
   drawParticles(particles, intensity = 20, color = 'green', size = 1){
-    for (let index = 0; index < evt.num_particles; index+=intensity) {
+    for (let index = 0; index < particles.length; index+=intensity) {
       this.ctx.beginPath();
       this.ctx.arc(config.ROBOT_START_X + (particles[index][0]/this.state.metersPerCell), 
                    config.ROBOT_START_Y - (particles[index][1]/this.state.metersPerCell), 

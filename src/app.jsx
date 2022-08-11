@@ -237,11 +237,16 @@ class DrawPaths extends React.Component {
     this.pathGrid.init(this.pathCanvas.current);
   }
 
+  shouldComponentUpdate(){
+    if (this.props.path == null) return false;
+    return true;
+  }
+
   componentDidUpdate(){
     this.pathGrid.setSize(this.props.width, this.props.height);
     this.pathGrid.clear();
     let robotPos = [this.props.xPos, this.props.yPos]
-    this.drawPath(this.props.path, robotPos)
+    this.pathGrid.drawPath(this.props.path, robotPos)
   }
 
   render(){
@@ -264,10 +269,15 @@ class DrawParticles extends React.Component {
     this.particleGrid.init(this.particleCanvas.current);
   }
 
+  shouldComponentUpdate(){
+    if (this.props.properties == null) return false;
+    return true;
+  }
+
   componentDidUpdate(){
     this.particleGrid.setSize(this.props.width, this.props.height);
     this.particleGrid.clear();
-    this.drawparticle(this.props.particles)
+    this.particleGrid.drawParticles(this.props.particles)
   }
 
   render(){
@@ -290,14 +300,16 @@ class DrawCostmap extends React.Component {
   }
 
   componentDidUpdate(){
-    this.costmapGrid.setSize(this.props.width, this.props.height);
-    this.costmapGrid.clear();
-    this.drawCostMap(this.props.cells)
+    // if(this.props.state) {
+      this.costmapGrid.setSize(this.props.width, this.props.height);
+      this.costmapGrid.clear();
+      this.costmapGrid.drawCostMap(this.props.cells)
+    // }
   }
 
   render(){
     return(
-      <canvas id="mapcostmaps" ref={this.costmapCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+      <canvas id="mapcostMaps" ref={this.costmapCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
       </canvas>
     );
   }
@@ -493,24 +505,24 @@ class MBotApp extends React.Component {
   }
 
   onDarkMode(){
-    var canvas = document.getElementById("canvas");
-    var driveCtrls = document.getElementsByClassName("drive-ctrl")
-    if (!this.state.darkMode){
-      document.body.classList.add("new-background-color");
-      canvas.classList.add("white-border", "canvas-color")
-      for (let index = 0; index < driveCtrls.length; index++) {
-        driveCtrls[index].classList.add("invert");
-      }
-    } else {
-      document.body.classList.remove("new-background-color");
-      canvas.classList.remove("white-border")
+    // var canvas = document.getElementById("canvas");
+    // var driveCtrls = document.getElementsByClassName("drive-ctrl")
+    // if (!this.state.darkMode){
+    //   document.body.classList.add("new-background-color");
+    //   canvas.classList.add("white-border", "canvas-color")
+    //   for (let index = 0; index < driveCtrls.length; index++) {
+    //     driveCtrls[index].classList.add("invert");
+    //   }
+    // } else {
+    //   document.body.classList.remove("new-background-color");
+    //   canvas.classList.remove("white-border")
     
-      for (let index = 0; index < driveCtrls.length; index++) {
-        driveCtrls[index].classList.remove("invert");
-      }
-      canvas.classList.remove("canvas-color", "white-border");
-    }
-    this.setState({darkMode: !this.state.darkMode});
+    //   for (let index = 0; index < driveCtrls.length; index++) {
+    //     driveCtrls[index].classList.remove("invert");
+    //   }
+    //   canvas.classList.remove("canvas-color", "white-border");
+    // }
+    // this.setState({darkMode: !this.state.darkMode});
   }
 
   onSpeedChange(event) {
@@ -648,7 +660,14 @@ class MBotApp extends React.Component {
   }
 
   handlePaths(evt) {
-    this.setState({displayPaths: evt.path})
+    var updated_path = [];
+
+    for(let i = 0; i < evt.path.length; i++)
+    {
+      updated_path[i] = this.posToPixels(evt.path[i][0], evt.path[i][1])
+    }
+
+    this.setState({displayPaths: updated_path})
   }
   
   handleParticles(evt){
@@ -656,7 +675,13 @@ class MBotApp extends React.Component {
   }
 
   handleObstacles(evt){
-    this.setState({drawCostmap: evt.pairs});
+    var updated_path = [];
+    for(let i = 0; i < evt.distances.length; i++)
+    {
+      updated_path[i] = this.posToPixels(evt.pairs[i][0], evt.pairs[i][1])
+    }
+
+    this.setState({drawCostmap: updated_path});
   }
 
   resetCanvas(){
@@ -806,8 +831,8 @@ class MBotApp extends React.Component {
                   <DrawMap cells={this.state.cells} prev_cells={this.state.prev_cells} width={this.state.width} height={this.state.height}/>
                   <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
                   </canvas>
-                  {this.state.costmapDisplay && <DrawCostmap cells = {this.state.drawCostmap}/>}
                   <DrawPaths xPos = {this.state.x} yPos = {this.state.y} path =  {this.state.displayPaths}/>
+                  <DrawCostmap cells = {this.state.drawCostmap} state = {this.state.costmapDisplay}/>
                   {this.state.particleDisplay && <DrawParticles/>}
                   <DrawLasers mappingMode={this.state.mappingMode} width={this.state.width} height={this.state.height}
                               lidarRays={this.state.lidarRays} origin={[this.state.x, this.state.y]}/>
