@@ -101,6 +101,37 @@ class GridCellCanvas {
 
     this.ctx.clearRect(start_x, start_y, size, size);
   }
+
+  drawLine(start_pos, end_pos, color = "red", line_width = 5) {
+    this.ctx.beginPath();
+    this.ctx.moveTo(start_pos[0], start_pos[1]);
+    this.ctx.lineTo(end_pos[0], end_pos[1]);
+    this.ctx.strokeStyle = color
+    this.ctx.line_width = line_width;
+    this.ctx.stroke();
+  }
+
+  drawLinesFromOrigin(start_pos, end_poses, color = "red", line_width = 5) {
+    this.ctx.beginPath();
+    for (var i = 0; i < end_poses.length; i++) {
+      this.ctx.moveTo(start_pos[0], start_pos[1]);
+      this.ctx.lineTo(end_poses[i][0], end_poses[i][1]);
+    }
+    this.ctx.strokeStyle = color
+    this.ctx.line_width = line_width;
+    this.ctx.stroke();
+  }
+
+  drawPath(path, color = "red", line_width = 5) {
+    this.ctx.beginPath();
+    this.ctx.moveTo(path[0][0], path[0][1]);
+    for (var i = 0; i < path.length; i++) {
+      this.ctx.lineTo(path[i][0], path[i][1]);
+    }
+    this.ctx.strokeStyle = color
+    this.ctx.line_width = line_width;
+    this.ctx.stroke();
+  }
 }
 
 export { colourStringToRGB, getColor, GridCellCanvas };
