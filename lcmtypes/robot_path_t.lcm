@@ -1,3 +1,5 @@
+package mbot_lcm_msgs;
+
 // robot_path_t defines a path through the environment as a sequence of poses. The first pose in the sequence is the
 // starting pose of the planned path. The final pose is the goal pose. Each pose is an (x, y, theta) for the robot to
 // reach before moving on to the next pose in the path. The theta associated with each pose points to the next

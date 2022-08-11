@@ -1,3 +1,5 @@
+package mbot_lcm_msgs;
+
 struct omni_motor_command_t
 {
 

@@ -1,3 +1,5 @@
+package mbot_lcm_msgs;
+
 struct mbot_system_reset_t
 {
     int64_t utime;

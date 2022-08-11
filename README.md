@@ -41,26 +41,33 @@ This will grab all the packages needed to run the React app.
 
 Download the binaries for the ARM v71 processor. 
 
-`wget https://nodejs.org/dist/v16.14.2/node-v16.14.2-linux-armv7l.tar.xz`
+```bash
+wget https://nodejs.org/dist/v16.14.2/node-v16.14.2-linux-armv7l.tar.xz
+```
 
 Decompress the binaries. 
 
-`tar -xsf node-v16.14.2-linux-armv7l.tar.xz node-v16.14.2-linux-armv7l/`
+```bash
+tar -xsf node-v16.14.2-linux-armv7l.tar.xz node-v16.14.2-linux-armv7l/
+```
 
 Navigate to the files.
 
-`cd node-v16.14.2-linux-armv7l/`
+```bash
+cd node-v16.14.2-linux-armv7l/
+```
 
 Copy the files to the proper directory. 
 
-`sudo cp -R * /usr/local`
+```bash
+sudo cp -R * /usr/local
+```
 
 To confirm that Nodejs is installed, run the commands below:
-
-`node -v`
-
-`npm -v`
-
+```bash
+node -v
+npm -v
+```
 
 #### Running
 
@@ -107,6 +114,14 @@ To install LCM, get the source and unzip it, then do:
 cd lcm-1.4.0/lcm-pythoninst
 python setup.py install
 ```
+
+Install the LCM messages by running:
+```bash
+cd mbot-omni-app
+./install_lcm.sh
+```
+If you want to install the LCM message package as root (only recommended on the
+RPi), run the script with `sudo`.
 
 #### Running
 

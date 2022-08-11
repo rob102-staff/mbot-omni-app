@@ -1,3 +1,5 @@
+package mbot_lcm_msgs;
+
 struct pose_xyt_t
 {
     int64_t utime;

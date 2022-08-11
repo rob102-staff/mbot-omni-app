@@ -1,3 +1,5 @@
+package mbot_lcm_msgs;
+
 // planner_request_t request for planner
 struct planner_request_t
 {
