@@ -1,3 +1,5 @@
+package mbot_lcm_msgs;
+
 struct timestamp_t
 {
     int64_t utime;

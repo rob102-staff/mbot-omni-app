@@ -1,3 +1,5 @@
+package mbot_lcm_msgs;
+
 // particles_t contains a set of particles from the particle filter.
 struct particles_t
 {

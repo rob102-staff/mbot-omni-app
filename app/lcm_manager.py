@@ -1,16 +1,17 @@
 import lcm
-from lcmtypes.omni_motor_command_t import omni_motor_command_t
-from lcmtypes.occupancy_grid_t import occupancy_grid_t
-from lcmtypes.particles_t import particles_t
-from lcmtypes.pose_xyt_t import pose_xyt_t
-from lcmtypes.exploration_status_t import exploration_status_t
-from lcmtypes.reset_odometry_t import reset_odometry_t
-from lcmtypes.mbot_state_t import mbot_state_t
-from lcmtypes.lidar_t import lidar_t
-from lcmtypes.planner_request_t import planner_request_t
-from lcmtypes.robot_path_t import robot_path_t
-from lcmtypes.mbot_system_reset_t import mbot_system_reset_t
-from lcmtypes.costmap_t import costmap_t
+
+from mbot_lcm_msgs import omni_motor_command_t
+from mbot_lcm_msgs import occupancy_grid_t
+from mbot_lcm_msgs import particles_t
+from mbot_lcm_msgs import pose_xyt_t
+from mbot_lcm_msgs import exploration_status_t
+from mbot_lcm_msgs import reset_odometry_t
+from mbot_lcm_msgs import mbot_state_t
+from mbot_lcm_msgs import lidar_t
+from mbot_lcm_msgs import planner_request_t
+from mbot_lcm_msgs import robot_path_t
+from mbot_lcm_msgs import mbot_system_reset_t
+from mbot_lcm_msgs import costmap_t
 from app import lcm_settings
 
 import time
@@ -163,6 +164,5 @@ class LcmCommunicationManager:
             self._callback_dict[channel](decoded_data)
 
     def __del__(self): 
-        print("joined thread")
         self.__lcm_thread.join()
         for s in self.subscriptions: self._lcm.unsubscribe(s)

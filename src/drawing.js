@@ -101,6 +101,83 @@ class GridCellCanvas {
 
     this.ctx.clearRect(start_x, start_y, size, size);
   }
+
+  drawLine(start_pos, end_pos, color = "red", line_width = 5) {
+    this.ctx.beginPath();
+    this.ctx.moveTo(start_pos[0], start_pos[1]);
+    this.ctx.lineTo(end_pos[0], end_pos[1]);
+    this.ctx.strokeStyle = color
+    this.ctx.line_width = line_width;
+    this.ctx.stroke();
+  }
+
+  drawLinesFromOrigin(start_pos, end_poses, color = "red", line_width = 5) {
+    this.ctx.beginPath();
+    for (var i = 0; i < end_poses.length; i++) {
+      this.ctx.moveTo(start_pos[0], start_pos[1]);
+      this.ctx.lineTo(end_poses[i][0], end_poses[i][1]);
+    }
+    this.ctx.strokeStyle = color
+    this.ctx.line_width = line_width;
+    this.ctx.stroke();
+  }
+
+  drawPath(path, robotPos, color = "rgb(255, 25, 25)", line_width = 5) {
+    var pt1, pt2;
+
+    for(let i = 0; i < path.length; i++) {  
+      //Draws the point for the path
+      this.ctx.beginPath();
+      this.ctx.fillStyle = "rgb(255, 25, 25)";
+      var start1 = posToPixels(path[i][0], path[i][1])
+      this.ctx.arc(config.ROBOT_START_X + (start1[0]), 
+                  (config.ROBOT_START_Y - (start1[1])), 
+                   4, 0, 2 * Math.PI);
+
+      //Draws a line between the points
+      this.ctx.beginPath();
+      // TODO: For this to work, need to use GridCellCanvas, which maintains
+      // consistent transforms for the canvas. Use the drawPath() function.
+      if(i==0){
+        pt1 = this.posToPixels(this.state.x, this.state.y);
+        pt2 = this.posToPixels(evt.path[i][0], evt.path[i][1]);
+      }
+      else{
+        pt1 = this.posToPixels(evt.path[i-1][0], evt.path[i-1][1]);
+        pt2 = this.posToPixels(evt.path[i][0], evt.path[i][1]);
+      }
+
+      this.ctx.moveTo(pt1[0], pt1[1]);
+      this.ctx.lineTo(pt2[0], pt2[1]);
+
+      this.ctx.line_width = line_width;
+      this.ctx.strokeStyle = color
+      this.ctx.stroke();
+    }
+  }
+
+  drawCostMap (obstacleCells, color = "rgba(249, 79, 53, 0.35)"){
+    for (let index = 0; index < obstacleCells[0].length; index++) {
+      this.ctx.beginPath()
+      this.ctx.strokeStyle = color;
+      this.ctx.rect(obstacleCells[index][1], obstacleCells[index][0], 1, 1)
+      this.ctx.stroke()
+    }
+  }
+
+  drawParticles(particles, intensity = 20, color = 'green', size = 1){
+    for (let index = 0; index < evt.num_particles; index+=intensity) {
+      this.ctx.beginPath();
+      this.ctx.arc(config.ROBOT_START_X + (particles[index][0]/this.state.metersPerCell), 
+                   config.ROBOT_START_Y - (particles[index][1]/this.state.metersPerCell), 
+                   size, 0, 2 * Math.PI)
+      this.ctx.fillStyle = color;
+      this.ctx.fill();
+      this.ctx.lineWidth = size;
+      this.ctx.strokeStyle = color;
+      this.ctx.stroke();      
+    }
+  }
 }
 
 export { colourStringToRGB, getColor, GridCellCanvas };

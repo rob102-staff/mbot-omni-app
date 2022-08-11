@@ -1,3 +1,5 @@
+package mbot_lcm_msgs;
+
 struct exploration_status_t
 {
     const int8_t STATE_INITIALIZING = 0;
