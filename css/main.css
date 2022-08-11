@@ -6,13 +6,13 @@ Light grey for backgrounds: #F5F5F5;
 */
 
 body {
-  margin: 50px auto;
   max-height: 100%;
   max-width:100%;
   line-height:1.6;
   font-size:20px;
   color:#444;
-  padding:0 10px;
+  padding: 0;
+  margin: 0;
   font-family: 'Montserrat', sans-serif;
   transition: background-color 0.24s;
 }
@@ -31,32 +31,70 @@ a:hover {
   color: #00274C !important;
 }
 
-.canvas-container {
-  border: 3px solid #000000;
-  margin-top: 0.5em;  
-  margin-bottom: 1em; 
-  position: relative; 
-  height: 100%;       
-  width: 100%;
+#wrapper {
+  height: 100vh;  /* Stretch to height of the full page. */
+  display: grid;
+  grid-template-columns: min-content 1fr;
+  grid-template-rows: 1fr;
+  grid-template-areas: "nav main";
+}
+
+#sidenav {
+  grid-area: nav;
+  width: 400px;
+  background-color: rgb(18, 18, 18, 0.924);
+  color: #fff;
+}
+
+#main {
+  grid-area: main;
+  width: auto;
   background-color: #00274c36;
-  z-index: 0;
-  margin: auto;
+}
+
+#sidenav > #toggle-nav {
+  position: absolute;
+  left: 400px;
+  top: 0;
+  display: block;
+  padding: 1em;
+  color: #000000;
+}
+
+#sidenav > #toggle-nav:hover {
+  color: #606060;
+}
+
+#sidenav.inactive {
+  margin-left: -400px;  /* Move over the width of the sidebar. */
+}
+
+#sidenav.inactive > #toggle-nav {
+  left: 0px;
+}
+
+#canvas-container {
+  height: 100%;
+  width: 100%;
 }
 
 .canvas-color{
   background-color: #22476a;
 }
 
+#canvas-wrapper {
+  display: grid;
+  justify-items: center;
+  align-items: center;
+}
+
 canvas {
-  position: relative;
   padding: 0;
-  margin: auto;
+  grid-column: 1;
+  grid-row: 1;
   display: block;
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  float: left;
+  max-width: 100%;
 }
 
 .roboticon {
@@ -113,6 +151,7 @@ input[type="file"] {
   display: inline-block;
   font-size: 16px;
   margin-right: 20px;
+  transition: background-color 0.5s;
 }
 
 .map-color{
@@ -123,8 +162,34 @@ input[type="file"] {
   background-color: #D86018;
 }
 
-.button-wrapper {
+.button-wrapper-col {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
   padding-top: 0.5em;
+}
+
+.button-wrapper-col > button {
+  margin: 0 0 1em 0;
+}
+
+.button-wrapper-col > button:last-of-type {
+    margin-bottom: 0;
+}
+
+.button-wrapper-row {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  padding-top: 0.5em;
+}
+
+.button-wrapper-row > button {
+  margin: 0 1em 0 0;
+}
+
+.button-wrapper-row > button:last-of-type {
+    margin-right: 0;
 }
 
 .status-wrapper {
@@ -313,20 +378,7 @@ input:checked + .slider:before {
   background: #00274C;
 }
 
-.sidenav {
-  height: 100%;
-  width: 0;
-  position: fixed;
-  z-index: 2;
-  top: 0;
-  left: 0;
-  background-color: rgb(18, 18, 18, 0.924);
-  overflow-x: hidden;
-  transition: 0.5s;
-  padding-top: 60px;
-}
-
-.sidenav a {
+#sidenav a {
   padding: 8px 8px 8px 32px;
   text-decoration: none;
   font-size: 25px;
@@ -335,11 +387,11 @@ input:checked + .slider:before {
   transition: 0.3s;
 }
 
-.sidenav a:hover {
+#sidenav a:hover {
   color: #f1f1f1;
 }
 
-.sidenav .closebtn {
+#sidenav .closebtn {
   position: absolute;
   top: 0;
   right: 25px;
@@ -347,78 +399,68 @@ input:checked + .slider:before {
   margin-left: 50px;
 }
 
-.drive-middle{
-  margin: 2% 8% 2% 0
+.drive-buttons {
+  width: fit-content;
+  display: grid;
+  justify-items: center;
+  align-items: center;
+  grid-template-columns: repeat(3, 1fr);
+  grid-template-rows: repeat(3, 1fr);
+  grid-template-areas: "turn-left forward turn-right"
+                       "left . right"
+                       ". back .";
 }
 
-.drive-bottom{
+/* Drive forward robot */
+#move-str {
+  grid-area: forward;
+}
+
+/* Drive back robot */
+#move-back {
+  grid-area: back;
+}
+
+/* Drive to the right */
+#move-right {
+  grid-area: right;
+}
+
+/* Drive to the left */
+#move-left {
+  grid-area: left;
+}
+
+/* Turn robot to the left */
+#turn-left {
+  grid-area: turn-left;
+}
+
+/* Turn robot to the right */
+#turn-right {
+  grid-area: turn-right;
+}
+
+.drive-buttons > button {
+  margin: 0.25em;
+  padding: 10px;
+}
+
+.drive-bottom {
   margin-right: 30.4%;
 }
 
 /* This is for the drive buttons up, down, left, and right */
 .drive-move {
-  background-image: url("https://cdn4.iconfinder.com/data/icons/arrow-part-2-line-pixel-art/48/51-play_player_arrow_game_application_mobile_up_down_left_right-512.png");
-  background-size: cover;
-  /* The Background Color exists due to the local machine not being able to access internet, and thus the icon above, when connected to the Pi */
-  background-color: rgb(0, 39, 76, 0.7);
-  color:none;
-  width: 10px;
-  height: 10px;
-  font-size: 2rem;
-  padding: 20px 20px;
-  transition: background-color 0.5s;
+  width: 50px;
+  height: 50px;
 }
 
 /* These buttons are to turn the robot left and right */
 .drive-turn {
-  background-image: url("https://cdn2.iconfinder.com/data/icons/game-center-mixed-icons/512/arrow1.png");
-  background-size: cover;
-  background-color: rgb(0, 39, 76, 0.7);
-  color:none;
-  width: 10px;
-  height: 10px;
-  transition: background-color 0.5s;
-}
-
-.drive-ctrl:hover {
-  background-color:#bdcf58;
-}
-
-/* Drive forward robot */
-#move-str {
-  transform: rotate(270deg);
-  margin-left: 4%;
-  margin-bottom: 5px;
-}
-
-/* Drive back robot */
-#move-back {
-  transform: rotate(90deg);
-  margin-left: 27%;
-  margin-top: 5px;
-}
-
-/* Drive to the right */
-#move-right {
-  margin-right: 2%;
-}
-
-/* Drive to the left */
-#move-left {
-  transform: rotate(180deg);
-  margin-left: 8%;
-  margin-right: 22%;
-}
-
-/* Turn robot to the left */
-#turn-left {
-  transform: scaleX(-1) rotate(60deg);
-}
-
-/* Turn robot to the right */
-#turn-right {
-  margin-left: 3%;
-  transform: rotate(63deg);
+  width: 40px;
+  height: 40px;
+  border-radius: 40px;
 }
 
 /* Inverts colors*/

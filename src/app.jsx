@@ -2,12 +2,22 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faBars,
+         faArrowUp,
+         faArrowDown,
+         faArrowLeft,
+         faArrowRight,
+         faArrowRotateLeft,
+         faArrowRotateRight } from '@fortawesome/free-solid-svg-icons'
+
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 
 import config from "./config.js";
+import { normalizeAngle } from "./util";
 import { WSHelper } from "./web.js";
 import { DrawRobot } from "./robot";
 import { parseMapFromSocket, parseMapFromLcm, normalizeList, downloadObjectAsJson } from "./map.js";
@@ -62,32 +72,43 @@ function ConnectionStatus(connection) {
 function DriveControlPanel(props) {
   return (
     <div className="row px-5 text-center pt-3">
-      <div className="button-wrapper col-lg-4">
-        <span>Speed: {props.speed}</span> <br />
+      <div className="col-lg-12">
+        <span>Speed: {props.speed}</span>
         <input type="range" min="1" max="100" value={props.speed}
                onChange={(evt) => props.onSpeedChange(evt)}></input>
       </div>
-      <div className="button-wrapper top-spacing col-lg-4">
-        <button className="button start-color" id="drive-start"
+      <div className="button-wrapper-row top-spacing col-lg-12">
+        <button className="button start-color col-lg-4" id="drive-start"
                 onClick={() => props.driveControls.start()}>Start</button>
-        <button className="button stop-color" id="drive-stop"
+        <button className="button stop-color col-lg-4" id="drive-stop"
                 onClick={() => props.driveControls.stop()}>Stop</button>
       </div>
-      <div className="button-wrapper col-lg-4">
-        <button className="button drive-turn drive-ctrl" id="turn-left"
-                onClick={() => props.driveControls.drive(0, 0, -1, props.speed)}></button>
-        <button className="button drive-move drive-ctrl" id="move-str"
-                onClick={() => props.driveControls.drive(1, 0, 0, props.speed)}></button>
-        <button className="button drive-turn drive-ctrl" id="turn-right"
-                onClick={() => props.driveControls.drive(0, 0, 1, props.speed)}></button>
-        <div className="drive-middle">
-          <button className="button drive-move drive-ctrl" id="move-left"
-                  onClick={() => props.driveControls.drive(0, -1, 0, props.speed)}></button>
-          <button className="button drive-move drive-ctrl" id="move-right"
-                  onClick={() => props.driveControls.drive(0, 1, 0, props.speed)}></button>
-        </div>
-        <button className="button drive-move drive-ctrl drive-bottom" id="move-back"
-                onClick={() => props.driveControls.drive(-1, 0, 0, props.speed)}></button>
+      <div className="drive-buttons">
+        <button className="button drive-turn" id="turn-left"
+                onClick={() => props.driveControls.drive(0, 0, -1, props.speed)}>
+          <FontAwesomeIcon icon={faArrowRotateLeft} />
+        </button>
+        <button className="button drive-move" id="move-str"
+                onClick={() => props.driveControls.drive(1, 0, 0, props.speed)}>
+          <FontAwesomeIcon icon={faArrowUp} />
+        </button>
+        <button className="button drive-turn" id="turn-right"
+                onClick={() => props.driveControls.drive(0, 0, 1, props.speed)}>
+          <FontAwesomeIcon icon={faArrowRotateRight} />
+        </button>
+
+        <button className="button drive-move" id="move-left"
+                onClick={() => props.driveControls.drive(0, -1, 0, props.speed)}>
+          <FontAwesomeIcon icon={faArrowLeft} />
+        </button>
+        <button className="button drive-move" id="move-right"
+                onClick={() => props.driveControls.drive(0, 1, 0, props.speed)}>
+          <FontAwesomeIcon icon={faArrowRight} />
+        </button>
+        <button className="button drive-move" id="move-back"
+                onClick={() => props.driveControls.drive(-1, 0, 0, props.speed)}>
+          <FontAwesomeIcon icon={faArrowDown} />
+        </button>
       </div>
     </div>
   );
@@ -196,50 +217,29 @@ class DrawCells extends React.Component {
 class DrawLasers extends React.Component {
   constructor(props) {
     super(props);
+
+    this.laserGrid = new GridCellCanvas();
+    this.laserCanvas = React.createRef();
+  }
+
+  componentDidMount() {
+    this.laserGrid.init(this.laserCanvas.current);
   }
 
   componentDidUpdate(){
-    //initial setup to get canvas
-    const canvas = document.getElementById("mapLasers");
-    this.ctx = canvas.getContext('2d');
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-    this.ctx.fillStyle = 'rgba(49, 227, 173, 0.5)'
+    this.laserGrid.setSize(this.props.width, this.props.height);
+    // Clear all the lines on the grid from before.
+    this.laserGrid.clear();
 
-    //checks if the mapping mode is engaged
-    if(this.props.state.mappingMode){
-      this.ctx.beginPath();
-
-      //checks the robot's pose, and calculates its position on the map
-      let xCell = this.props.state.xPose/this.props.state.metersPerCell
-      let yCell = this.props.state.yPose/this.props.state.metersPerCell
-
-      //Origin point
-      if(this.props.state.metersPerCell > 0) {
-        this.ctx.moveTo(400 + xCell, 400 - yCell);
-      }
-      else this.ctx.moveTo(400, 400)
-
-      //All points of the mapped out area
-      for(let i = 0; i < this.props.state.lidarLength; i++){
-        let x = this.props.state.x_values[i];
-        let y = this.props.state.y_values[i];
-    
-        if(x != 0 && y != 0) {
-          if(this.props.state.metersPerCell > 0) {
-            this.ctx.lineTo(400 + x + (xCell), 400 + y - (yCell));
-          }
-          else this.ctx.lineTo(400 + x, 400 + y);
-        }
-      }
-
-      this.ctx.closePath()
-      this.ctx.fill()
+    // Checks if the mapping mode is engaged
+    if (this.props.mappingMode) {
+      this.laserGrid.drawLinesFromOrigin(this.props.origin, this.props.lidarRays, 'green');
     }
   }
 
   render(){
     return(
-      <canvas id="mapLasers" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+      <canvas id="mapLasers" ref={this.laserCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
       </canvas>
     );
   }
@@ -301,20 +301,15 @@ class MBotApp extends React.Component {
       darkMode: false,
       mappingMode: false,
       drivingMode: false,
-      sideBarMode: false,
+      sideBarMode: true,
       sideBarWidth: 0,
       omni: false,
       diff: false,
       // Robot parameters.
       x: config.MAP_DISPLAY_WIDTH / 2,
       y: config.MAP_DISPLAY_WIDTH / 2,
-      xPose: 0,
-      yPose: 0,
       theta: 0,
-      lidarLength: 0,
-      x_values: [],
-      y_values: [],
-      lasers: {},
+      lidarRays: [],
       isRobotClicked: false,
       robot: true,
       particles: true,
@@ -332,7 +327,7 @@ class MBotApp extends React.Component {
 
     this.driveControls = new DriveControls(this.ws);
     this.visitGrid = new GridCellCanvas();
-    this.visitCellsCanvas = React.createRef();	
+    this.visitCellsCanvas = React.createRef();
     this.clickCanvas = React.createRef();
   }
 
@@ -342,6 +337,7 @@ class MBotApp extends React.Component {
 
   componentDidMount() {
     this.visitGrid.init(this.visitCellsCanvas.current);
+    this.handleWindowChange(null);
 
     // Get the window size and watch for resize events.
     this.rect = this.clickCanvas.current.getBoundingClientRect();
@@ -361,7 +357,7 @@ class MBotApp extends React.Component {
 
     let x = 0;
     let y = 0;
-    let t = 0; 
+    let t = 0;
 
     document.addEventListener('keydown', (evt) => {
       //handles a couple of shortcut keys
@@ -494,7 +490,7 @@ class MBotApp extends React.Component {
       canvas.classList.remove("canvas-color", "white-border");
     }
     this.setState({darkMode: !this.state.darkMode});
-  } 
+  }
 
   onSpeedChange(event) {
     this.setState({speed: event.target.value});
@@ -502,15 +498,6 @@ class MBotApp extends React.Component {
 
   onSideBar(){
     this.setState({sideBarMode: !this.state.sideBarMode})
-    let widthBody = document.body.clientWidth
-    let temp;
-    if(this.state.sideBarMode) {
-      if(widthBody <= 400) temp = 100 + "%"
-      else if(widthBody <= 850) temp = 80 + "%"
-      else temp = 35 + "%"
-      this.setState({sideBarWidth: temp});
-    }
-    else this.setState({sideBarWidth: 0});
   }
 
   /***************************
@@ -519,9 +506,6 @@ class MBotApp extends React.Component {
 
    handleWindowChange(evt) {
     this.rect = this.clickCanvas.current.getBoundingClientRect();
-    config.CANVAS_DISPLAY_WIDTH = document.documentElement.clientWidth * config.CANVAS_WIDTH_MODIFIER;  
-    config.CANVAS_DISPLAY_HEIGHT = document.documentElement.clientHeight * config.CANVAS_HEIGHT_MODIFIER;
-    this.setState({width: config.CANVAS_DISPLAY_WIDTH, height: config.CANVAS_DISPLAY_HEIGHT})
   }
 
   handleMapClick(event) {
@@ -607,34 +591,30 @@ class MBotApp extends React.Component {
   }
 
   handlePoses(evt){
-    this.setState({xPose: evt.x, yPose: evt.y});
-    this.setState({theta: evt.theta})
-
-    //Sets the robot position
-    if(this.state.metersPerCell > 0) {
-      this.setRobotPos(400 + this.state.xPose/this.state.metersPerCell, 400 + this.state.yPose/this.state.metersPerCell)
+    // Sets the robot position
+    if (this.state.mapLoaded > 0) {
+      // Convert the robot position in meters in the map coordinates to pixels
+      // in the canvas coordinates.
+      var pix = this.posToPixels(evt.x, evt.y);
+      this.setRobotPos(pix[0], pix[1], evt.theta);
     }
-    else this.setRobotPos(400, 400)
-    
   }
 
   handleLasers(evt) {
-    this.setState({lidarLength: evt.ranges.length})
-    
-    let a = [];
-    let b = [];
-    let mPC;
+    let lidarLength = evt.ranges.length
 
-    //sets a default value if metersPerCell isn't initialized yet (because mapping isn't engaged)
-    if(!(this.state.metersPerCell) > 0) mPC = config.CELL_START_SIZE;
-    else mPC = this.state.metersPerCell;
-
-    for(let i = 0; i < this.state.lidarLength; i++) {
-      a[i] = ((evt.ranges[i] * Math.cos(evt.thetas[i] - this.state.theta))) / mPC;
-      b[i] = ((evt.ranges[i] * Math.sin(evt.thetas[i] - this.state.theta))) / mPC;
+    let rays = [];
+    for(let i = 0; i < lidarLength; i++) {
+      // Convert the ray into pixel coordinates.
+      let rayX = evt.ranges[i] * Math.cos(normalizeAngle(evt.thetas[i] + this.state.theta)) * this.state.pixelsPerMeter;
+      let rayY = evt.ranges[i] * Math.sin(normalizeAngle(evt.thetas[i] + this.state.theta)) * this.state.pixelsPerMeter;
+      // Shift by the current robot position.
+      rayX += this.state.x;
+      rayY += this.state.y;
+      rays.push([rayX, rayY]);
     } 
 
-    this.setState({x_values : a, y_values : b})
+    this.setState({lidarRays: rays, lidarLength: lidarLength})
   }
 
   handlePaths(evt) {
@@ -653,18 +633,21 @@ class MBotApp extends React.Component {
 
       //Draws a line between the points
       this.ctx.beginPath();
+      // TODO: For this to work, need to use GridCellCanvas, which maintains
+      // consistent transforms for the canvas. Use the drawPath() function.
       if(i==0){
-        this.ctx.moveTo(config.ROBOT_START_X+(this.state.xPose/this.state.metersPerCell), config.ROBOT_START_Y-(this.state.yPose/this.state.metersPerCell));
-        this.ctx.lineTo(config.ROBOT_START_X + (evt.path[i][0]/this.state.metersPerCell), 
-                        config.ROBOT_START_Y - (evt.path[i][1]/this.state.metersPerCell))
+        var pt1 = this.posToPixels(this.state.x, this.state.y);
+        var pt2 = this.posToPixels(evt.path[i][0], evt.path[i][1]);
+        this.ctx.moveTo(pt1[0], pt1[1]);
+        this.ctx.lineTo(pt2[0], pt2[1])
         this.ctx.strokeStyle = 'rgb(255, 25, 25)'
         this.ctx.stroke();
       }
       else{
-        this.ctx.moveTo(config.ROBOT_START_X + (evt.path[i-1][0]/this.state.metersPerCell), 
-                        config.ROBOT_START_X - (evt.path[i-1][1]/this.state.metersPerCell));
-        this.ctx.lineTo(config.ROBOT_START_X + (evt.path[i][0]/this.state.metersPerCell), 
-                        config.ROBOT_START_X - (evt.path[i][1]/this.state.metersPerCell))
+        var pt1 = this.posToPixels(evt.path[i-1][0], evt.path[i-1][1]);
+        var pt2 = this.posToPixels(evt.path[i][0], evt.path[i][1]);
+        this.ctx.moveTo(pt1[0], pt1[1]);
+        this.ctx.lineTo(pt2[0], pt2[1])
         this.ctx.strokeStyle = 'rgb(255, 25, 25)'
         this.ctx.stroke();
       }
@@ -703,15 +686,15 @@ class MBotApp extends React.Component {
    *   STATE SETTERS
    **********************/
 
-  setRobotPos(x, y) {
-    this.setState({x: x, y: y});
+  setRobotPos(x, y, theta = 0) {
+    this.setState({x: x, y: y, theta: theta});
   }
 
   /**********************
    *   OTHER FUNCTIONS
    **********************/
 
-   updateMap(result) {
+  updateMap(result) {
     this.visitGrid.clear();
     var loaded = result.cells.length > 0;
     this.setState({prev_cells: this.state.cells,
@@ -730,7 +713,7 @@ class MBotApp extends React.Component {
                    isRobotClicked: false});
   }
 
-  changeOnmi() {
+  changeOmni() {
     this.setState({omni: !this.state.omni});
   }
 
@@ -784,6 +767,12 @@ class MBotApp extends React.Component {
   }
 
   posToPixels(x, y) {
+    var u = (x - this.state.origin[0]) * this.state.pixelsPerMeter;
+    var v = (y - this.state.origin[1]) * this.state.pixelsPerMeter;
+    return [u, v];
+  }
+
+  cellToPixels(x, y) {
     var u = (x * this.state.cellSize);
     var v = (y * this.state.cellSize);
 
@@ -811,27 +800,58 @@ class MBotApp extends React.Component {
   }
 
   render() {
-    var canvasStyle = {
-      width: config.CANVAS_DISPLAY_WIDTH,
-      height: config.CANVAS_DISPLAY_HEIGHT
-    };
+    let sidebarClasses = ""
+    if (!this.state.sideBarMode) {
+      sidebarClasses += "inactive";
+    }
 
     return (
-      <>
-        <div className="row mx-5">
-          <div className="col-7">
-            <h1>MBot Omni GUI</h1>
-          </div>
-          <div className="col-4"></div>
-          <div className="col-1 very-small-top">
-            <i className="fa-solid fa-bars fa-2xl pf" onClick={() => this.onSideBar()}></i>
+      <div id="wrapper">
+        <div id="main">
+
+          <div id="canvas-container" ref={this.canvasWrapperRef}>
+            <TransformWrapper>
+              <TransformComponent>
+                <div id="canvas-wrapper">
+                  <DrawMap cells={this.state.cells} prev_cells={this.state.prev_cells} width={this.state.width} height={this.state.height}/>
+                  <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+                  </canvas>
+                  <DrawPaths />
+                  <DrawParticles/>
+                  <DrawLasers mappingMode={this.state.mappingMode} width={this.state.width} height={this.state.height}
+                              lidarRays={this.state.lidarRays} origin={[this.state.x, this.state.y]}/>
+                  <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
+                             goalCell={this.state.goalCell} goalValid={this.state.goalValid}
+                             cellSize={this.state.cellSize} />
+
+                  {this.state.robot &&
+                    <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
+                               pixelsPerMeter={this.state.pixelsPerMeter} />
+                  }
+
+                  <canvas ref={this.clickCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}
+                          onMouseDown={(e) => this.handleMouseDown(e)}
+                          onContextMenu={(e) => this.handleMouseDown(e)}
+                          onMouseMove={(e) => this.handleMouseMove(e)}
+                          onMouseUp={() => this.handleMouseUp()}
+                          onScroll={() => this.handleZoom()}>
+                  </canvas>
+                </div>
+              </TransformComponent>
+            </TransformWrapper>
+
           </div>
         </div>
 
+        <div id="sidenav" className={sidebarClasses}>
+          <div className="status-wrapper mx-5 py-3">
+            <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} clickedCell={this.state.clickedCell}
+                           showField={this.state.showField} fieldVal={this.state.fieldHoverVal}/>
+            <ConnectionStatus status={this.state.connection}/>
+          </div>
+          <div id="toggle-nav" onClick={() => this.onSideBar()}><FontAwesomeIcon icon={faBars} /></div>
 
-        <div id="mySidenav" className="sidenav" style = {{width: this.state.sideBarWidth}}>
-          <a href="#" className = "text-right" onClick={() => this.onSideBar()}>X</a>
-          <div className="row field-toggle-wrapper top-spacing text-white mx-3 mt-4">
+          <div className="row field-toggle-wrapper top-spacing mx-3 mt-4">
             <div className="col">
               <div className="row">
                 <div className="col-8">
@@ -863,14 +883,21 @@ class MBotApp extends React.Component {
                 </label>
                 <input id="file-upload" type="file" onChange = {(event) => this.onFileChange(event)}/>
               </div>
-              <div className="row mt-4 mb-5 text-left mx-2 text-center">
-                <div className="col-6 text-small"> Draw Particles
-                <input type="checkbox" className="mx-2" checked = {this.state.particles}
-                  onChange={() => this.changeParticles()}/>
+              <div className="button-wrapper-col">
+                <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
+                <button className="button" onClick={() => this.restartmap()}>Reset Mapping</button>
+                <button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>
+                <button className="button stop-color2" onClick={() => this.stopmap()}>Stop Mapping</button>
+
+              </div>
+              <div className="row mt-4 mb-5 text-left mx-2">
+                <div className="col-12 text-small"> Draw Particles
+                  <input type="checkbox" className="mx-2" checked={this.state.particles}
+                         onChange={() => this.changeParticles()}/>
                 </div>
-                <div className="col-6"> Draw Robot
-                  <input type="checkbox" className="mx-2" checked = {this.state.robot}
-                  onChange={() => this.changeRobot()} />
+                <div className="col-12"> Draw Robot
+                  <input type="checkbox" className="mx-2" checked={this.state.robot}
+                         onChange={() => this.changeRobot()} />
                 </div>
               </div>
               </>
@@ -886,19 +913,23 @@ class MBotApp extends React.Component {
                     <span className="slider round"></span>
                   </label>
                 </div>
-              </div>
-              { this.state.drivingMode &&
-              <div className="row mt-5 text-left mx-2">
-                <div className="col-6 text-small">Omni-Drive
-                <input type="checkbox" className="mx-2" checked={this.state.omni}
-                  onChange={() => this.changeOnmi()}/>
-                </div>
-                <div className="col-6"> Diff-Drive
-                  <input type="checkbox" className="mx-2" checked={this.state.diff}
-                  onChange={() => this.changeDiff()} />
-                </div>
-              </div>
+                {this.state.drivingMode &&
+                  <div className="drive-panel-wrapper">
+                    <DriveControlPanel driveControls={this.driveControls}
+                                       speed={this.state.speed}
+                                       onSpeedChange={(evt) => this.onSpeedChange(evt)} />
+                    <div className="col-6 text-small">Omni-Drive
+                    <input type="checkbox" className="mx-2" checked={this.state.omni}
+                      onChange={() => this.changeOmni()}/>
+                    </div>
+                    <div className="col-6"> Diff-Drive
+                      <input type="checkbox" className="mx-2" checked={this.state.diff}
+                      onChange={() => this.changeDiff()} />
+                    </div>
+                  </div>
               }
+              </div>
+
               <div className="row my-5">
                 <div className="col-8">
                   <span className = "field-toggle-wrapper">
@@ -917,71 +948,7 @@ class MBotApp extends React.Component {
         </div>
 
 
-
-        <div className="pt-3">
-
-          {this.state.mappingMode &&
-            <div className="button-wrapper top-spacing d-flex justify-content-center">
-              <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
-              <button className="button" onClick={() => this.restartmap()}>Reset Mapping</button>
-              <label htmlFor="file-upload" className="button upload-color">
-                  <i className="fa fa-cloud-upload"></i> Upload a Map
-              </label>
-              <input id="file-upload" type="file" onClick = {(event) => this.onFileChange(event)}/>
-              <button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>
-              <button className="button stop-color2 me-3" onClick={() => this.stopmap()}>Stop Mapping</button>
-
-            </div>
-          }
-
-          {this.state.drivingMode &&
-            <DriveControlPanel driveControls={this.driveControls}
-                                speed={this.state.speed}
-                                onSpeedChange={(evt) => this.onSpeedChange(evt)} />
-          }
-
-        </div>
-
-        <div className="status-wrapper mx-5 py-3">
-          <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} clickedCell={this.state.clickedCell}
-                         showField={this.state.showField} fieldVal={this.state.fieldHoverVal}/>
-          <ConnectionStatus status={this.state.connection}/>
-        </div>
-
-
-        <div className="canvas-container" id = "canvas" style={canvasStyle}>
-          <TransformWrapper>
-            <TransformComponent>
-              <div style={canvasStyle}>
-                <DrawMap cells={this.state.cells} prev_cells={this.state.prev_cells} width={this.state.width} height={this.state.height} />
-                
-                <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}>
-                </canvas>
-                <DrawPaths />
-                <DrawParticles/>
-                <DrawLasers state = {this.state}/>
-                <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
-                          goalCell={this.state.goalCell} goalValid={this.state.goalValid}
-                          cellSize={this.state.cellSize} />
-                
-                {this.state.robot &&
-                  <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
-                      pixelsPerMeter={this.state.pixelsPerMeter} /> 
-                }
-
-                <canvas ref={this.clickCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_WIDTH}
-                        onMouseDown={(e) => this.handleMouseDown(e)}
-                        onContextMenu={(e) => this.handleMouseDown(e)}
-                        onMouseMove={(e) => this.handleMouseMove(e)}
-                        onMouseUp={() => this.handleMouseUp()}
-                        onScroll={() => this.handleZoom()}>
-                </canvas>
-              </div>
-            </TransformComponent>
-          </TransformWrapper>
-        </div>
-
-      </>
+      </div>
     );
   }
 }

@@ -14,18 +14,17 @@ var config = {
     CELL_START_SIZE: 0.025,
 
     // Sim info
-    MAP_DISPLAY_WIDTH: 800,      // px
-    MAP_DISPLAY_HEIGHT: 800,    // px
+    MAP_DISPLAY_WIDTH: 2000,      // px
+    MAP_DISPLAY_HEIGHT: 2000,    // px
     CANVAS_WIDTH_MODIFIER: width_modifier, // %
     CANVAS_HEIGHT_MODIFIER: height_modifier, // %
-    CANVAS_DISPLAY_WIDTH: document.documentElement.clientWidth * width_modifier,      // px
-    CANVAS_DISPLAY_HEIGHT: document.documentElement.clientHeight * height_modifier,    // px
+    CANVAS_DISPLAY_WIDTH: 800,  // px
+    CANVAS_DISPLAY_HEIGHT: 800, // px
     ROBOT_SIZE: 0.274,         // m, diameter
     ROBOT_DEFAULT_SIZE: 100,  // px
 
     // Display info
     MAP_COLOUR_HIGH: "#000000",      // Black
-    //MAP_COLOUR_HIGH: "#00274C",        // Michigan blue
     MAP_COLOUR_LOW: "#ffffff",        // White
     FIELD_COLOUR_HIGH: "#444444",    // White
     FIELD_COLOUR_LOW: "#ffffff",    // Grey
