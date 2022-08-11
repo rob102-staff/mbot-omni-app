@@ -2,6 +2,15 @@ import React from "react";
 import ReactDOM from "react-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
+import { faBars,
+         faArrowUp,
+         faArrowDown,
+         faArrowLeft,
+         faArrowRight,
+         faArrowRotateLeft,
+         faArrowRotateRight } from '@fortawesome/free-solid-svg-icons'
+
 import InputLabel from '@mui/material/InputLabel';
 import MenuItem from '@mui/material/MenuItem';
 import FormControl from '@mui/material/FormControl';
@@ -63,32 +72,43 @@ function ConnectionStatus(connection) {
 function DriveControlPanel(props) {
   return (
     <div className="row px-5 text-center pt-3">
-      <div className="button-wrapper col-lg-4">
-        <span>Speed: {props.speed}</span> <br />
+      <div className="col-lg-12">
+        <span>Speed: {props.speed}</span>
         <input type="range" min="1" max="100" value={props.speed}
                onChange={(evt) => props.onSpeedChange(evt)}></input>
       </div>
-      <div className="button-wrapper top-spacing col-lg-4">
-        <button className="button start-color" id="drive-start"
+      <div className="button-wrapper-row top-spacing col-lg-12">
+        <button className="button start-color col-lg-4" id="drive-start"
                 onClick={() => props.driveControls.start()}>Start</button>
-        <button className="button stop-color" id="drive-stop"
+        <button className="button stop-color col-lg-4" id="drive-stop"
                 onClick={() => props.driveControls.stop()}>Stop</button>
       </div>
-      <div className="button-wrapper col-lg-4">
-        <button className="button drive-turn drive-ctrl" id="turn-left"
-                onClick={() => props.driveControls.drive(0, 0, -1, props.speed)}></button>
-        <button className="button drive-move drive-ctrl" id="move-str"
-                onClick={() => props.driveControls.drive(1, 0, 0, props.speed)}></button>
-        <button className="button drive-turn drive-ctrl" id="turn-right"
-                onClick={() => props.driveControls.drive(0, 0, 1, props.speed)}></button>
-        <div className="drive-middle">
-          <button className="button drive-move drive-ctrl" id="move-left"
-                  onClick={() => props.driveControls.drive(0, -1, 0, props.speed)}></button>
-          <button className="button drive-move drive-ctrl" id="move-right"
-                  onClick={() => props.driveControls.drive(0, 1, 0, props.speed)}></button>
-        </div>
-        <button className="button drive-move drive-ctrl drive-bottom" id="move-back"
-                onClick={() => props.driveControls.drive(-1, 0, 0, props.speed)}></button>
+      <div className="drive-buttons">
+        <button className="button drive-turn" id="turn-left"
+                onClick={() => props.driveControls.drive(0, 0, -1, props.speed)}>
+          <FontAwesomeIcon icon={faArrowRotateLeft} />
+        </button>
+        <button className="button drive-move" id="move-str"
+                onClick={() => props.driveControls.drive(1, 0, 0, props.speed)}>
+          <FontAwesomeIcon icon={faArrowUp} />
+        </button>
+        <button className="button drive-turn" id="turn-right"
+                onClick={() => props.driveControls.drive(0, 0, 1, props.speed)}>
+          <FontAwesomeIcon icon={faArrowRotateRight} />
+        </button>
+
+        <button className="button drive-move" id="move-left"
+                onClick={() => props.driveControls.drive(0, -1, 0, props.speed)}>
+          <FontAwesomeIcon icon={faArrowLeft} />
+        </button>
+        <button className="button drive-move" id="move-right"
+                onClick={() => props.driveControls.drive(0, 1, 0, props.speed)}>
+          <FontAwesomeIcon icon={faArrowRight} />
+        </button>
+        <button className="button drive-move" id="move-back"
+                onClick={() => props.driveControls.drive(-1, 0, 0, props.speed)}>
+          <FontAwesomeIcon icon={faArrowDown} />
+        </button>
       </div>
     </div>
   );
@@ -478,15 +498,6 @@ class MBotApp extends React.Component {
 
   onSideBar(){
     this.setState({sideBarMode: !this.state.sideBarMode})
-    let widthBody = document.body.clientWidth
-    let temp;
-    if(this.state.sideBarMode) {
-      if(widthBody <= 400) temp = 100 + "%"
-      else if(widthBody <= 850) temp = 80 + "%"
-      else temp = 35 + "%"
-      this.setState({sideBarWidth: temp});
-    }
-    else this.setState({sideBarWidth: 0});
   }
 
   /***************************
@@ -702,7 +713,7 @@ class MBotApp extends React.Component {
                    isRobotClicked: false});
   }
 
-  changeOnmi() {
+  changeOmni() {
     this.setState({omni: !this.state.omni});
   }
 
@@ -789,6 +800,11 @@ class MBotApp extends React.Component {
   }
 
   render() {
+    let sidebarClasses = ""
+    if (!this.state.sideBarMode) {
+      sidebarClasses += "inactive";
+    }
+
     return (
       <div id="wrapper">
         <div id="main">
@@ -827,15 +843,15 @@ class MBotApp extends React.Component {
           </div>
         </div>
 
-        <div id="sidenav">
-          <a href="#" className="text-right" onClick={() => this.onSideBar()}>X</a>
+        <div id="sidenav" className={sidebarClasses}>
           <div className="status-wrapper mx-5 py-3">
             <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} clickedCell={this.state.clickedCell}
                            showField={this.state.showField} fieldVal={this.state.fieldHoverVal}/>
             <ConnectionStatus status={this.state.connection}/>
           </div>
-          {
-          <div className="row field-toggle-wrapper top-spacing text-white mx-3 mt-4">
+          <div id="toggle-nav" onClick={() => this.onSideBar()}><FontAwesomeIcon icon={faBars} /></div>
+
+          <div className="row field-toggle-wrapper top-spacing mx-3 mt-4">
             <div className="col">
               <div className="row">
                 <div className="col-8">
@@ -867,25 +883,21 @@ class MBotApp extends React.Component {
                 </label>
                 <input id="file-upload" type="file" onChange = {(event) => this.onFileChange(event)}/>
               </div>
-              <div className="button-wrapper top-spacing d-flex justify-content-center">
+              <div className="button-wrapper-col">
                 <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
                 <button className="button" onClick={() => this.restartmap()}>Reset Mapping</button>
-                <label htmlFor="file-upload" className="button upload-color">
-                    <i className="fa fa-cloud-upload"></i> Upload a Map
-                </label>
-                <input id="file-upload" type="file" onClick = {(event) => this.onFileChange(event)}/>
                 <button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>
-                <button className="button stop-color2 me-3" onClick={() => this.stopmap()}>Stop Mapping</button>
+                <button className="button stop-color2" onClick={() => this.stopmap()}>Stop Mapping</button>
 
               </div>
-              <div className="row mt-4 mb-5 text-left mx-2 text-center">
-                <div className="col-6 text-small"> Draw Particles
-                <input type="checkbox" className="mx-2" checked = {this.state.particles}
-                  onChange={() => this.changeParticles()}/>
+              <div className="row mt-4 mb-5 text-left mx-2">
+                <div className="col-12 text-small"> Draw Particles
+                  <input type="checkbox" className="mx-2" checked={this.state.particles}
+                         onChange={() => this.changeParticles()}/>
                 </div>
-                <div className="col-6"> Draw Robot
-                  <input type="checkbox" className="mx-2" checked = {this.state.robot}
-                  onChange={() => this.changeRobot()} />
+                <div className="col-12"> Draw Robot
+                  <input type="checkbox" className="mx-2" checked={this.state.robot}
+                         onChange={() => this.changeRobot()} />
                 </div>
               </div>
               </>
@@ -901,22 +913,23 @@ class MBotApp extends React.Component {
                     <span className="slider round"></span>
                   </label>
                 </div>
-              </div>
-              { this.state.drivingMode &&
-              <div className="row mt-5 text-left mx-2">
-                <DriveControlPanel driveControls={this.driveControls}
-                                   speed={this.state.speed}
-                                   onSpeedChange={(evt) => this.onSpeedChange(evt)} />
-                <div className="col-6 text-small">Omni-Drive
-                <input type="checkbox" className="mx-2" checked={this.state.omni}
-                  onChange={() => this.changeOnmi()}/>
-                </div>
-                <div className="col-6"> Diff-Drive
-                  <input type="checkbox" className="mx-2" checked={this.state.diff}
-                  onChange={() => this.changeDiff()} />
-                </div>
-              </div>
+                {this.state.drivingMode &&
+                  <div className="drive-panel-wrapper">
+                    <DriveControlPanel driveControls={this.driveControls}
+                                       speed={this.state.speed}
+                                       onSpeedChange={(evt) => this.onSpeedChange(evt)} />
+                    <div className="col-6 text-small">Omni-Drive
+                    <input type="checkbox" className="mx-2" checked={this.state.omni}
+                      onChange={() => this.changeOmni()}/>
+                    </div>
+                    <div className="col-6"> Diff-Drive
+                      <input type="checkbox" className="mx-2" checked={this.state.diff}
+                      onChange={() => this.changeDiff()} />
+                    </div>
+                  </div>
               }
+              </div>
+
               <div className="row my-5">
                 <div className="col-8">
                   <span className = "field-toggle-wrapper">
@@ -932,7 +945,6 @@ class MBotApp extends React.Component {
               </div>
             </div>
           </div>
-          }
         </div>
 
 
