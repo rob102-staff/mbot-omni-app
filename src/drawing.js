@@ -113,7 +113,6 @@ class GridCellCanvas {
 
   drawLinesFromOrigin(start_pos, end_poses, color = "red", line_width = 5) {
     this.ctx.beginPath();
-    console.log("dsfjh")
     for (var i = 0; i < end_poses.length; i++) {
       this.ctx.moveTo(start_pos[0], start_pos[1]);
       this.ctx.lineTo(end_poses[i][0], end_poses[i][1]);
@@ -124,7 +123,6 @@ class GridCellCanvas {
   }
 
   drawPath(path, color = "rgb(255, 25, 25)", line_width = 2) {
-
     for(let i = 1; i < path.length; i++) {  
       //Draws a line between the points
       this.ctx.beginPath();
@@ -138,13 +136,9 @@ class GridCellCanvas {
     }
   }
 
-  drawCostMap (obstacleCells, color = "rgba(249, 79, 53, 1)"){
-
+  drawCostMap (obstacleCells, color = "rgba(249, 79, 53)"){
     for (let index = 0; index < obstacleCells.length; index++) {
-      this.ctx.beginPath()
-      this.ctx.strokeStyle = color;
-      this.ctx.rect(obstacleCells[index][0], obstacleCells[index][1], 1, 1)
-      this.ctx.stroke()
+      this.drawCell(obstacleCells[index], color, 1) 
     }
   }
 
