@@ -122,15 +122,38 @@ class GridCellCanvas {
     this.ctx.stroke();
   }
 
-  drawPath(path, color = "red", line_width = 5) {
-    this.ctx.beginPath();
-    this.ctx.moveTo(path[0][0], path[0][1]);
-    for (var i = 0; i < path.length; i++) {
+  drawPath(path, color = "rgb(255, 25, 25)", line_width = 2) {
+    for(let i = 1; i < path.length; i++) {  
+      //Draws a line between the points
+      this.ctx.beginPath();
+
+      this.ctx.moveTo(path[i-1][0], path[i-1][1]);
       this.ctx.lineTo(path[i][0], path[i][1]);
+      
+      this.ctx.lineWidth = line_width;
+      this.ctx.strokeStyle = color
+      this.ctx.stroke();
     }
-    this.ctx.strokeStyle = color
-    this.ctx.line_width = line_width;
-    this.ctx.stroke();
+  }
+
+  drawCostMap (obstacleCells, color = "rgba(249, 79, 53)"){
+    for (let index = 0; index < obstacleCells.length; index++) {
+      this.drawCell(obstacleCells[index], color, 1) 
+    }
+  }
+
+  drawParticles(particles, intensity = 20, color = 'green', size = 1){
+    for (let index = 0; index < particles.length; index+=intensity) {
+      this.ctx.beginPath();
+      this.ctx.arc((particles[index][0]), 
+                   (particles[index][1]), 
+                   size, 0, 2 * Math.PI)
+      this.ctx.fillStyle = color;
+      this.ctx.fill();
+      this.ctx.lineWidth = size;
+      this.ctx.strokeStyle = color;
+      this.ctx.stroke();      
+    }
   }
 }
 

@@ -1,4 +1,5 @@
 import lcm
+
 from mbot_lcm_msgs import omni_motor_command_t
 from mbot_lcm_msgs import occupancy_grid_t
 from mbot_lcm_msgs import particles_t
@@ -10,6 +11,7 @@ from mbot_lcm_msgs import lidar_t
 from mbot_lcm_msgs import planner_request_t
 from mbot_lcm_msgs import robot_path_t
 from mbot_lcm_msgs import mbot_system_reset_t
+from mbot_lcm_msgs import costmap_t
 from app import lcm_settings
 
 import time
@@ -43,6 +45,7 @@ class LcmCommunicationManager:
         self.__subscribe(lcm_settings.SLAM_POSE_CHANNEL, self.pose_listener)
         self.__subscribe(lcm_settings.CONTROLLER_PATH_CHANNEL, self.path_listener)
         self.__subscribe(lcm_settings.SLAM_PARTICLES_CHANNEL, self.particle_listener)        
+        self.__subscribe(lcm_settings.COSTMAP_CHANNEL, self.obstacle_listener)        
         ###################################
 
         self.__lcm_thread = threading.Thread(target=self.__run_handle_loop)
@@ -64,7 +67,6 @@ class LcmCommunicationManager:
         cmd.vx = vx; cmd.vy = vy; cmd.wz = wz 
         cmd.utime = int(time.time() * 1000)
         self._lcm.publish(lcm_settings.MBOT_MOTOR_COMMAND_CHANNEL, cmd.encode())
-        print(f"published: {vx}, {vy}, {wz} to the channel {lcm_settings.MBOT_MOTOR_COMMAND_CHANNEL}")  # TODO: remove. For testing
 
     def publish_plan_data(self, goal:pose_xyt_t, plan:bool):
         goal_pose = pose_xyt_t()
@@ -136,6 +138,11 @@ class LcmCommunicationManager:
         if channel in self._callback_dict.keys(): 
             self._callback_dict[channel](decoded_data)
 
+    def obstacle_listener(self, channel, data):
+        decoded_data = costmap_t.decode(data)
+        if channel in self._callback_dict.keys(): 
+            self._callback_dict[channel](decoded_data)
+
     def lidar_listener(self, channel, data):
         decoded_data = lidar_t.decode(data)
         if channel in self._callback_dict.keys(): 
@@ -157,6 +164,5 @@ class LcmCommunicationManager:
             self._callback_dict[channel](decoded_data)
 
     def __del__(self): 
-        print("joined thread")
         self.__lcm_thread.join()
         for s in self.subscriptions: self._lcm.unsubscribe(s)

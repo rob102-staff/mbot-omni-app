@@ -59,6 +59,7 @@ a:hover {
   display: block;
   padding: 1em;
   color: #000000;
+  transition: left 0.3s;
 }
 
 #sidenav > #toggle-nav:hover {
@@ -67,10 +68,12 @@ a:hover {
 
 #sidenav.inactive {
   margin-left: -400px;  /* Move over the width of the sidebar. */
+  transition: left 0.3s, margin-left 0.3s;
 }
 
 #sidenav.inactive > #toggle-nav {
   left: 0px;
+  /* transition: left 0.3s, margin-left 0.3s; */
 }
 
 #canvas-container {

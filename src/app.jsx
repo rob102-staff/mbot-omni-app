@@ -231,10 +231,9 @@ class DrawLasers extends React.Component {
     // Clear all the lines on the grid from before.
     this.laserGrid.clear();
 
-    // Checks if the mapping mode is engaged
-    if (this.props.mappingMode) {
-      this.laserGrid.drawLinesFromOrigin(this.props.origin, this.props.lidarRays, 'green');
-    }
+    // Checks if the Laser mode is engaged
+    this.laserGrid.drawLinesFromOrigin(this.props.origin, this.props.drawLasers, 'green');
+    
   }
 
   render(){
@@ -248,11 +247,29 @@ class DrawLasers extends React.Component {
 class DrawPaths extends React.Component {
   constructor(props) {
     super(props);
+
+    this.pathGrid = new GridCellCanvas();
+    this.pathCanvas = React.createRef();
+  }
+
+  componentDidMount() {
+    this.pathGrid.init(this.pathCanvas.current);
+  }
+
+  shouldComponentUpdate(nextProps, nextState){
+    if (this.props.path == null) return false;
+    return true;
+  }
+
+  componentDidUpdate(){
+    this.pathGrid.setSize(this.props.width, this.props.height);
+    this.pathGrid.clear();
+    this.pathGrid.drawPath(this.props.path)
   }
 
   render(){
     return(
-      <canvas id="mapLine" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+      <canvas id="mapLine" ref={this.pathCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
       </canvas>
     );
   }
@@ -261,11 +278,51 @@ class DrawPaths extends React.Component {
 class DrawParticles extends React.Component {
   constructor(props) {
     super(props);
+
+    this.particleGrid = new GridCellCanvas();
+    this.particleCanvas = React.createRef();
+  }
+
+  componentDidMount() {
+    this.particleGrid.init(this.particleCanvas.current);
+  }
+
+  componentDidUpdate(){
+    this.particleGrid.setSize(this.props.width, this.props.height);
+    this.particleGrid.clear();
+    this.particleGrid.drawParticles(this.props.particles)
   }
 
   render(){
     return(
-      <canvas id="mapParticles" width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+      <canvas id="mapParticles" ref={this.particleCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+      </canvas>
+    );
+  }
+}
+
+class DrawCostmap extends React.Component {
+  constructor(props) {
+    super(props);
+    this.costmapGrid = new GridCellCanvas();
+    this.costmapCanvas = React.createRef();
+  }
+
+  componentDidMount() {
+    this.costmapGrid.init(this.costmapCanvas.current);
+  }
+
+  componentDidUpdate(){
+    // if(this.props.state) {
+      this.costmapGrid.setSize(this.props.width, this.props.height);
+      this.costmapGrid.clear();
+      this.costmapGrid.drawCostMap(this.props.cells)
+    // }
+  }
+
+  render(){
+    return(
+      <canvas id="mapcostMaps" ref={this.costmapCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
       </canvas>
     );
   }
@@ -298,7 +355,6 @@ class MBotApp extends React.Component {
       goalCell: [],
       goalValid: true,
       speed: 50,
-      darkMode: false,
       mappingMode: false,
       drivingMode: false,
       sideBarMode: true,
@@ -309,10 +365,15 @@ class MBotApp extends React.Component {
       x: config.MAP_DISPLAY_WIDTH / 2,
       y: config.MAP_DISPLAY_WIDTH / 2,
       theta: 0,
-      lidarRays: [],
+      drawLasers: [],
+      drawPaths: [],
+      drawCostmap: [],
+      drawParticles: [],
       isRobotClicked: false,
-      robot: true,
-      particles: true,
+      laserDisplay:false, 
+      robotDisplay: true,
+      particleDisplay: true,
+      costmapDisplay: false, 
       newMap: null,
     };
 
@@ -324,6 +385,7 @@ class MBotApp extends React.Component {
     this.ws.handlePose = (evt) => { this.handlePoses(evt)};
     this.ws.handlePath = (evt) => { this.handlePaths(evt)}
     this.ws.handleParticle = (evt) => { this.handleParticles(evt)};
+    this.ws.handleObstacle = (evt) => { this.handleObstacles(evt)};
 
     this.driveControls = new DriveControls(this.ws);
     this.visitGrid = new GridCellCanvas();
@@ -414,13 +476,9 @@ class MBotApp extends React.Component {
     this.ws.attemptConnection();
   }
 
-  /*****************************
-   *  COMPONENT EVENT HANDLERS
-   *****************************/
 
   onFileChange(event) {
     this.setState({ mapfile: event.target.files[0] });
-    this.resetCanvas()
 
     const fileSelector = document.querySelector('input[type="file"]');
     const reader = new FileReader()
@@ -432,27 +490,13 @@ class MBotApp extends React.Component {
 
   onMapChange(map_upload){
     if(map_upload == null) return;
-    this.ws.socket.emit('reset', {'mode' : 2, 'map':map_upload})
+    //Sends a message to the backend to start SLAM in localization mode, with the passes map
+    this.ws.socket.emit('reset', {'mode' : 2, 'map': map_upload})
   }
 
   saveMap() {
     var name = prompt("What do you want to name the map? (.json will automatically be added to the end)");
     downloadObjectAsJson(this.state.newMap, name)
-  }
-
-  onFileUpload() {
-    if (this.state.mapfile === null) return;
-
-    var fr = new FileReader();
-    fr.onload = (evt) => {
-      var map = parseMap(fr.result);
-      this.updateMap(map);
-    }
-    fr.readAsText(this.state.mapfile);
-
-    var map_data = {type: "map_file",
-                    data: { file_name: this.state.mapfile.name } };
-    this.ws.send(map_data);
   }
 
   onFieldCheck() {
@@ -469,27 +513,6 @@ class MBotApp extends React.Component {
 
   onDrivingMode() {
     this.setState({drivingMode: !this.state.drivingMode});
-  }
-
-  onDarkMode(){
-    var canvas = document.getElementById("canvas");
-    var driveCtrls = document.getElementsByClassName("drive-ctrl")
-    if (!this.state.darkMode){
-      document.body.classList.add("new-background-color");
-      canvas.classList.add("white-border", "canvas-color")
-      for (let index = 0; index < driveCtrls.length; index++) {
-        driveCtrls[index].classList.add("invert");
-      }
-    } else {
-      document.body.classList.remove("new-background-color");
-      canvas.classList.remove("white-border")
-    
-      for (let index = 0; index < driveCtrls.length; index++) {
-        driveCtrls[index].classList.remove("invert");
-      }
-      canvas.classList.remove("canvas-color", "white-border");
-    }
-    this.setState({darkMode: !this.state.darkMode});
   }
 
   onSpeedChange(event) {
@@ -564,9 +587,8 @@ class MBotApp extends React.Component {
   handleKeyPressDown(event) {
     var name = event.key;
     if (name == "p") this.onSideBar();
-    if (name == "b") this.onDarkMode();
-    if (name == "n") this.setState({mappingMode: !this.state.mappingMode});
-    if (name == "m") this.setState({drivingMode: !this.state.drivingMode});
+    if (name == "m") this.setState({mappingMode: !this.state.mappingMode});
+    if (name == "n") this.setState({drivingMode: !this.state.drivingMode});
   }
 
 
@@ -614,73 +636,37 @@ class MBotApp extends React.Component {
       rays.push([rayX, rayY]);
     } 
 
-    this.setState({lidarRays: rays, lidarLength: lidarLength})
+    this.setState({drawLasers: rays, lidarLength: lidarLength})
   }
 
   handlePaths(evt) {
-    const canvas = document.getElementById("mapLine");
-    this.ctx = canvas.getContext('2d');
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
+    var updated_path = [];
 
-    //Cycling through each path cell
-    for(let i = 0; i < evt.path.length; i++) {  
-      //Draws the point for the path
-      this.ctx.beginPath();
-      this.ctx.fillStyle = "rgb(255, 25, 25)";
-      this.ctx.arc(config.ROBOT_START_X + (evt.path[i][0]/this.state.metersPerCell), 
-                  (config.ROBOT_START_Y - (evt.path[i][1]/this.state.metersPerCell)), 
-                   4, 0, 2 * Math.PI);
-
-      //Draws a line between the points
-      this.ctx.beginPath();
-      // TODO: For this to work, need to use GridCellCanvas, which maintains
-      // consistent transforms for the canvas. Use the drawPath() function.
-      if(i==0){
-        var pt1 = this.posToPixels(this.state.x, this.state.y);
-        var pt2 = this.posToPixels(evt.path[i][0], evt.path[i][1]);
-        this.ctx.moveTo(pt1[0], pt1[1]);
-        this.ctx.lineTo(pt2[0], pt2[1])
-        this.ctx.strokeStyle = 'rgb(255, 25, 25)'
-        this.ctx.stroke();
-      }
-      else{
-        var pt1 = this.posToPixels(evt.path[i-1][0], evt.path[i-1][1]);
-        var pt2 = this.posToPixels(evt.path[i][0], evt.path[i][1]);
-        this.ctx.moveTo(pt1[0], pt1[1]);
-        this.ctx.lineTo(pt2[0], pt2[1])
-        this.ctx.strokeStyle = 'rgb(255, 25, 25)'
-        this.ctx.stroke();
-      }
+    for(let i = 0; i < evt.path.length; i++) {
+      updated_path[i] = this.posToPixels(evt.path[i][0], evt.path[i][1])
     }
+
+    this.setState({displayPaths: updated_path})
   }
   
   handleParticles(evt){
-    const canvas = document.getElementById("mapParticles");
-    this.ctx = canvas.getContext('2d');
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    //Checks if Particle Checkbox is ticked
-    if(this.state.particles){
-      for (let index = 0; index < evt.num_particles; index+=20) {
-        //Draws Particle for each instance
-        this.ctx.beginPath();
-        this.ctx.arc(config.ROBOT_START_X + (evt.particles[index][0]/this.state.metersPerCell), 
-                     config.ROBOT_START_Y - (evt.particles[index][1]/this.state.metersPerCell), 
-                     1, 0, 2 * Math.PI)
-        this.ctx.fillStyle = 'green';
-        this.ctx.fill();
-        this.ctx.lineWidth = 1;
-        this.ctx.strokeStyle = 'green'
-        this.ctx.stroke();      
-      }
+    var updated_pixels = [];
+    for (let i = 0; i < evt.num_particles; i++) {
+      updated_pixels[i] = this.posToPixels(evt.particles[i][0], evt.particles[i][1]);
+      
     }
+    this.setState({drawParticles: updated_pixels});
   }
 
-  resetCanvas(){
-    const pathCanvas = document.getElementById("mapLine");
-    this.ctx = pathCanvas.getContext('2d');
-    this.ctx.clearRect(0, 0, pathCanvas.width, pathCanvas.height);
+  handleObstacles(evt){
+    var updated_path = [];
+    for(let i = 0; i < evt.distances.length; i++)
+    {
+      updated_path[i] = this.cellToPixels(evt.pairs[i][0], evt.pairs[i][1])
+    }
+    this.setState({drawCostmap: updated_path});
   }
+
 
   /**********************
    *   STATE SETTERS
@@ -725,11 +711,19 @@ class MBotApp extends React.Component {
   }
 
   changeRobot(){
-    this.setState({robot: !this.state.robot})
+    this.setState({robotDisplay: !this.state.robotDisplay})
+  }
+
+  changeLasers(){
+    this.setState({laserDisplay: !this.state.laserDisplay})
   }
 
   changeParticles(){
-    this.setState({particles: !this.state.particles})
+    this.setState({particleDisplay: !this.state.particleDisplay})
+  }
+
+  changeCostMap(){
+    this.setState({costmapDisplay: !this.state.costmapDisplay})
   }
 
   onGoalClear() {
@@ -785,7 +779,6 @@ class MBotApp extends React.Component {
     return [row, col];
   }
 
-  //TODO: emit message to backend when the running mode is changed.
   startmap(){
     console.log("Starting to map")
   }
@@ -795,7 +788,6 @@ class MBotApp extends React.Component {
   }
 
   restartmap(){
-    this.resetCanvas()
     this.ws.socket.emit('reset', {'mode' : 3})
   }
 
@@ -816,18 +808,21 @@ class MBotApp extends React.Component {
                   <DrawMap cells={this.state.cells} prev_cells={this.state.prev_cells} width={this.state.width} height={this.state.height}/>
                   <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
                   </canvas>
-                  <DrawPaths />
-                  <DrawParticles/>
-                  <DrawLasers mappingMode={this.state.mappingMode} width={this.state.width} height={this.state.height}
-                              lidarRays={this.state.lidarRays} origin={[this.state.x, this.state.y]}/>
+                  <DrawPaths xPos = {this.state.x} yPos = {this.state.y} path =  {this.state.displayPaths}/>
+                  {this.state.costmapDisplay && 
+                    <DrawCostmap cells = {this.state.drawCostmap} state = {this.state.costmapDisplay}/>}
+                  {this.state.particleDisplay && 
+                    <DrawParticles particles = {this.state.drawParticles}/>}
+                  {this.state.laserDisplay && 
+                    <DrawLasers mappingMode={this.state.mappingMode} width={this.state.width} height={this.state.height}
+                              drawLasers={this.state.drawLasers} origin={[this.state.x, this.state.y]}/>}
+                  {this.state.robotDisplay &&
+                    <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
+                               pixelsPerMeter={this.state.pixelsPerMeter} />}
+                  
                   <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                              goalCell={this.state.goalCell} goalValid={this.state.goalValid}
                              cellSize={this.state.cellSize} />
-
-                  {this.state.robot &&
-                    <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
-                               pixelsPerMeter={this.state.pixelsPerMeter} />
-                  }
 
                   <canvas ref={this.clickCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}
                           onMouseDown={(e) => this.handleMouseDown(e)}
@@ -853,17 +848,6 @@ class MBotApp extends React.Component {
 
           <div className="row field-toggle-wrapper top-spacing mx-3 mt-4">
             <div className="col">
-              <div className="row">
-                <div className="col-8">
-                  <span>Dark Mode</span>
-                </div>
-                <div className="col-4">
-                  <label className="switch">
-                    <input type="checkbox" id="myDark" onClick={() => this.onDarkMode()}/>
-                    <span className="slider round"></span>
-                  </label>
-                </div>
-              </div>
               <div className="row my-5">
                 <div className="col-8">
                   <span className = "">Mapping Mode</span>
@@ -877,27 +861,38 @@ class MBotApp extends React.Component {
               </div>
               {this.state.mappingMode &&
               <>
-              <div className="row d-flex justify-content-center text-center">
-                <label htmlFor="file-upload" className="custom-file-upload">
-                  <i className="fa fa-cloud-upload"></i> Upload a Map
+
+              <div className="button-wrapper-col justify-content-center">
+                {/* TODO: Implement intial pose branch into code*/}
+                <button className="button start-color2" onClick={() => this.startmap()}>Set Inital Pose</button>
+                <button className="button" onClick={() => this.restartmap()}>Reset Mapping</button>
+                {/* TODO: Fix this button as it is not as wide as the other buttons*/}
+                <label htmlFor="file-upload" className="button upload-color mb-3">
+                  Upload a Map
                 </label>
                 <input id="file-upload" type="file" onChange = {(event) => this.onFileChange(event)}/>
-              </div>
-              <div className="button-wrapper-col">
-                <button className="button start-color2" onClick={() => this.startmap()}>Start Mapping</button>
-                <button className="button" onClick={() => this.restartmap()}>Reset Mapping</button>
                 <button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>
                 <button className="button stop-color2" onClick={() => this.stopmap()}>Stop Mapping</button>
-
               </div>
+
               <div className="row mt-4 mb-5 text-left mx-2">
-                <div className="col-12 text-small"> Draw Particles
-                  <input type="checkbox" className="mx-2" checked={this.state.particles}
+                <div className="col-6 text-small"> Draw Particles
+                  <input type="checkbox" className="mx-2" checked={this.state.particleDisplay}
                          onChange={() => this.changeParticles()}/>
                 </div>
-                <div className="col-12"> Draw Robot
-                  <input type="checkbox" className="mx-2" checked={this.state.robot}
+                <div className="col-6"> Draw Robot
+                  <input type="checkbox" className="mx-2" checked={this.state.robotDisplay}
                          onChange={() => this.changeRobot()} />
+                </div>
+              </div>
+              <div className="row mt-4 mb-5 text-left mx-2">
+                <div className="col-6 text-small"> Draw Costmap
+                <input type="checkbox" className="mx-2" checked = {this.state.costmapDisplay}
+                  onChange={() => this.changeCostMap()}/>
+                </div>
+                <div className="col-6"> Draw Lasers
+                  <input type="checkbox" className="mx-2" checked = {this.state.laserDisplay}
+                  onChange={() => this.changeLasers()} />
                 </div>
               </div>
               </>
@@ -918,14 +913,6 @@ class MBotApp extends React.Component {
                     <DriveControlPanel driveControls={this.driveControls}
                                        speed={this.state.speed}
                                        onSpeedChange={(evt) => this.onSpeedChange(evt)} />
-                    <div className="col-6 text-small">Omni-Drive
-                    <input type="checkbox" className="mx-2" checked={this.state.omni}
-                      onChange={() => this.changeOmni()}/>
-                    </div>
-                    <div className="col-6"> Diff-Drive
-                      <input type="checkbox" className="mx-2" checked={this.state.diff}
-                      onChange={() => this.changeDiff()} />
-                    </div>
                   </div>
               }
               </div>
@@ -946,9 +933,7 @@ class MBotApp extends React.Component {
             </div>
           </div>
         </div>
-
-
-      </div>
+    </div>
     );
   }
 }

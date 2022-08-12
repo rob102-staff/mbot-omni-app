@@ -223,3 +223,51 @@ class ParticleEmitter():
     def __del__(self):
         self.__stop_thread = True
         self.__thread.join()
+
+class CostmapEmitter():
+    def __init__(self, socket, event_name, period):
+        self.__socket           = socket
+        self.__event_name       = event_name
+        self.__period           = period
+        self.__obstacle_available    = False
+        self.__obstacle              = None
+
+        self.__lock   = threading.Lock()
+        self.__thread = threading.Thread(target=self.__run)
+        self.__stop_thread = False
+        self.__thread.start()
+
+    def __lcm_obstacle_to_dict(self):
+        return {
+            "utime" : self.__obstacle.utime,
+            "num_cells" : self.__obstacle.num_cells,
+            "distances" : self.__obstacle.distances,
+            "pairs" : self.__extract_pairs(self.__obstacle.num_cells, self.__obstacle.pairs)
+        }
+
+    def __extract_pairs(self, num_cells, pairs):
+        parts = []
+        for i in range(num_cells):
+            x = pairs[i].x
+            y = pairs[i].y
+            parts.append((x,y))
+        return parts
+
+    def __run(self):
+        while not self.__stop_thread:
+            time.sleep(self.__period)
+            if self.__obstacle_available:
+                self.__lock.acquire()
+                self.__socket.emit(self.__event_name, self.__lcm_obstacle_to_dict())
+                self.__obstacle_available = False
+                self.__lock.release()
+
+    def __call__(self, data):
+        self.__lock.acquire()
+        self.__obstacle = data
+        self.__obstacle_available = True
+        self.__lock.release()
+
+    def __del__(self):
+        self.__stop_thread = True
+        self.__thread.join()
