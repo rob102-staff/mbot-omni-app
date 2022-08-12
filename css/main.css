@@ -52,6 +52,10 @@ a:hover {
   background-color: #00274c36;
 }
 
+.inner {
+  margin: 2em;
+}
+
 #sidenav > #toggle-nav {
   position: absolute;
   left: 400px;
@@ -176,6 +180,10 @@ input[type="file"] {
   margin: 0 0 1em 0;
 }
 
+.button-wrapper-col > .button {
+  margin: 0 0 1em 0;
+}
+
 .button-wrapper-col > button:last-of-type {
     margin-bottom: 0;
 }
@@ -199,8 +207,7 @@ input[type="file"] {
   position: relative;
   overflow: hidden;
   display: flex;
-  flex-direction: row;
-  padding-top: 0.3em;
+  flex-direction: column;
 }
 
 .status {
@@ -214,10 +221,7 @@ input[type="file"] {
 }
 
 .status-msg {
-  margin-right: auto;
-  margin-top: auto;
-  margin-bottom: auto;
-  padding-left: 1em;
+  padding: 1em 0;
   font-size: 14px;
 }
 

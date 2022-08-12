@@ -20,6 +20,7 @@ import config from "./config.js";
 import { normalizeAngle } from "./util";
 import { WSHelper } from "./web.js";
 import { DrawRobot } from "./robot";
+import { DrawMap, DrawCells, DrawLasers, DrawPaths, DrawParticles, DrawCostmap } from "./canvas";
 import { parseMapFromSocket, parseMapFromLcm, normalizeList, downloadObjectAsJson } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControls } from "./driveControls.js";
@@ -112,220 +113,6 @@ function DriveControlPanel(props) {
       </div>
     </div>
   );
-}
-
-/*******************
- *     CANVAS
- *******************/
-
- class DrawMap extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.mapGrid = new GridCellCanvas();
-    this.mapCanvas = React.createRef();
-  }
-
-  componentDidMount() {
-    this.mapGrid.init(this.mapCanvas.current);
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    return nextProps.cells !== this.props.cells;
-  }
-
-  componentDidUpdate() {
-    this.mapGrid.setSize(this.props.width, this.props.height);
-    this.mapGrid.drawCells(this.props.cells, this.props.prev_cells, config.MAP_COLOUR_LOW, config.MAP_COLOUR_HIGH);
-  }
-
-  render() {
-    return (
-      <canvas id="mapCanvas" ref={this.mapCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
-      </canvas>
-    );
-  }
-}
-
-class DrawCells extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.pathUpdated = true;
-    this.clickedUpdated = true;
-    this.goalUpdated = true;
-
-    this.cellGrid = new GridCellCanvas();
-    this.cellsCanvas = React.createRef();
-  }
-
-  componentDidMount() {
-    this.cellGrid.init(this.cellsCanvas.current);
-  }
-
-  drawPath() {
-    for (var i in this.props.path) {
-      this.cellGrid.drawCell(this.props.path[i], config.PATH_COLOUR, this.props.cellSize);
-    }
-  }
-
-  shouldComponentUpdate(nextProps, nextState) {
-    this.pathUpdated = nextProps.path !== this.props.path;
-    this.clickedUpdated = nextProps.clickedCell !== this.props.clickedCell;
-    this.goalUpdated = nextProps.goalCell !== this.props.goalCell;
-
-    if (this.clickedUpdated && this.props.clickedCell.length > 0) {
-      this.cellGrid.clearCell(this.props.clickedCell, this.props.cellSize)
-    }
-    if (this.goalUpdated && this.props.goalCell.length > 0) {
-      this.cellGrid.clearCell(this.props.goalCell, this.props.cellSize)
-    }
-
-    return (this.pathUpdated || this.clickedUpdated || this.goalUpdated);
-  }
-
-  componentDidUpdate() {
-    // The first time the visited cells are null, the map was reset. Clear the
-    // canvas. Make sure this is only done once using this.clear.
-    this.cellGrid.clear();
-
-    // If the map has been loaded, we can draw the cells.
-    if (this.props.loaded) {
-      // Draw the found path.
-      if (this.pathUpdated) {
-        this.drawPath();
-      }
-
-      // If there's a goal cell, clear it in case it was clicked then draw it.
-      if (this.props.goalCell.length > 0) {
-        this.cellGrid.clearCell(this.props.goalCell, this.props.cellSize);
-        var colour = this.props.goalValid ? config.GOAL_CELL_COLOUR : config.BAD_GOAL_COLOUR;
-        this.cellGrid.drawCell(this.props.goalCell,
-                               colour, this.props.cellSize);
-      }
-    }
-  }
-
-  render() {
-    return (
-      <canvas ref={this.cellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
-      </canvas>
-    );
-  }
-}
-
-class DrawLasers extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.laserGrid = new GridCellCanvas();
-    this.laserCanvas = React.createRef();
-  }
-
-  componentDidMount() {
-    this.laserGrid.init(this.laserCanvas.current);
-  }
-
-  componentDidUpdate(){
-    this.laserGrid.setSize(this.props.width, this.props.height);
-    // Clear all the lines on the grid from before.
-    this.laserGrid.clear();
-
-    // Checks if the Laser mode is engaged
-    this.laserGrid.drawLinesFromOrigin(this.props.origin, this.props.drawLasers, 'green');
-    
-  }
-
-  render(){
-    return(
-      <canvas id="mapLasers" ref={this.laserCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
-      </canvas>
-    );
-  }
-}
-
-class DrawPaths extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.pathGrid = new GridCellCanvas();
-    this.pathCanvas = React.createRef();
-  }
-
-  componentDidMount() {
-    this.pathGrid.init(this.pathCanvas.current);
-  }
-
-  shouldComponentUpdate(nextProps, nextState){
-    if (this.props.path == null) return false;
-    return true;
-  }
-
-  componentDidUpdate(){
-    this.pathGrid.setSize(this.props.width, this.props.height);
-    this.pathGrid.clear();
-    this.pathGrid.drawPath(this.props.path)
-  }
-
-  render(){
-    return(
-      <canvas id="mapLine" ref={this.pathCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
-      </canvas>
-    );
-  }
-}
-
-class DrawParticles extends React.Component {
-  constructor(props) {
-    super(props);
-
-    this.particleGrid = new GridCellCanvas();
-    this.particleCanvas = React.createRef();
-  }
-
-  componentDidMount() {
-    this.particleGrid.init(this.particleCanvas.current);
-  }
-
-  componentDidUpdate(){
-    this.particleGrid.setSize(this.props.width, this.props.height);
-    this.particleGrid.clear();
-    this.particleGrid.drawParticles(this.props.particles)
-  }
-
-  render(){
-    return(
-      <canvas id="mapParticles" ref={this.particleCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
-      </canvas>
-    );
-  }
-}
-
-class DrawCostmap extends React.Component {
-  constructor(props) {
-    super(props);
-    this.costmapGrid = new GridCellCanvas();
-    this.costmapCanvas = React.createRef();
-  }
-
-  componentDidMount() {
-    this.costmapGrid.init(this.costmapCanvas.current);
-  }
-
-  componentDidUpdate(){
-    // if(this.props.state) {
-      this.costmapGrid.setSize(this.props.width, this.props.height);
-      this.costmapGrid.clear();
-      this.costmapGrid.drawCostMap(this.props.cells)
-    // }
-  }
-
-  render(){
-    return(
-      <canvas id="mapcostMaps" ref={this.costmapCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
-      </canvas>
-    );
-  }
 }
 
 /*******************
@@ -756,10 +543,6 @@ class MBotApp extends React.Component {
     this.ws.socket.emit("plan", {goal: [row, col], plan: plan})
   }
 
-  anExamplePost() {
-    this.ws.socket.emit("test", {'test_key': "test_value"});
-  }
-
   posToPixels(x, y) {
     var u = (x - this.state.origin[0]) * this.state.pixelsPerMeter;
     var v = (y - this.state.origin[1]) * this.state.pixelsPerMeter;
@@ -839,96 +622,85 @@ class MBotApp extends React.Component {
         </div>
 
         <div id="sidenav" className={sidebarClasses}>
-          <div className="status-wrapper mx-5 py-3">
-            <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} clickedCell={this.state.clickedCell}
-                           showField={this.state.showField} fieldVal={this.state.fieldHoverVal}/>
-            <ConnectionStatus status={this.state.connection}/>
-          </div>
           <div id="toggle-nav" onClick={() => this.onSideBar()}><FontAwesomeIcon icon={faBars} /></div>
+          <div className="inner">
+            <div className="status-wrapper">
+              <ConnectionStatus status={this.state.connection}/>
+              <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} clickedCell={this.state.clickedCell}
+                             showField={this.state.showField} fieldVal={this.state.fieldHoverVal}/>
+            </div>
 
-          <div className="row field-toggle-wrapper top-spacing mx-3 mt-4">
-            <div className="col">
-              <div className="row my-5">
-                <div className="col-8">
-                  <span className = "">Mapping Mode</span>
-                </div>
-                <div className="col-4">
-                  <label className="switch">
-                    <input type="checkbox" id="myCheck" onClick={() => this.onMappingMode()}/>
-                    <span className="slider round"></span>
-                  </label>
-                </div>
-              </div>
-              {this.state.mappingMode &&
-              <>
-
-              <div className="button-wrapper-col justify-content-center">
-                {/* TODO: Implement intial pose branch into code*/}
-                <button className="button start-color2" onClick={() => this.startmap()}>Set Inital Pose</button>
-                <button className="button" onClick={() => this.restartmap()}>Reset Mapping</button>
-                {/* TODO: Fix this button as it is not as wide as the other buttons*/}
-                <label htmlFor="file-upload" className="button upload-color mb-3">
-                  Upload a Map
-                </label>
-                <input id="file-upload" type="file" onChange = {(event) => this.onFileChange(event)}/>
-                <button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>
-                <button className="button stop-color2" onClick={() => this.stopmap()}>Stop Mapping</button>
-              </div>
-
-              <div className="row mt-4 mb-5 text-left mx-2">
-                <div className="col-6 text-small"> Draw Particles
-                  <input type="checkbox" className="mx-2" checked={this.state.particleDisplay}
-                         onChange={() => this.changeParticles()}/>
-                </div>
-                <div className="col-6"> Draw Robot
-                  <input type="checkbox" className="mx-2" checked={this.state.robotDisplay}
-                         onChange={() => this.changeRobot()} />
-                </div>
-              </div>
-              <div className="row mt-4 mb-5 text-left mx-2">
-                <div className="col-6 text-small"> Draw Costmap
-                <input type="checkbox" className="mx-2" checked = {this.state.costmapDisplay}
-                  onChange={() => this.changeCostMap()}/>
-                </div>
-                <div className="col-6"> Draw Lasers
-                  <input type="checkbox" className="mx-2" checked = {this.state.laserDisplay}
-                  onChange={() => this.changeLasers()} />
-                </div>
-              </div>
-              </>
-              }
-
-              <div className="row">
-                <div className="col-8">
-                  <span className = "">Drive Mode</span>
-                </div>
-                <div className="col-4">
-                  <label className="switch">
-                    <input type="checkbox" id="myDrive" onClick={() => this.onDrivingMode()}/>
-                    <span className="slider round"></span>
-                  </label>
-                </div>
-                {this.state.drivingMode &&
-                  <div className="drive-panel-wrapper">
-                    <DriveControlPanel driveControls={this.driveControls}
-                                       speed={this.state.speed}
-                                       onSpeedChange={(evt) => this.onSpeedChange(evt)} />
+            <div className="row field-toggle-wrapper">
+              <div className="col">
+                <div className="row my-4">
+                  <div className="col-8">
+                    <span className = "">Mapping Mode</span>
                   </div>
-              }
-              </div>
+                  <div className="col-4">
+                    <label className="switch">
+                      <input type="checkbox" id="myCheck" onClick={() => this.onMappingMode()}/>
+                      <span className="slider round"></span>
+                    </label>
+                  </div>
+                </div>
+                {this.state.mappingMode &&
+                <>
 
-              <div className="row my-5">
-                <div className="col-8">
-                  <span className = "field-toggle-wrapper">
-                    Show Field:
-                    </span>
-                </div>
-                <div className="col-4">
-                  <label className="switch">
-                    <input type="checkbox" id=""/>
-                    <span className="slider round"></span>
+                <div className="button-wrapper-col justify-content-center">
+                  {/* TODO: Implement intial pose branch into code*/}
+                  <button className="button start-color2" onClick={() => this.startmap()}>Set Inital Pose</button>
+                  <button className="button" onClick={() => this.restartmap()}>Reset Mapping</button>
+                  {/* TODO: Fix this button as it is not as wide as the other buttons*/}
+                  <label htmlFor="file-upload" className="button upload-color mb-3">
+                    Upload a Map
                   </label>
+                  <input id="file-upload" type="file" onChange = {(event) => this.onFileChange(event)}/>
+                  <button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>
+                  <button className="button stop-color2" onClick={() => this.stopmap()}>Stop Mapping</button>
                 </div>
+
+                <div className="row mt-4 mb-5 text-left mx-2">
+                  <div className="col-6 text-small"> Draw Particles
+                    <input type="checkbox" className="mx-2" checked={this.state.particleDisplay}
+                           onChange={() => this.changeParticles()}/>
+                  </div>
+                  <div className="col-6"> Draw Robot
+                    <input type="checkbox" className="mx-2" checked={this.state.robotDisplay}
+                           onChange={() => this.changeRobot()} />
+                  </div>
+                </div>
+                <div className="row mt-4 mb-5 text-left mx-2">
+                  <div className="col-6 text-small"> Draw Costmap
+                  <input type="checkbox" className="mx-2" checked = {this.state.costmapDisplay}
+                    onChange={() => this.changeCostMap()}/>
+                  </div>
+                  <div className="col-6"> Draw Lasers
+                    <input type="checkbox" className="mx-2" checked = {this.state.laserDisplay}
+                    onChange={() => this.changeLasers()} />
+                  </div>
+                </div>
+                </>
+                }
+
+                <div className="row">
+                  <div className="col-8">
+                    <span>Drive Mode</span>
+                  </div>
+                  <div className="col-4">
+                    <label className="switch">
+                      <input type="checkbox" id="myDrive" onClick={() => this.onDrivingMode()}/>
+                      <span className="slider round"></span>
+                    </label>
+                  </div>
+                  {this.state.drivingMode &&
+                    <div className="drive-panel-wrapper">
+                      <DriveControlPanel driveControls={this.driveControls}
+                                         speed={this.state.speed}
+                                         onSpeedChange={(evt) => this.onSpeedChange(evt)} />
+                    </div>
+                }
+                </div>
+
               </div>
             </div>
           </div>
