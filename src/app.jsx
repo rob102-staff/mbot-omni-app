@@ -212,9 +212,8 @@ class DrawLasers extends React.Component {
     this.laserGrid.clear();
 
     // Checks if the Laser mode is engaged
-    if (this.props.laserDisplay) {
-      this.laserGrid.drawLinesFromOrigin(this.props.origin, this.props.lidarRays, 'green');
-    }
+    this.laserGrid.drawLinesFromOrigin(this.props.origin, this.props.lidarRays, 'green');
+    
   }
 
   render(){
@@ -245,8 +244,7 @@ class DrawPaths extends React.Component {
   componentDidUpdate(){
     this.pathGrid.setSize(this.props.width, this.props.height);
     this.pathGrid.clear();
-    let robotPos = [this.props.xPos, this.props.yPos]
-    this.pathGrid.drawPath(this.props.path, robotPos)
+    this.pathGrid.drawPath(this.props.path)
   }
 
   render(){
@@ -269,12 +267,13 @@ class DrawParticles extends React.Component {
     this.particleGrid.init(this.particleCanvas.current);
   }
 
-  shouldComponentUpdate(){
-    if (this.props.properties == null) return false;
-    return true;
-  }
+  // shouldComponentUpdate(){
+  //   if (this.props.properties == null) return false;
+  //   return true;
+  // }
 
   componentDidUpdate(){
+    console.log(this.props.particles)
     this.particleGrid.setSize(this.props.width, this.props.height);
     this.particleGrid.clear();
     this.particleGrid.drawParticles(this.props.particles)
@@ -662,8 +661,7 @@ class MBotApp extends React.Component {
   handlePaths(evt) {
     var updated_path = [];
 
-    for(let i = 0; i < evt.path.length; i++)
-    {
+    for(let i = 0; i < evt.path.length; i++) {
       updated_path[i] = this.posToPixels(evt.path[i][0], evt.path[i][1])
     }
 
@@ -671,16 +669,20 @@ class MBotApp extends React.Component {
   }
   
   handleParticles(evt){
-    this.setState({particleDisplay: evt.particles});
+    var updated_pixels = [];
+    for (let i = 0; i < evt.num_particles; i++) {
+      updated_pixels[i] = this.posToPixels(evt.particles[i][0], evt.particles[i][1]);
+      
+    }
+    this.setState({drawParticles: updated_pixels});
   }
 
   handleObstacles(evt){
     var updated_path = [];
     for(let i = 0; i < evt.distances.length; i++)
     {
-      updated_path[i] = this.posToPixels(evt.pairs[i][0], evt.pairs[i][1])
+      updated_path[i] = this.cellToPixels(evt.pairs[i][0], evt.pairs[i][1])
     }
-
     this.setState({drawCostmap: updated_path});
   }
 
@@ -832,15 +834,17 @@ class MBotApp extends React.Component {
                   <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
                   </canvas>
                   <DrawPaths xPos = {this.state.x} yPos = {this.state.y} path =  {this.state.displayPaths}/>
-                  <DrawCostmap cells = {this.state.drawCostmap} state = {this.state.costmapDisplay}/>
-                  {this.state.particleDisplay && <DrawParticles/>}
+                  {this.state.costmapDisplay && 
+                    <DrawCostmap cells = {this.state.drawCostmap} state = {this.state.costmapDisplay}/>}
+                  {this.state.particleDisplay && 
+                    <DrawParticles particles = {this.state.drawParticles}/>}
                   <DrawLasers mappingMode={this.state.mappingMode} width={this.state.width} height={this.state.height}
                               lidarRays={this.state.lidarRays} origin={[this.state.x, this.state.y]}/>
                   <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                              goalCell={this.state.goalCell} goalValid={this.state.goalValid}
                              cellSize={this.state.cellSize} />
 
-                  {this.state.robot &&
+                  {this.state.robotDisplay &&
                     <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
                                pixelsPerMeter={this.state.pixelsPerMeter} />
                   }

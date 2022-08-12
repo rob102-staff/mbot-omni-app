@@ -113,6 +113,7 @@ class GridCellCanvas {
 
   drawLinesFromOrigin(start_pos, end_poses, color = "red", line_width = 5) {
     this.ctx.beginPath();
+    console.log("dsfjh")
     for (var i = 0; i < end_poses.length; i++) {
       this.ctx.moveTo(start_pos[0], start_pos[1]);
       this.ctx.lineTo(end_poses[i][0], end_poses[i][1]);
@@ -122,13 +123,11 @@ class GridCellCanvas {
     this.ctx.stroke();
   }
 
-  drawPath(path, robotPos, color = "rgb(255, 25, 25)", line_width = 2) {
+  drawPath(path, color = "rgb(255, 25, 25)", line_width = 2) {
 
     for(let i = 1; i < path.length; i++) {  
       //Draws a line between the points
       this.ctx.beginPath();
-
-      console.log(path[i][0], path[i][1])
 
       this.ctx.moveTo(path[i-1][0], path[i-1][1]);
       this.ctx.lineTo(path[i][0], path[i][1]);
@@ -144,7 +143,6 @@ class GridCellCanvas {
     for (let index = 0; index < obstacleCells.length; index++) {
       this.ctx.beginPath()
       this.ctx.strokeStyle = color;
-      // console.log(obstacleCells[index][0], obstacleCells[index][1])
       this.ctx.rect(obstacleCells[index][0], obstacleCells[index][1], 1, 1)
       this.ctx.stroke()
     }
@@ -153,8 +151,8 @@ class GridCellCanvas {
   drawParticles(particles, intensity = 20, color = 'green', size = 1){
     for (let index = 0; index < particles.length; index+=intensity) {
       this.ctx.beginPath();
-      this.ctx.arc(config.ROBOT_START_X + (particles[index][0]/this.state.metersPerCell), 
-                   config.ROBOT_START_Y - (particles[index][1]/this.state.metersPerCell), 
+      this.ctx.arc((particles[index][0]), 
+                   (particles[index][1]), 
                    size, 0, 2 * Math.PI)
       this.ctx.fillStyle = color;
       this.ctx.fill();
