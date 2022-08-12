@@ -256,7 +256,7 @@ class DrawPaths extends React.Component {
     this.pathGrid.init(this.pathCanvas.current);
   }
 
-  shouldComponentUpdate(){
+  shouldComponentUpdate(nextProps, nextState){
     if (this.props.path == null) return false;
     return true;
   }
@@ -374,7 +374,7 @@ class MBotApp extends React.Component {
       robotDisplay: true,
       particleDisplay: true,
       costmapDisplay: false, 
-      newMap: null
+      newMap: null,
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
@@ -479,7 +479,6 @@ class MBotApp extends React.Component {
 
   onFileChange(event) {
     this.setState({ mapfile: event.target.files[0] });
-    this.resetCanvas()
 
     const fileSelector = document.querySelector('input[type="file"]');
     const reader = new FileReader()
@@ -668,15 +667,6 @@ class MBotApp extends React.Component {
     this.setState({drawCostmap: updated_path});
   }
 
-  resetCanvas(){
-    const pathCanvas = document.getElementById("mapLine");
-    this.ctx = pathCanvas.getContext('2d');
-    this.ctx.clearRect(0, 0, pathCanvas.width, pathCanvas.height);
-
-    const canvas = document.getElementById("mapcostmaps");
-    this.ctx = canvas.getContext('2d');
-    this.ctx.clearRect(0, 0, canvas.width, canvas.height);
-  }
 
   /**********************
    *   STATE SETTERS
@@ -789,7 +779,6 @@ class MBotApp extends React.Component {
     return [row, col];
   }
 
-  //TODO: emit message to backend when the running mode is changed.
   startmap(){
     console.log("Starting to map")
   }
@@ -799,7 +788,6 @@ class MBotApp extends React.Component {
   }
 
   restartmap(){
-    // this.resetCanvas()
     this.ws.socket.emit('reset', {'mode' : 3})
   }
 
