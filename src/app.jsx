@@ -232,7 +232,7 @@ class DrawLasers extends React.Component {
     this.laserGrid.clear();
 
     // Checks if the Laser mode is engaged
-    this.laserGrid.drawLinesFromOrigin(this.props.origin, this.props.lidarRays, 'green');
+    this.laserGrid.drawLinesFromOrigin(this.props.origin, this.props.drawLasers, 'green');
     
   }
 
@@ -286,11 +286,6 @@ class DrawParticles extends React.Component {
   componentDidMount() {
     this.particleGrid.init(this.particleCanvas.current);
   }
-
-  // shouldComponentUpdate(){
-  //   if (this.props.properties == null) return false;
-  //   return true;
-  // }
 
   componentDidUpdate(){
     this.particleGrid.setSize(this.props.width, this.props.height);
@@ -360,7 +355,6 @@ class MBotApp extends React.Component {
       goalCell: [],
       goalValid: true,
       speed: 50,
-      darkMode: false,
       mappingMode: false,
       drivingMode: false,
       sideBarMode: true,
@@ -371,7 +365,7 @@ class MBotApp extends React.Component {
       x: config.MAP_DISPLAY_WIDTH / 2,
       y: config.MAP_DISPLAY_WIDTH / 2,
       theta: 0,
-      lidarRays: [],
+      drawLasers: [],
       drawPaths: [],
       drawCostmap: [],
       drawParticles: [],
@@ -522,27 +516,6 @@ class MBotApp extends React.Component {
     this.setState({drivingMode: !this.state.drivingMode});
   }
 
-  onDarkMode(){
-    // var canvas = document.getElementById("canvas");
-    // var driveCtrls = document.getElementsByClassName("drive-ctrl")
-    // if (!this.state.darkMode){
-    //   document.body.classList.add("new-background-color");
-    //   canvas.classList.add("white-border", "canvas-color")
-    //   for (let index = 0; index < driveCtrls.length; index++) {
-    //     driveCtrls[index].classList.add("invert");
-    //   }
-    // } else {
-    //   document.body.classList.remove("new-background-color");
-    //   canvas.classList.remove("white-border")
-    
-    //   for (let index = 0; index < driveCtrls.length; index++) {
-    //     driveCtrls[index].classList.remove("invert");
-    //   }
-    //   canvas.classList.remove("canvas-color", "white-border");
-    // }
-    // this.setState({darkMode: !this.state.darkMode});
-  }
-
   onSpeedChange(event) {
     this.setState({speed: event.target.value});
   }
@@ -615,9 +588,8 @@ class MBotApp extends React.Component {
   handleKeyPressDown(event) {
     var name = event.key;
     if (name == "p") this.onSideBar();
-    if (name == "b") this.onDarkMode();
-    if (name == "n") this.setState({mappingMode: !this.state.mappingMode});
-    if (name == "m") this.setState({drivingMode: !this.state.drivingMode});
+    if (name == "m") this.setState({mappingMode: !this.state.mappingMode});
+    if (name == "n") this.setState({drivingMode: !this.state.drivingMode});
   }
 
 
@@ -665,7 +637,7 @@ class MBotApp extends React.Component {
       rays.push([rayX, rayY]);
     } 
 
-    this.setState({lidarRays: rays, lidarLength: lidarLength})
+    this.setState({drawLasers: rays, lidarLength: lidarLength})
   }
 
   handlePaths(evt) {
@@ -827,7 +799,7 @@ class MBotApp extends React.Component {
   }
 
   restartmap(){
-    this.resetCanvas()
+    // this.resetCanvas()
     this.ws.socket.emit('reset', {'mode' : 3})
   }
 
@@ -855,7 +827,7 @@ class MBotApp extends React.Component {
                     <DrawParticles particles = {this.state.drawParticles}/>}
                   {this.state.laserDisplay && 
                     <DrawLasers mappingMode={this.state.mappingMode} width={this.state.width} height={this.state.height}
-                              lidarRays={this.state.lidarRays} origin={[this.state.x, this.state.y]}/>}
+                              drawLasers={this.state.drawLasers} origin={[this.state.x, this.state.y]}/>}
                   {this.state.robotDisplay &&
                     <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
                                pixelsPerMeter={this.state.pixelsPerMeter} />}
@@ -907,7 +879,7 @@ class MBotApp extends React.Component {
                 <button className="button start-color2" onClick={() => this.startmap()}>Set Inital Pose</button>
                 <button className="button" onClick={() => this.restartmap()}>Reset Mapping</button>
                 {/* TODO: Fix this button as it is not as wide as the other buttons*/}
-                <label htmlFor="file-upload" className="button mb-3">
+                <label htmlFor="file-upload" className="button upload-color mb-3">
                   Upload a Map
                 </label>
                 <input id="file-upload" type="file" onChange = {(event) => this.onFileChange(event)}/>
