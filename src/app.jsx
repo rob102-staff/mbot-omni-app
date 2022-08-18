@@ -1,5 +1,5 @@
 import React from "react";
-// import ReactDOM from "react-dom";
+
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
@@ -15,8 +15,8 @@ import { normalizeAngle } from "./util";
 import { WSHelper } from "./web.js";
 import { DrawRobot } from "./robot";
 import { DrawMap, DrawCells, DrawLasers, DrawPaths, DrawParticles, DrawCostmap } from "./canvas";
-import { parseMapFromSocket, parseMapFromLcm, normalizeList, downloadObjectAsJson } from "./map.js";
-import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
+import { parseMapFromLcm, downloadObjectAsJson } from "./map.js";
+import { GridCellCanvas } from "./drawing.js"
 import { DriveControlPanel } from "./driveControls";
 
 
@@ -56,6 +56,23 @@ function ConnectionStatus(connection) {
   return (
     <div className="status" style={{backgroundColor: colour}}>
       {msg}
+    </div>
+  );
+}
+
+function ToggleSelect(props) {
+  return (
+    <div className="row my-4 text-left">
+      <div className="col-8">
+        <span>{props.label}</span>
+      </div>
+      <div className="col-4">
+        <label className="switch">
+          <input type="checkbox" className="mx-2" checked={props.checked}
+                 onChange={() => props.onChange()}/>
+          <span className="slider round"></span>
+        </label>
+      </div>
     </div>
   );
 }
@@ -182,6 +199,10 @@ class MBotApp extends React.Component {
 
   onSideBar(){
     this.setState({sideBarMode: !this.state.sideBarMode})
+  }
+
+  onSetPose(){
+    console.log("Set pose. Not implemented.");
   }
 
   /***************************
@@ -427,20 +448,12 @@ class MBotApp extends React.Component {
     return [row, col];
   }
 
-  startmap(){
-    console.log("Starting to map")
-  }
-
-  stopmap(){
-    console.log("Stopping map")
-  }
-
-  restartmap(){
-    this.ws.socket.emit('reset', {'mode' : 3})
+  resetMap(){
+    this.ws.socket.emit('reset', {'mode' : 3});
   }
 
   render() {
-    let sidebarClasses = ""
+    let sidebarClasses = "";
     if (!this.state.sideBarMode) {
       sidebarClasses += "inactive";
     }
@@ -497,70 +510,36 @@ class MBotApp extends React.Component {
 
             <div className="row field-toggle-wrapper">
               <div className="col">
-                <div className="row my-4">
-                  <div className="col-8">
-                    <span className = "">Mapping Mode</span>
-                  </div>
-                  <div className="col-4">
-                    <label className="switch">
-                      <input type="checkbox" id="myCheck" onClick={() => this.onMappingMode()}/>
-                      <span className="slider round"></span>
-                    </label>
-                  </div>
-                </div>
-                {this.state.mappingMode &&
-                <>
+                <ToggleSelect label={"Mapping Mode"} checked={this.state.mappingMode} 
+                              onChange={ () => this.onMappingMode() }/>
 
                 <div className="button-wrapper-col">
                   {/* TODO: Implement intial pose branch into code*/}
-                  <button className="button start-color2" onClick={() => this.startmap()}>Set Inital Pose</button>
-                  <button className="button" onClick={() => this.restartmap()}>Reset Mapping</button>
-                  {/* TODO: Fix this button as it is not as wide as the other buttons*/}
+                  <button className="button start-color2" onClick={() => this.onSetPose()}>Set Inital Pose</button>
+                  <button className="button" onClick={() => this.resetMap()}>Reset Mapping</button>
                   <label htmlFor="file-upload" className="button upload-color mb-3">
                     Upload a Map
                   </label>
                   <input id="file-upload" type="file" onChange = {(event) => this.onFileChange(event)}/>
                   <button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>
-                  <button className="button stop-color2" onClick={() => this.stopmap()}>Stop Mapping</button>
                 </div>
 
-                <div className="row mt-4 mb-5 text-left mx-2">
-                  <div className="col-6 text-small"> Draw Particles
-                    <input type="checkbox" className="mx-2" checked={this.state.particleDisplay}
-                           onChange={() => this.changeParticles()}/>
-                  </div>
-                  <div className="col-6"> Draw Robot
-                    <input type="checkbox" className="mx-2" checked={this.state.robotDisplay}
-                           onChange={() => this.changeRobot()} />
-                  </div>
-                </div>
-                <div className="row mt-4 mb-5 text-left mx-2">
-                  <div className="col-6 text-small"> Draw Costmap
-                  <input type="checkbox" className="mx-2" checked = {this.state.costmapDisplay}
-                    onChange={() => this.changeCostMap()}/>
-                  </div>
-                  <div className="col-6"> Draw Lasers
-                    <input type="checkbox" className="mx-2" checked = {this.state.laserDisplay}
-                    onChange={() => this.changeLasers()} />
-                  </div>
-                </div>
-                </>
+                { /* Drive mode and control panel. */}
+                <ToggleSelect label={"Drive Mode"} checked={this.state.drivingMode} 
+                              onChange={ () => this.onDrivingMode() }/>
+                {this.state.drivingMode &&
+                  <DriveControlPanel ws={this.ws} drivingMode={this.state.drivingMode} />
                 }
 
-                <div className="row">
-                  <div className="col-8">
-                    <span>Drive Mode</span>
-                  </div>
-                  <div className="col-4">
-                    <label className="switch">
-                      <input type="checkbox" id="myDrive" onClick={() => this.onDrivingMode()}/>
-                      <span className="slider round"></span>
-                    </label>
-                  </div>
-                  {this.state.drivingMode &&
-                    <DriveControlPanel ws={this.ws} drivingMode={this.state.drivingMode} />
-                  }
-                </div>
+                { /* Checkboxes for map visualization. */}
+                <ToggleSelect label={"Draw Particles"} checked={this.state.particleDisplay} 
+                              onChange={ () => this.changeParticles() }/>
+                <ToggleSelect label={"Draw Robot"} checked={this.state.robotDisplay} 
+                              onChange={ () => this.changeRobot() }/>
+                <ToggleSelect label={"Draw Costmap"} checked={this.state.costmapDisplay} 
+                              onChange={ () => this.changeCostMap() }/>
+                <ToggleSelect label={"Draw Lasers"} checked={this.state.laserDisplay} 
+                              onChange={ () => this.changeLasers() }/>
 
               </div>
             </div>
