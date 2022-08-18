@@ -1,20 +1,14 @@
 import React from "react";
-import ReactDOM from "react-dom";
+// import ReactDOM from "react-dom";
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBars,
-         faArrowUp,
-         faArrowDown,
-         faArrowLeft,
-         faArrowRight,
-         faArrowRotateLeft,
-         faArrowRotateRight } from '@fortawesome/free-solid-svg-icons'
+import { faBars } from '@fortawesome/free-solid-svg-icons'
 
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
+// import InputLabel from '@mui/material/InputLabel';
+// import MenuItem from '@mui/material/MenuItem';
+// import FormControl from '@mui/material/FormControl';
+// import Select from '@mui/material/Select';
 
 import config from "./config.js";
 import { normalizeAngle } from "./util";
@@ -23,7 +17,7 @@ import { DrawRobot } from "./robot";
 import { DrawMap, DrawCells, DrawLasers, DrawPaths, DrawParticles, DrawCostmap } from "./canvas";
 import { parseMapFromSocket, parseMapFromLcm, normalizeList, downloadObjectAsJson } from "./map.js";
 import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
-import { DriveControls } from "./driveControls.js";
+import { DriveControlPanel } from "./driveControls";
 
 
 /*******************
@@ -67,55 +61,6 @@ function ConnectionStatus(connection) {
 }
 
 /*******************
- *  CONTROL PANELS
- *******************/
-
-function DriveControlPanel(props) {
-  return (
-    <div className="row px-5 text-center pt-3">
-      <div className="col-lg-12">
-        <span>Speed: {props.speed}</span>
-        <input type="range" min="1" max="100" value={props.speed}
-               onChange={(evt) => props.onSpeedChange(evt)}></input>
-      </div>
-      <div className="button-wrapper-row top-spacing col-lg-12">
-        <button className="button start-color col-lg-4" id="drive-start"
-                onClick={() => props.driveControls.start()}>Start</button>
-        <button className="button stop-color col-lg-4" id="drive-stop"
-                onClick={() => props.driveControls.stop()}>Stop</button>
-      </div>
-      <div className="drive-buttons">
-        <button className="button drive-turn" id="turn-left"
-                onClick={() => props.driveControls.drive(0, 0, -1, props.speed)}>
-          <FontAwesomeIcon icon={faArrowRotateLeft} />
-        </button>
-        <button className="button drive-move" id="move-str"
-                onClick={() => props.driveControls.drive(1, 0, 0, props.speed)}>
-          <FontAwesomeIcon icon={faArrowUp} />
-        </button>
-        <button className="button drive-turn" id="turn-right"
-                onClick={() => props.driveControls.drive(0, 0, 1, props.speed)}>
-          <FontAwesomeIcon icon={faArrowRotateRight} />
-        </button>
-
-        <button className="button drive-move" id="move-left"
-                onClick={() => props.driveControls.drive(0, -1, 0, props.speed)}>
-          <FontAwesomeIcon icon={faArrowLeft} />
-        </button>
-        <button className="button drive-move" id="move-right"
-                onClick={() => props.driveControls.drive(0, 1, 0, props.speed)}>
-          <FontAwesomeIcon icon={faArrowRight} />
-        </button>
-        <button className="button drive-move" id="move-back"
-                onClick={() => props.driveControls.drive(-1, 0, 0, props.speed)}>
-          <FontAwesomeIcon icon={faArrowDown} />
-        </button>
-      </div>
-    </div>
-  );
-}
-
-/*******************
  *   WHOLE PAGE
  *******************/
 
@@ -141,7 +86,6 @@ class MBotApp extends React.Component {
       clickedCell: [],
       goalCell: [],
       goalValid: true,
-      speed: 50,
       mappingMode: false,
       drivingMode: false,
       sideBarMode: true,
@@ -174,7 +118,7 @@ class MBotApp extends React.Component {
     this.ws.handleParticle = (evt) => { this.handleParticles(evt)};
     this.ws.handleObstacle = (evt) => { this.handleObstacles(evt)};
 
-    this.driveControls = new DriveControls(this.ws);
+    // this.ws = new ws(this.ws);
     this.visitGrid = new GridCellCanvas();
     this.visitCellsCanvas = React.createRef();
     this.clickCanvas = React.createRef();
@@ -193,72 +137,6 @@ class MBotApp extends React.Component {
     window.addEventListener('resize', (evt) => this.handleWindowChange(evt));
     window.addEventListener('scroll', (evt) => this.handleWindowChange(evt));
 
-    // TODO: Discuss what other modes will enable drive control. Currently the
-    // key presses active only when the drive toggle is toggled on.
-    const controller =  {
-      s: {pressed: false, fn: "back"},    
-      w: {pressed: false, fn: "forward"},
-      a: {pressed: false, fn: "left"},
-      d: {pressed: false, fn: "right"},  
-      e: {pressed: false, fn: "tright"},
-      q: {pressed: false, fn: "tleft"}
-    }
-
-    let x = 0;
-    let y = 0;
-    let t = 0;
-
-    document.addEventListener('keydown', (evt) => {
-      //handles a couple of shortcut keys
-      this.handleKeyPressDown(evt)
-
-      //First checks if the drive State is active, then adds speed values in rx, ry, and theta
-      if(this.state.drivingMode)
-      {
-        if(controller[evt.key]){
-          controller[evt.key].pressed = true
-          if(controller[evt.key].fn == "back" && x > -1) x--; 
-          if(controller[evt.key].fn == "forward" && x < 1) x++;
-          if(controller[evt.key].fn == "left" && y > -1) y--;
-          if(controller[evt.key].fn == "right" && y < 1) y++; 
-          if(controller[evt.key].fn == "tleft" && t > -1) t--; 
-          if(controller[evt.key].fn == "tright" && t < 1) t++; 
-          this.driveControls.goKeyDown(evt.key);
-        }
-
-        //Updates drive commands to robot
-        this.driveControls.drive(x, y, t, this.state.speed)
-      }
-
-    }, false);
-
-    document.addEventListener('keyup', (evt) => {
-      //First checks if the drive State is active, then substracts speed values in rx, ry, and theta
-      if(this.state.drivingMode){
-        if(controller[evt.key]){
-          controller[evt.key].pressed = false
-          if(controller[evt.key].fn == "back") x++;
-          if(controller[evt.key].fn == "forward") x--;
-          if(controller[evt.key].fn == "left") y++;
-          if(controller[evt.key].fn == "right") y--;
-          if(controller[evt.key].fn == "tleft") t++;
-          if(controller[evt.key].fn == "tright") t--;
-        }
-
-        //animation for color change
-        this.driveControls.stopKeyUp(evt.key);
-        //Stops robot if it finds that all keys have been lifted up, acts as a failsafe to above logic
-        let reset = true;
-        for (const [key, value] of Object.entries(controller)) {
-          if(value.pressed) reset = false
-        }
-        if(reset) {x = 0; y = 0; t = 0;}
-
-        //code to update drive speeds
-        this.driveControls.drive(x, y, t, this.state.speed)
-      }
-
-    }, false);
     // Try to connect to the websocket backend.
     this.ws.attemptConnection();
   }
@@ -300,10 +178,6 @@ class MBotApp extends React.Component {
 
   onDrivingMode() {
     this.setState({drivingMode: !this.state.drivingMode});
-  }
-
-  onSpeedChange(event) {
-    this.setState({speed: event.target.value});
   }
 
   onSideBar(){
@@ -370,14 +244,6 @@ class MBotApp extends React.Component {
     // this moves the robot along the path
     this.setState({isRobotClicked: false});
   }
-
-  handleKeyPressDown(event) {
-    var name = event.key;
-    if (name == "p") this.onSideBar();
-    if (name == "m") this.setState({mappingMode: !this.state.mappingMode});
-    if (name == "n") this.setState({drivingMode: !this.state.drivingMode});
-  }
-
 
  /********************
    *   WS HANDLERS
@@ -453,7 +319,6 @@ class MBotApp extends React.Component {
     }
     this.setState({drawCostmap: updated_path});
   }
-
 
   /**********************
    *   STATE SETTERS
@@ -646,7 +511,7 @@ class MBotApp extends React.Component {
                 {this.state.mappingMode &&
                 <>
 
-                <div className="button-wrapper-col justify-content-center">
+                <div className="button-wrapper-col">
                   {/* TODO: Implement intial pose branch into code*/}
                   <button className="button start-color2" onClick={() => this.startmap()}>Set Inital Pose</button>
                   <button className="button" onClick={() => this.restartmap()}>Reset Mapping</button>
@@ -693,12 +558,8 @@ class MBotApp extends React.Component {
                     </label>
                   </div>
                   {this.state.drivingMode &&
-                    <div className="drive-panel-wrapper">
-                      <DriveControlPanel driveControls={this.driveControls}
-                                         speed={this.state.speed}
-                                         onSpeedChange={(evt) => this.onSpeedChange(evt)} />
-                    </div>
-                }
+                    <DriveControlPanel ws={this.ws} drivingMode={this.state.drivingMode} />
+                  }
                 </div>
 
               </div>
