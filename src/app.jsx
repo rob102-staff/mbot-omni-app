@@ -126,7 +126,6 @@ class MBotApp extends React.Component {
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
-    this.ws.userHandleMessage = (evt) => { this.handleMessage(evt); };
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
     this.ws.handleLaser = (evt) => { this.handleLasers(evt)};
@@ -252,10 +251,6 @@ class MBotApp extends React.Component {
     var map = parseMapFromLcm(mapmsg)
     this.updateMap(map);
     this.setState({newMap: map})
-  }
-
-  handleMessage(msg) {
-    // TODO: Handle messages from the websocket.
   }
 
   updateSocketStatus(status) {

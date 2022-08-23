@@ -11,7 +11,6 @@ class WSHelper {
     this.attempting_connection = false;
     this.connectInterval = null;
     this.connect_period = reconnect_delay;
-    this.userHandleMessage = (evt) => {console.warn("userHandleMessage is not yet set up.")};
     this.statusCallback = (status) => {console.warn("statusCallback is not yet set up.")};
     this.userHandleMap = (evt) => {console.warn("userHandleMap is not yet set up.")};
     this.handleLaser = (evt) => {console.warn("handleLaser is not yet set up.")};
@@ -25,14 +24,13 @@ class WSHelper {
     if (this.socket !== null) {
       if (this.socket.connected === true){
         return true
-      } 
+      }
     }
 
     this.socket = io(this.uri);
 
-    this.socket.on("message", (evt) => this.userHandleMessage(evt));
-    this.socket.on("connect", (evt) => this.handleOpen(evt));
-    this.socket.on("close", (evt) => this.attemptConnection());
+    this.socket.on('connect', (evt) => this.handleOpen(evt));
+    this.socket.on('disconnect', (evt) => this.attemptConnection());
     this.socket.on('error', (evt) => { this.statusCallback(this.status()); });
     this.socket.on('map', (evt) => this.userHandleMap(evt));
     this.socket.on('lidar', (evt) => this.handleLaser(evt));
