@@ -30,9 +30,6 @@ function StatusMessage(props) {
   if (props.clickedCell.length > 0) {
     msg.push("Clicked Cell: (" + props.clickedCell + ")");
   }
-  if (props.showField) {
-    msg.push("Field: " + props.fieldVal.toFixed(4));
-  }
 
   return (
     <div className="status-msg">
@@ -88,6 +85,7 @@ class MBotApp extends React.Component {
     // React state.
     this.state = {
       connection: false,
+      // Map parameters.
       cells: [],
       prev_cells: [],
       width: 0,
@@ -99,31 +97,32 @@ class MBotApp extends React.Component {
       cellSize: 0,
       mapLoaded: false,
       mapfile: null,
-      path: [],
-      clickedCell: [],
       goalCell: [],
       goalValid: true,
+      newMap: null,
+      localMapFileLocation: "current.map",
+      // Mode variables.
       mappingMode: false,
       drivingMode: false,
       sideBarMode: true,
-      sideBarWidth: 0,
       omni: false,
       diff: false,
       // Robot parameters.
       x: config.MAP_DISPLAY_WIDTH / 2,
       y: config.MAP_DISPLAY_WIDTH / 2,
       theta: 0,
+      // Visualization elements.
+      path: [],
+      clickedCell: [],
       drawLasers: [],
       drawPaths: [],
       drawCostmap: [],
       drawParticles: [],
-      isRobotClicked: false,
-      laserDisplay:false,
+      // Flags to display elements.
+      laserDisplay: false,
       robotDisplay: true,
       particleDisplay: true,
       costmapDisplay: false,
-      newMap: null,
-      localMapFileLocation: "current.map"
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
@@ -180,10 +179,6 @@ class MBotApp extends React.Component {
   saveMap() {
     var name = prompt("What do you want to name the map? (.json will automatically be added to the end)");
     downloadObjectAsJson(this.state.newMap, name)
-  }
-
-  onFieldCheck() {
-    this.setState({showField: !this.state.showField});
   }
 
   onGrabMap() {
@@ -247,42 +242,6 @@ class MBotApp extends React.Component {
     // Implement check for ctrl-click and whether an a* plan is required
     // if(event.type === "mousedown") plan = true;
     this.onPlan(row, col, plan);
-  }
-
-  handleMouseDown(event) {
-    var x = event.clientX - this.rect.left;
-    var y = this.rect.bottom - event.clientY;
-    var robotRadius = config.ROBOT_SIZE *this.state.pixelsPerMeter / 2;
-    // if click is near robot, set isDown as true
-    if (x < this.state.x + robotRadius && x > this.state.x - robotRadius &&
-        y < this.state.y + robotRadius && y > this.state.y - robotRadius) {
-      this.setState({ isRobotClicked: true });
-    }
-    else {
-      this.handleMapClick(event);
-    }
-  }
-
-  handleMouseMove(event) {
-    if (!this.state.showField && !this.state.isRobotClicked) return;
-
-    var x = event.clientX - this.rect.left;
-    var y = this.rect.bottom - event.clientY;
-
-    if (this.state.isRobotClicked) {
-      this.setState({ x: x, y: y });
-    }
-    if (this.state.showField && this.state.fieldRaw.length > 0) {
-      var cell = this.pixelsToCell(x, y);
-      var idx = Math.max(Math.min(cell[1] + cell[0] * this.state.width, this.state.num_cells - 1), 0);
-      this.setState({ fieldHoverVal: this.state.fieldRaw[idx] });
-    }
-  }
-
-  handleMouseUp() {
-    if (this.state.isRobotClicked == false) return;
-    // this moves the robot along the path
-    this.setState({isRobotClicked: false});
   }
 
  /********************
@@ -383,9 +342,7 @@ class MBotApp extends React.Component {
                    pixelsPerMeter: config.MAP_DISPLAY_WIDTH / (result.width * result.meters_per_cell),
                    mapLoaded: loaded,
                    path: [],
-                   clickedCell: [],
                    goalCell: [],
-                   isRobotClicked: false,
                    mappingMode: mappingMode,
                    localMapFileLocation: result.slam_map_location});
   }
@@ -504,10 +461,7 @@ class MBotApp extends React.Component {
                              cellSize={this.state.cellSize} />
 
                   <canvas ref={this.clickCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}
-                          onMouseDown={(e) => this.handleMouseDown(e)}
-                          onContextMenu={(e) => this.handleMouseDown(e)}
-                          onMouseMove={(e) => this.handleMouseMove(e)}
-                          onMouseUp={() => this.handleMouseUp()}
+                          onClick={(e) => this.handleMapClick(e)}
                           onScroll={() => this.handleZoom()}>
                   </canvas>
                 </div>
@@ -522,11 +476,10 @@ class MBotApp extends React.Component {
           <div className="inner">
             <div className="status-wrapper">
               <ConnectionStatus status={this.state.connection}/>
-              <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} clickedCell={this.state.clickedCell}
-                             showField={this.state.showField} fieldVal={this.state.fieldHoverVal}/>
+              <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} clickedCell={this.state.clickedCell} />
             </div>
 
-            <div className="row field-toggle-wrapper">
+            <div className="row">
               <div className="col">
                 <ToggleSelect label={"Mapping Mode"} checked={this.state.mappingMode}
                               onChange={ () => this.onMappingMode() }/>
