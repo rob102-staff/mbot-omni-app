@@ -191,6 +191,15 @@ class MBotApp extends React.Component {
   }
 
   onMappingMode() {
+    if (this.state.mappingMode) {
+      // If we're mapping, we need to reset the robot to localization only mode.
+      this.ws.socket.emit('reset', {'mode' : 2});
+    }
+    else {
+      // If we are not mapping, we need to tell the robot to start mapping.
+      if (!confirm("This will overwrite the current map. Are you sure?")) return;
+      this.ws.socket.emit('reset', {'mode' : 3});
+    }
     this.setState({mappingMode: !this.state.mappingMode});
   }
 
@@ -204,6 +213,15 @@ class MBotApp extends React.Component {
 
   onSetPose(){
     console.log("Set pose. Not implemented.");
+  }
+
+  onResetMap(){
+    if (this.state.mappingMode) {
+      // Get user confirmation that the map should be cleared.
+      if (!confirm("This will clear the current map. Are you sure?")) return;
+      // Reset in full SLAM mode, if in mapping mode.
+      this.ws.socket.emit('reset', {'mode' : 3});
+    }
   }
 
   /***************************
@@ -350,10 +368,6 @@ class MBotApp extends React.Component {
     this.setState({x: x, y: y, theta: theta});
   }
 
-  /**********************
-   *   OTHER FUNCTIONS
-   **********************/
-
   updateMap(result) {
     this.visitGrid.clear();
     var mappingMode = result.slam_mode != 2;  // We are in mapping mode if the state is not localization_only (=2).
@@ -419,6 +433,10 @@ class MBotApp extends React.Component {
     return valid;
   }
 
+  /**********************
+   *   OTHER FUNCTIONS
+   **********************/
+
   onPlan(row, col, plan) {
     if (!this.setGoal([row, col])) return;
     // Clear visted canvas
@@ -450,10 +468,6 @@ class MBotApp extends React.Component {
     var row = Math.floor(v / this.state.cellSize);
     var col = Math.floor(u / this.state.cellSize);
     return [row, col];
-  }
-
-  resetMap(){
-    this.ws.socket.emit('reset', {'mode' : 3});
   }
 
   render() {
@@ -520,7 +534,7 @@ class MBotApp extends React.Component {
                 <div className="button-wrapper-col">
                   {/* TODO: Implement intial pose branch into code*/}
                   <button className="button start-color2" onClick={() => this.onSetPose()}>Set Inital Pose</button>
-                  <button className="button" onClick={() => this.resetMap()}>Reset Mapping</button>
+                  <button className="button" onClick={() => this.onResetMap()}>Reset Map</button>
                   <label htmlFor="file-upload" className="button upload-color mb-3">
                     Upload a Map
                   </label>

@@ -37,11 +37,10 @@ def plan_cb(data):
 
 @socket.on('reset')
 def reset_slam(data):
-    # Checks if the user wants to reset to localization mode (2) or reset Full SLAM
-    if(data["mode"] == 2):
-        lcm_manager.publish_slam_reset(data["mode"], data["map"])
-    else:
-        lcm_manager.publish_slam_reset(data["mode"])
+    map_file = None
+    if "map_file" in data.keys():
+        map_file = data["map_file"]
+    lcm_manager.publish_slam_reset(data["mode"], map_file)
 
 @socket.on('move')
 def test_message(data):
@@ -52,11 +51,11 @@ def test_message(data):
     theta = data["theta"]
 
     lcm_manager.publish_motor_commands((x * spd), -(y * spd), -(2.5 * theta * spd))
-        
+
     app.logger.info(data)
-    
+
     #socket.emit("message", json.dumps({'data':{'type':'server_test', 'server_test_key':'server_test_val'}}))
-    
+
 @socket.on('stop')
 def test_message(data):
     app.logger.info("STOP!!!")
