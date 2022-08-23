@@ -1,7 +1,0 @@
-package mbot_lcm_msgs;
-
-struct cell_coordinate_t
-{
-    int64_t x;
-    int64_t y;
-}

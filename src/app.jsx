@@ -118,10 +118,10 @@ class MBotApp extends React.Component {
       drawCostmap: [],
       drawParticles: [],
       isRobotClicked: false,
-      laserDisplay:false, 
+      laserDisplay:false,
       robotDisplay: true,
       particleDisplay: true,
-      costmapDisplay: false, 
+      costmapDisplay: false,
       newMap: null,
     };
 
@@ -218,7 +218,7 @@ class MBotApp extends React.Component {
     let plan = true;
 
     this.rect = this.clickCanvas.current.getBoundingClientRect();
-    
+
     var x = event.clientX - this.rect.left;
     var y = this.rect.bottom - event.clientY;
     let cs = this.rect.width / this.state.width;
@@ -308,7 +308,7 @@ class MBotApp extends React.Component {
       rayX += this.state.x;
       rayY += this.state.y;
       rays.push([rayX, rayY]);
-    } 
+    }
 
     this.setState({drawLasers: rays, lidarLength: lidarLength})
   }
@@ -322,12 +322,12 @@ class MBotApp extends React.Component {
 
     this.setState({displayPaths: updated_path})
   }
-  
+
   handleParticles(evt){
     var updated_pixels = [];
     for (let i = 0; i < evt.num_particles; i++) {
       updated_pixels[i] = this.posToPixels(evt.particles[i][0], evt.particles[i][1]);
-      
+
     }
     this.setState({drawParticles: updated_pixels});
   }
@@ -470,17 +470,17 @@ class MBotApp extends React.Component {
                   <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
                   </canvas>
                   <DrawPaths xPos = {this.state.x} yPos = {this.state.y} path =  {this.state.displayPaths}/>
-                  {this.state.costmapDisplay && 
+                  {this.state.costmapDisplay &&
                     <DrawCostmap cells = {this.state.drawCostmap} state = {this.state.costmapDisplay}/>}
-                  {this.state.particleDisplay && 
+                  {this.state.particleDisplay &&
                     <DrawParticles particles = {this.state.drawParticles}/>}
-                  {this.state.laserDisplay && 
+                  {this.state.laserDisplay &&
                     <DrawLasers mappingMode={this.state.mappingMode} width={this.state.width} height={this.state.height}
                               drawLasers={this.state.drawLasers} origin={[this.state.x, this.state.y]}/>}
                   {this.state.robotDisplay &&
                     <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
                                pixelsPerMeter={this.state.pixelsPerMeter} />}
-                  
+
                   <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                              goalCell={this.state.goalCell} goalValid={this.state.goalValid}
                              cellSize={this.state.cellSize} />
@@ -510,7 +510,7 @@ class MBotApp extends React.Component {
 
             <div className="row field-toggle-wrapper">
               <div className="col">
-                <ToggleSelect label={"Mapping Mode"} checked={this.state.mappingMode} 
+                <ToggleSelect label={"Mapping Mode"} checked={this.state.mappingMode}
                               onChange={ () => this.onMappingMode() }/>
 
                 <div className="button-wrapper-col">
@@ -525,20 +525,21 @@ class MBotApp extends React.Component {
                 </div>
 
                 { /* Drive mode and control panel. */}
-                <ToggleSelect label={"Drive Mode"} checked={this.state.drivingMode} 
+                <ToggleSelect label={"Drive Mode"} checked={this.state.drivingMode}
                               onChange={ () => this.onDrivingMode() }/>
                 {this.state.drivingMode &&
                   <DriveControlPanel ws={this.ws} drivingMode={this.state.drivingMode} />
                 }
 
                 { /* Checkboxes for map visualization. */}
-                <ToggleSelect label={"Draw Particles"} checked={this.state.particleDisplay} 
+                <ToggleSelect label={"Draw Particles"} checked={this.state.particleDisplay}
                               onChange={ () => this.changeParticles() }/>
-                <ToggleSelect label={"Draw Robot"} checked={this.state.robotDisplay} 
+                <ToggleSelect label={"Draw Robot"} checked={this.state.robotDisplay}
                               onChange={ () => this.changeRobot() }/>
-                <ToggleSelect label={"Draw Costmap"} checked={this.state.costmapDisplay} 
-                              onChange={ () => this.changeCostMap() }/>
-                <ToggleSelect label={"Draw Lasers"} checked={this.state.laserDisplay} 
+                {// Remove temporarily since backend doesn't publish this.
+                /* <ToggleSelect label={"Draw Costmap"} checked={this.state.costmapDisplay}
+                                 onChange={ () => this.changeCostMap() }/> */ }
+                <ToggleSelect label={"Draw Lasers"} checked={this.state.laserDisplay}
                               onChange={ () => this.changeLasers() }/>
 
               </div>
