@@ -123,6 +123,7 @@ class MBotApp extends React.Component {
       particleDisplay: true,
       costmapDisplay: false,
       newMap: null,
+      localMapFileLocation: "current.map"
     };
 
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
@@ -209,7 +210,7 @@ class MBotApp extends React.Component {
    *  WINDOW EVENT HANDLERS
    ***************************/
 
-   handleWindowChange(evt) {
+  handleWindowChange(evt) {
     this.rect = this.clickCanvas.current.getBoundingClientRect();
   }
 
@@ -355,6 +356,7 @@ class MBotApp extends React.Component {
 
   updateMap(result) {
     this.visitGrid.clear();
+    var mappingMode = result.slam_mode != 2;  // We are in mapping mode if the state is not localization_only (=2).
     var loaded = result.cells.length > 0;
     this.setState({prev_cells: this.state.cells,
                    cells: result.cells,
@@ -369,7 +371,9 @@ class MBotApp extends React.Component {
                    path: [],
                    clickedCell: [],
                    goalCell: [],
-                   isRobotClicked: false});
+                   isRobotClicked: false,
+                   mappingMode: mappingMode,
+                   localMapFileLocation: result.slam_map_location});
   }
 
   changeOmni() {
@@ -524,13 +528,6 @@ class MBotApp extends React.Component {
                   <button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>
                 </div>
 
-                { /* Drive mode and control panel. */}
-                <ToggleSelect label={"Drive Mode"} checked={this.state.drivingMode}
-                              onChange={ () => this.onDrivingMode() }/>
-                {this.state.drivingMode &&
-                  <DriveControlPanel ws={this.ws} drivingMode={this.state.drivingMode} />
-                }
-
                 { /* Checkboxes for map visualization. */}
                 <ToggleSelect label={"Draw Particles"} checked={this.state.particleDisplay}
                               onChange={ () => this.changeParticles() }/>
@@ -541,6 +538,13 @@ class MBotApp extends React.Component {
                                  onChange={ () => this.changeCostMap() }/> */ }
                 <ToggleSelect label={"Draw Lasers"} checked={this.state.laserDisplay}
                               onChange={ () => this.changeLasers() }/>
+
+                { /* Drive mode and control panel. */}
+                <ToggleSelect label={"Drive Mode"} checked={this.state.drivingMode}
+                              onChange={ () => this.onDrivingMode() }/>
+                {this.state.drivingMode &&
+                  <DriveControlPanel ws={this.ws} drivingMode={this.state.drivingMode} />
+                }
 
               </div>
             </div>

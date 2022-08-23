@@ -31,13 +31,15 @@ function parseMapFromSocket(data) {
 
 function parseMapFromLcm(msg){
   var map = {};
-  map.origin = msg["origin"]
-  map.width = msg["width"]
-  map.height = msg["height"]
-  map.meters_per_cell = msg["meters_per_cell"]
-  map.num_cells = msg["num_cells"]
-  map.cells = normalizeList(msg["cells"])
-  return map
+  map.origin = msg["origin"];
+  map.width = msg["width"];
+  map.height = msg["height"];
+  map.meters_per_cell = msg["meters_per_cell"];
+  map.num_cells = msg["num_cells"];
+  map.cells = normalizeList(msg["cells"]);
+  map.slam_mode = msg["slam_mode"];
+  map.slam_map_location = msg["slam_map_location"];
+  return map;
 }
 
 

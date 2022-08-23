@@ -16,13 +16,15 @@ class OccupancyGridEmitter():
 
     def __lcm_map_to_dict(self):
         return {
-            "utime" : self.__map.utime, 
+            "utime" : self.__map.utime,
             "origin" : [self.__map.origin_x , self.__map.origin_y],
             "meters_per_cell" : self.__map.meters_per_cell,
             "width" : self.__map.width,
             "height" : self.__map.height,
             "num_cells" : self.__map.num_cells,
-            "cells" : self.__map.cells
+            "cells" : self.__map.cells,
+            "slam_mode" : self.__map.slam_mode,
+            "slam_map_location" : self.__map.slam_map_location
         }
 
     def __run(self):
@@ -60,7 +62,7 @@ class LidarEmitter():
 
     def __lcm_lidar_to_dict(self):
         return {
-            "utime" : self.__lidar.utime, 
+            "utime" : self.__lidar.utime,
             "num_ranges" : self.__lidar.num_ranges,
             "ranges" : self.__lidar.ranges,
             "thetas" : self.__lidar.thetas,
@@ -102,7 +104,7 @@ class PoseEmitter():
 
     def __lcm_pose_to_dict(self):
         return {
-            "utime" : self.__pose.utime, 
+            "utime" : self.__pose.utime,
             "x" : self.__pose.x,
             "y" : self.__pose.y,
             "theta" : self.__pose.theta,
@@ -143,7 +145,7 @@ class PathEmitter():
 
     def __lcm_path_to_dict(self):
         return {
-            "utime" : self.__path.utime, 
+            "utime" : self.__path.utime,
             "path_length" : self.__path.path_length,
             "path" : self.__extract_path(self.__path.path_length, self.__path.path),
         }
@@ -190,7 +192,7 @@ class ParticleEmitter():
 
     def __lcm_particle_to_dict(self):
         return {
-            "utime" : self.__particle.utime, 
+            "utime" : self.__particle.utime,
             "num_particles" : self.__particle.num_particles,
             "particles" : self.__extract_particle_poses(self.__particle.num_particles, self.__particle.particles),
         }
