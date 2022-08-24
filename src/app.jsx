@@ -15,8 +15,8 @@ import { normalizeAngle } from "./util";
 import { WSHelper } from "./web.js";
 import { DrawRobot } from "./robot";
 import { DrawMap, DrawCells, DrawLasers, DrawPaths, DrawParticles, DrawCostmap } from "./canvas";
-import { parseMapFromLcm, downloadObjectAsJson } from "./map.js";
-import { GridCellCanvas } from "./drawing.js"
+import { normalizeList, parseMapFromLcm, downloadObjectAsJson } from "./map.js";
+import { getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControlPanel } from "./driveControls";
 
 
@@ -86,11 +86,8 @@ class MBotApp extends React.Component {
     this.state = {
       connection: false,
       // Map parameters.
-      cells: [],
-      prev_cells: [],
       width: 0,
       height: 0,
-      num_cells: 0,
       origin: [0, 0],
       metersPerCell: 0,
       pixelsPerMeter: 0,
@@ -99,7 +96,6 @@ class MBotApp extends React.Component {
       mapfile: null,
       goalCell: [],
       goalValid: true,
-      newMap: null,
       localMapFileLocation: "current.map",
       // Mode variables.
       mappingMode: false,
@@ -121,13 +117,17 @@ class MBotApp extends React.Component {
       // Flags to display elements.
       laserDisplay: false,
       robotDisplay: true,
-      particleDisplay: true,
+      particleDisplay: false,
       costmapDisplay: false,
     };
 
+    this.mapCells = [];
+
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
+    this.ws.userOnConnect = (evt) => { this.onWSConnect(evt); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
+    this.ws.handleMapUpdate = (evt) => { this.handleMapUpdate(evt); };
     this.ws.handleLaser = (evt) => { this.handleLasers(evt)};
     this.ws.handlePose = (evt) => { this.handlePoses(evt)};
     this.ws.handlePath = (evt) => { this.handlePaths(evt)}
@@ -138,6 +138,10 @@ class MBotApp extends React.Component {
     this.visitGrid = new GridCellCanvas();
     this.visitCellsCanvas = React.createRef();
     this.clickCanvas = React.createRef();
+    this.mapGrid = new GridCellCanvas();
+    this.mapCanvas = React.createRef();
+
+    this.last_time = performance.now();
   }
 
   /********************
@@ -146,6 +150,7 @@ class MBotApp extends React.Component {
 
   componentDidMount() {
     this.visitGrid.init(this.visitCellsCanvas.current);
+    this.mapGrid.init(this.mapCanvas.current);
     this.handleWindowChange(null);
 
     // Get the window size and watch for resize events.
@@ -155,8 +160,12 @@ class MBotApp extends React.Component {
 
     // Try to connect to the websocket backend.
     this.ws.attemptConnection();
-  }
 
+    this.requestInterval = setInterval(() => {
+      // this.requestMapUpdate();
+      this.requestMap();
+    }, 5000);
+  }
 
   onFileChange(event) {
     this.setState({ mapfile: event.target.files[0] });
@@ -177,11 +186,7 @@ class MBotApp extends React.Component {
 
   saveMap() {
     var name = prompt("What do you want to name the map? (.json will automatically be added to the end)");
-    downloadObjectAsJson(this.state.newMap, name)
-  }
-
-  onGrabMap() {
-    this.ws.socket.emit("map", {'test_key': "Need map. Please give."});
+    // downloadObjectAsJson(this.state.newMap, name)
   }
 
   onMappingMode() {
@@ -243,14 +248,23 @@ class MBotApp extends React.Component {
     this.onPlan(row, col, plan);
   }
 
- /********************
+  /********************
    *   WS HANDLERS
    ********************/
 
+  onWSConnect(evt) {
+    this.requestMap();
+  }
+
   handleMap(mapmsg) {
-    var map = parseMapFromLcm(mapmsg)
-    this.updateMap(map);
-    this.setState({newMap: map})
+    console.log("got map, skipping")
+    // TODO: Cleanup
+    // var starttime = performance.now();
+    // var map = parseMapFromLcm(mapmsg)
+    // this.updateMap(map);
+    // var endtime = performance.now();
+    // console.log("since last update", endtime - this.last_time, "process time", endtime - starttime);
+    // this.last_time = endtime;
   }
 
   updateSocketStatus(status) {
@@ -326,11 +340,17 @@ class MBotApp extends React.Component {
     this.visitGrid.clear();
     var mappingMode = result.slam_mode != 2;  // We are in mapping mode if the state is not localization_only (=2).
     var loaded = result.cells.length > 0;
-    this.setState({prev_cells: this.state.cells,
-                   cells: result.cells,
-                   width: result.width,
+
+    if (loaded) {
+      // Update the map grid.
+      this.mapGrid.setSize(result.width, result.height);
+      this.mapGrid.updateCells(result.cells, this.mapCells, config.MAP_COLOUR_LOW, config.MAP_COLOUR_HIGH);
+    }
+
+    this.mapCells = result.cells;
+
+    this.setState({width: result.width,
                    height: result.height,
-                   num_cells: result.num_cells,
                    origin: result.origin,
                    metersPerCell: result.meters_per_cell,
                    cellSize: config.MAP_DISPLAY_WIDTH / result.width,
@@ -340,6 +360,24 @@ class MBotApp extends React.Component {
                    goalCell: [],
                    mappingMode: mappingMode,
                    localMapFileLocation: result.slam_map_location});
+  }
+
+  resetMapData() {
+    this.mapCells = [];
+
+    this.setState({
+      width: 0,
+      height: 0,
+      origin: [0, 0],
+      metersPerCell: 0,
+      pixelsPerMeter: 0,
+      cellSize: 0,
+      mapLoaded: false,
+      mapfile: null,
+      goalCell: [],
+      goalValid: true,
+      localMapFileLocation: "current.map",
+    });
   }
 
   changeOmni() {
@@ -378,7 +416,7 @@ class MBotApp extends React.Component {
     if (goal.length === 0) return false;
 
     var idx = goal[1] + goal[0] * this.state.width;
-    var valid = this.state.cells[idx] < 0.5;
+    var valid = this.mapCells[idx] < 0;
 
     this.setState({goalCell: goal, goalValid: valid});
 
@@ -401,6 +439,49 @@ class MBotApp extends React.Component {
                      }
                    };
     this.ws.socket.emit("plan", {goal: [row, col], plan: plan})
+  }
+
+  requestMap() {
+    var starttime = performance.now();
+    this.ws.socket.emit('request_map', (response) => {
+      console.log("Updating map returned from the server", response);
+      if (Object.keys(response).length === 0) {
+        console.log("Map not yet available. Waiting");
+        this.resetMapData();
+        setTimeout(() => { this.requestMap(); }, 2000);
+        return;
+      }
+      // TODO: If there is no map yet, add a timer that continues to ask for it.
+      var map = parseMapFromLcm(response);
+      this.updateMap(map);
+
+      console.log("request map DONE", performance.now() - starttime);
+    });
+  }
+
+  requestMapUpdate() {
+    // TODO: This should instead request the map from the server, sending the current cells in the request to get a real update.
+    if (!this.state.mapLoaded) return;
+    var starttime = performance.now();
+    this.ws.socket.emit('request_map_update', {"cells": this.mapCells}, (response) => {
+      console.log("Processing map update", response);
+      if (response.indices.length === 0) {
+        console.log("No updates to make.");
+        return;
+      }
+
+      // TODO: If there is no map yet, add a timer that continues to ask for it.
+      console.log("UPDATE", response.indices.length);
+      for (var i = 0; i < response.values.length; i++) {
+        var idx = response.indices[i];
+        var cell = this.mapGrid.idxToCell(idx);
+        this.mapCells[idx] = response.values[i];
+        var prob = (response.values[i] + 127.) / 255.;
+        var color = getColor(prob, config.MAP_COLOUR_LOW, config.MAP_COLOUR_HIGH);
+        this.mapGrid.drawCell(cell, color, this.mapGrid.cellSize);
+      }
+      console.log("request map update DONE", performance.now() - starttime);
+    });
   }
 
   posToPixels(x, y) {
@@ -436,7 +517,8 @@ class MBotApp extends React.Component {
             <TransformWrapper>
               <TransformComponent>
                 <div id="canvas-wrapper">
-                  <DrawMap cells={this.state.cells} prev_cells={this.state.prev_cells} width={this.state.width} height={this.state.height}/>
+                  <canvas id="mapCanvas" ref={this.mapCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+                  </canvas>
                   <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
                   </canvas>
                   <DrawPaths xPos = {this.state.x} yPos = {this.state.y} path =  {this.state.displayPaths}/>

@@ -125,7 +125,7 @@ sudo make install
 
 To run the Flask app, do:
 ```bash
-npm run start-api
+python3.7 mbot_omni_app.py
 ```
 
 Traffic on `http://localhost:8000` will be forwarded to `http://localhost:5000`,

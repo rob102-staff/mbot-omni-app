@@ -11,13 +11,16 @@ class WSHelper {
     this.attempting_connection = false;
     this.connectInterval = null;
     this.connect_period = reconnect_delay;
+
     this.statusCallback = (status) => {console.warn("statusCallback is not yet set up.")};
+    this.userOnConnect = (evt) => {};
     this.userHandleMap = (evt) => {console.warn("userHandleMap is not yet set up.")};
+    this.handleMapUpdate = (evt) => {console.warn("handleMapUpdate is not yet set up.")};
     this.handleLaser = (evt) => {console.warn("handleLaser is not yet set up.")};
     this.handlePose = (evt) => {console.warn("handlePose is not yet set up.")};
     this.handlePath = (evt) => {console.warn("handlePath is not yet set up.")};
-    this.handleParticle = (evt) => {console.warn("handleParticle is not yet set up.")}
-    this.handleObstacle = (evt) => {console.warn("handleObstacle is not yet set up.")}
+    this.handleParticle = (evt) => {console.warn("handleParticle is not yet set up.")};
+    this.handleObstacle = (evt) => {console.warn("handleObstacle is not yet set up.")};
   }
 
   connect() {
@@ -33,13 +36,13 @@ class WSHelper {
     this.socket.on('disconnect', (evt) => this.attemptConnection());
     this.socket.on('error', (evt) => { this.statusCallback(this.status()); });
     this.socket.on('map', (evt) => this.userHandleMap(evt));
+    this.socket.on('map_update', (evt) => this.handleMapUpdate(evt));
     this.socket.on('lidar', (evt) => this.handleLaser(evt));
     this.socket.on('path', (evt) => this.handlePath(evt));
     this.socket.on('pose', (evt) => this.handlePose(evt))
     this.socket.on('particles', (evt) => this.handleParticle(evt))
     this.socket.on('obstacles', (evt) => this.handleObstacle(evt))
 
-    console.log("Connection status: ", this.status())
     return this.status();
   }
 
@@ -70,6 +73,7 @@ class WSHelper {
     this.attempting_connection = false;
 
     this.statusCallback(this.status());
+    this.userOnConnect(evt);
   }
 
   status() {

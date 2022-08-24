@@ -58,8 +58,14 @@ class GridCellCanvas {
     this.cellSize = this.canvas.width / this.width;
   }
 
-  getCellIdx(i, j) {
-    return i + j * this.width;
+  cellToIdx(r, c) {
+    return c + r * this.width;
+  }
+
+  idxToCell(idx) {
+    var r = Math.floor(idx / this.width);
+    var c = idx % this.width;
+    return [r, c];
   }
 
   clear() {
@@ -77,19 +83,32 @@ class GridCellCanvas {
     this.ctx.fillRect(start_x, start_y, size, size);
   }
 
-  drawCells(cells, prev_cells, colour_low, colour_high, alpha="ff") {
-
-    // Bug: sometimes this happens for some reason. 
+  drawCells(cells, colour_low, colour_high, alpha="ff") {
     if (cells.length !== this.width * this.height) {
-      console.log("Error. Cannot render canvas: " + String(cells.length) + " != " + String(this.width*this.height));
+      console.warn("Error. Cannot render canvas: " + String(cells.length) + " != " + String(this.width*this.height));
       return;
     }
-    for (var i = 0; i < this.width; i++) {
-      for (var j = 0; j < this.height; j++) {
-        var prob = cells[this.getCellIdx(i, j)];
-        if (prob != prev_cells[this.getCellIdx(i, j)]){
+    for (var c = 0; c < this.width; c++) {
+      for (var r = 0; r < this.height; r++) {
+        var prob = cells[this.cellToIdx(r, c)];
+        var color = getColor(prob, colour_low, colour_high);
+        this.drawCell([r, c], color + alpha, this.cellSize);
+      }
+    }
+  }
+
+  updateCells(cells, prev_cells, colour_low, colour_high, alpha="ff") {
+    if (cells.length !== this.width * this.height) {
+      console.warn("Error. Cannot render canvas: " + String(cells.length) + " != " + String(this.width*this.height));
+      return;
+    }
+    for (var c = 0; c < this.width; c++) {
+      for (var r = 0; r < this.height; r++) {
+        var idx = this.cellToIdx(r, c);
+        if (cells[idx] != prev_cells[idx]){
+          var prob = (cells[idx] + 127.) / 255.;
           var color = getColor(prob, colour_low, colour_high);
-          this.drawCell([j, i], color + alpha, this.cellSize);
+          this.drawCell([r, c], color + alpha, this.cellSize);
         }
       }
     }
@@ -123,13 +142,13 @@ class GridCellCanvas {
   }
 
   drawPath(path, color = "rgb(255, 25, 25)", line_width = 2) {
-    for(let i = 1; i < path.length; i++) {  
+    for(let i = 1; i < path.length; i++) {
       //Draws a line between the points
       this.ctx.beginPath();
 
       this.ctx.moveTo(path[i-1][0], path[i-1][1]);
       this.ctx.lineTo(path[i][0], path[i][1]);
-      
+
       this.ctx.lineWidth = line_width;
       this.ctx.strokeStyle = color
       this.ctx.stroke();
@@ -138,21 +157,21 @@ class GridCellCanvas {
 
   drawCostMap (obstacleCells, color = "rgba(249, 79, 53)"){
     for (let index = 0; index < obstacleCells.length; index++) {
-      this.drawCell(obstacleCells[index], color, 1) 
+      this.drawCell(obstacleCells[index], color, 1)
     }
   }
 
   drawParticles(particles, intensity = 20, color = 'green', size = 1){
     for (let index = 0; index < particles.length; index+=intensity) {
       this.ctx.beginPath();
-      this.ctx.arc((particles[index][0]), 
-                   (particles[index][1]), 
+      this.ctx.arc((particles[index][0]),
+                   (particles[index][1]),
                    size, 0, 2 * Math.PI)
       this.ctx.fillStyle = color;
       this.ctx.fill();
       this.ctx.lineWidth = size;
       this.ctx.strokeStyle = color;
-      this.ctx.stroke();      
+      this.ctx.stroke();
     }
   }
 }
