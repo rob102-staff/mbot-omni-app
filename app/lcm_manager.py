@@ -17,8 +17,6 @@ from app import lcm_settings
 import time
 import sys
 import threading
-from copy import deepcopy
-
 
 
 class LcmCommunicationManager:
@@ -48,9 +46,11 @@ class LcmCommunicationManager:
         # self.__subscribe(lcm_settings.COSTMAP_CHANNEL, self.obstacle_listener)
         ###################################
 
-        self.__lcm_thread = threading.Thread(target=self.__run_handle_loop)
-        self.__lcm_thread.start()
+    def request_current_map(self):
+        return self._callback_dict[lcm_settings.SLAM_MAP_CHANNEL].request_current_map()
 
+    def request_map_update(self, cells):
+        return self._callback_dict[lcm_settings.SLAM_MAP_CHANNEL].request_map_update(cells)
 
     def update_callback(self, channel, function):
         self._callback_dict[channel] = function
@@ -58,9 +58,12 @@ class LcmCommunicationManager:
     def __subscribe(self, channel, handler):
         self.subscriptions.append(self._lcm.subscribe(channel, handler))
 
-    def __run_handle_loop(self):
-        while True:
-            self._lcm.handle()
+    def run(self):
+        self._lcm.handle()
+
+    def emit_msgs(self):
+        for channel in self._callback_dict.keys():
+            self._callback_dict[channel].emit()
 
     def publish_motor_commands(self, vx, vy, wz):
         cmd = omni_motor_command_t()
@@ -98,10 +101,6 @@ class LcmCommunicationManager:
         cmd.theta=0.0
 
         self._lcm.publish(lcm_settings.RESET_ODOMETRY_CHANNEL, cmd.encode())
-
-    # TODO: Implement start mapping publisher.
-    def start_mapping_publisher(self):
-        raise(Exception("Not Yet Implemented!"))
 
     def _position_listener(self, channel, data):
         decoded_data = pose_xyt_t.decode(data)
@@ -148,7 +147,3 @@ class LcmCommunicationManager:
         decoded_data = particles_t.decode(data)
         if channel in self._callback_dict.keys():
             self._callback_dict[channel](decoded_data)
-
-    def __del__(self):
-        self.__lcm_thread.join()
-        for s in self.subscriptions: self._lcm.unsubscribe(s)

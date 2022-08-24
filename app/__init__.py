@@ -10,7 +10,7 @@ from app.lcm_callbacks import LidarEmitter, CostmapEmitter, OccupancyGridEmitter
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'development key'
 socket = SocketIO(app , cors_allowed_origins='*', max_http_buffer_size = 10000000000)
-CORS(app) 
+CORS(app)
 
 lcm_callback_dict = {
     lcm_settings.SLAM_MAP_CHANNEL: OccupancyGridEmitter(socket, 'map', period=0.5),
