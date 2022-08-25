@@ -44,8 +44,8 @@ class GridCellCanvas {
     this.canvas = canvas;
 
     this.ctx = this.canvas.getContext('2d');
-    this.ctx.transform(1, 0, 0, -1, 0, 0);
-    this.ctx.transform(1, 0, 0, 1, 0, -this.canvas.width);
+    this.ctx.transform(1, 0, 0, -1, 0, 0); 
+    this.ctx.transform(1, 0, 0, 1, 0, -this.canvas.height);
 
     this.width = this.canvas.width;
     this.height = this.canvas.height;

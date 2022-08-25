@@ -288,9 +288,14 @@ class MBotApp extends React.Component {
 
     let rays = [];
     for(let i = 0; i < lidarLength; i++) {
+
+      //Lasers come in lidar frame (origin same as robot frame but + theta is CW)
+      //First tranform into robot frame
+      var theta = -1 * evt.thetas[i];
+      // console.log("Transformed ray theta");
       // Convert the ray into pixel coordinates.
-      let rayX = evt.ranges[i] * Math.cos(normalizeAngle(evt.thetas[i] + this.state.theta)) * this.state.pixelsPerMeter;
-      let rayY = evt.ranges[i] * Math.sin(normalizeAngle(evt.thetas[i] + this.state.theta)) * this.state.pixelsPerMeter;
+      let rayX = evt.ranges[i] * Math.cos(normalizeAngle(theta + this.state.theta)) * this.state.pixelsPerMeter;
+      let rayY = evt.ranges[i] * Math.sin(normalizeAngle(theta + this.state.theta)) * this.state.pixelsPerMeter;
       // Shift by the current robot position.
       rayX += this.state.x;
       rayY += this.state.y;
