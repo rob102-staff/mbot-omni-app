@@ -5,12 +5,14 @@ import numpy as np
 
 
 class OccupancyGridEmitter():
-    def __init__(self, socket, event_name, period):
+    def __init__(self, socket, event_name, period, emit=False):
         self.__socket           = socket
         self.__event_name       = event_name
         self.__period           = period
         self.__map_available    = False
         self.__map              = None
+        # To turn off sending the map message, so it can be requested at a different frequency.
+        self.__emit             = emit
 
         self.__lock = threading.Lock()
 
@@ -42,6 +44,8 @@ class OccupancyGridEmitter():
         }
 
     def emit(self):
+        if not self.__emit:
+            return
         if self.__map_available:
             self.__lock.acquire()
             self.__socket.emit(self.__event_name, self.__lcm_map_to_dict())
@@ -130,7 +134,6 @@ class PoseEmitter():
     def emit(self):
         if self.__pose_available:
             self.__lock.acquire()
-            print("POSE", self.__event_name)
             self.__socket.emit(self.__event_name, self.__lcm_pose_to_dict())
             self.__pose_available = False
             self.__lock.release()

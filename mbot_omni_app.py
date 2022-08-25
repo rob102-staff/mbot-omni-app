@@ -2,19 +2,23 @@ import sys
 import signal
 from app import app, socket, lcm_manager
 
+EMIT_PERIOD = 0.1
+
 
 def run():
     while True:
-        # TODO: Use the non-blocking handle?
-        lcm_manager.run()
+        try:
+            # TODO: Use the non-blocking handle? Might help with killing the thread.
+            lcm_manager.run()
+        except:
+            break
         socket.sleep(1e-3)
 
 
 def emit_msgs():
     while True:
-        # TODO: Use the non-blocking handle?
         lcm_manager.emit_msgs()
-        socket.sleep(0.5)
+        socket.sleep(EMIT_PERIOD)
 
 
 if __name__ == '__main__':
