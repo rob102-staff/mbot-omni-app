@@ -33,7 +33,7 @@ class WSHelper {
     this.socket = io(this.uri);
 
     this.socket.on('connect', (evt) => this.handleOpen(evt));
-    this.socket.on('disconnect', (evt) => this.attemptConnection());
+    this.socket.on('disconnect', (evt) => this.statusCallback(false));
     this.socket.on('error', (evt) => { this.statusCallback(this.status()); });
     this.socket.on('map', (evt) => this.userHandleMap(evt));
     this.socket.on('map_update', (evt) => this.handleMapUpdate(evt));
@@ -47,30 +47,17 @@ class WSHelper {
   }
 
   attemptConnection() {
-    console.log("Attempting to connect socket...")
-    // If we aren't already trying to connect, try now.
-    if (!this.attempting_connection) {
-      // Try to connect. If we fail, start an interval to keep trying.
-      if (!this.connect()) {
-        console.log("Failed to connect!")
-        this.connectInterval = setInterval(() => {
-          this.connect();
-        }, this.connect_period);
-
-        this.attempting_connection = true;
-      }
-    }
-
+    this.connect();  // Socket IO reconnects automatically on disconnect.
     this.statusCallback(this.status());
   }
 
   handleOpen(evt) {
     console.log("Socket connection open to:", this.uri);
 
-    if (this.connectInterval !== null) {
-      clearInterval(this.connectInterval);
-    }
-    this.attempting_connection = false;
+    // if (this.connectInterval !== null) {
+    //   clearInterval(this.connectInterval);
+    // }
+    // this.attempting_connection = false;
 
     this.statusCallback(this.status());
     this.userOnConnect(evt);
@@ -82,7 +69,7 @@ class WSHelper {
   }
 
   send(data) {
-    if (this.status() !== true) return;
+    if (!this.status()) return;
     this.socket.send(JSON.stringify(data));
   }
 }

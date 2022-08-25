@@ -5,17 +5,12 @@ import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
 import { faBars } from '@fortawesome/free-solid-svg-icons'
 
-// import InputLabel from '@mui/material/InputLabel';
-// import MenuItem from '@mui/material/MenuItem';
-// import FormControl from '@mui/material/FormControl';
-// import Select from '@mui/material/Select';
-
 import config from "./config.js";
 import { normalizeAngle } from "./util";
 import { WSHelper } from "./web.js";
 import { DrawRobot } from "./robot";
-import { DrawMap, DrawCells, DrawLasers, DrawPaths, DrawParticles, DrawCostmap } from "./canvas";
-import { normalizeList, parseMapFromLcm, downloadObjectAsJson } from "./map.js";
+import { DrawCells, DrawLasers, DrawPaths, DrawParticles, DrawCostmap } from "./canvas";
+import { parseMapFromLcm, downloadObjectAsJson } from "./map.js";
 import { getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControlPanel } from "./driveControls";
 
@@ -134,14 +129,15 @@ class MBotApp extends React.Component {
     this.ws.handleParticle = (evt) => { this.handleParticles(evt)};
     this.ws.handleObstacle = (evt) => { this.handleObstacles(evt)};
 
-    // this.ws = new ws(this.ws);
     this.visitGrid = new GridCellCanvas();
     this.visitCellsCanvas = React.createRef();
     this.clickCanvas = React.createRef();
     this.mapGrid = new GridCellCanvas();
     this.mapCanvas = React.createRef();
 
-    this.last_time = performance.now();
+    this.requestInterval = null;
+
+    // this.last_time = performance.now();
   }
 
   /********************
@@ -162,9 +158,8 @@ class MBotApp extends React.Component {
     this.ws.attemptConnection();
 
     this.requestInterval = setInterval(() => {
-      // this.requestMapUpdate();
       this.requestMap();
-    }, 5000);
+    }, config.MAP_UPDATE_PERIOD);
   }
 
   onFileChange(event) {
@@ -193,13 +188,25 @@ class MBotApp extends React.Component {
     if (this.state.mappingMode) {
       // If we're mapping, we need to reset the robot to localization only mode.
       this.ws.socket.emit('reset', {'mode' : 2});
+
+      // Stop asking for map.
+      clearInterval(this.requestInterval);
+      this.requestInterval = null;
+
+      this.setState({mappingMode: false});
     }
     else {
       // If we are not mapping, we need to tell the robot to start mapping.
       if (!confirm("This will overwrite the current map. Are you sure?")) return;
       this.ws.socket.emit('reset', {'mode' : 3});
+
+      // Start asking for map.
+      this.requestInterval = setInterval(() => {
+        this.requestMap();
+      }, config.MAP_UPDATE_PERIOD);
+
+      this.setState({mappingMode: true});
     }
-    this.setState({mappingMode: !this.state.mappingMode});
   }
 
   onDrivingMode() {
@@ -289,10 +296,9 @@ class MBotApp extends React.Component {
     let rays = [];
     for(let i = 0; i < lidarLength; i++) {
 
-      //Lasers come in lidar frame (origin same as robot frame but + theta is CW)
-      //First tranform into robot frame
+      // Lasers come in lidar frame (origin same as robot frame but + theta is CW)
+      // First tranform into robot frame
       var theta = -1 * evt.thetas[i];
-      // console.log("Transformed ray theta");
       // Convert the ray into pixel coordinates.
       let rayX = evt.ranges[i] * Math.cos(normalizeAngle(theta + this.state.theta)) * this.state.pixelsPerMeter;
       let rayY = evt.ranges[i] * Math.sin(normalizeAngle(theta + this.state.theta)) * this.state.pixelsPerMeter;
@@ -345,6 +351,19 @@ class MBotApp extends React.Component {
     this.visitGrid.clear();
     var mappingMode = result.slam_mode != 2;  // We are in mapping mode if the state is not localization_only (=2).
     var loaded = result.cells.length > 0;
+
+
+    if (this.requestInterval !== null && !mappingMode) {
+      // If we are not in mapping mode, stop asking for map.
+      clearInterval(this.requestInterval);
+      this.requestInterval = null;
+    }
+    else if (this.requestInterval === null && mappingMode) {
+      // If we are in mapping mode, start asking for map.
+      this.requestInterval = setInterval(() => {
+        this.requestMap();
+      }, config.MAP_UPDATE_PERIOD);
+    }
 
     if (loaded) {
       // Update the map grid.
@@ -447,13 +466,13 @@ class MBotApp extends React.Component {
   }
 
   requestMap() {
+    if (!this.ws.status()) return;
     var starttime = performance.now();
     this.ws.socket.emit('request_map', (response) => {
-      console.log("Updating map returned from the server", response);
       if (Object.keys(response).length === 0) {
-        console.log("Map not yet available. Waiting");
+        console.log("Map not yet available.");
         this.resetMapData();
-        setTimeout(() => { this.requestMap(); }, 2000);
+        console.log("request map DONE", performance.now() - starttime);
         return;
       }
       // TODO: If there is no map yet, add a timer that continues to ask for it.
@@ -465,7 +484,7 @@ class MBotApp extends React.Component {
   }
 
   requestMapUpdate() {
-    // TODO: This should instead request the map from the server, sending the current cells in the request to get a real update.
+    if (!this.ws.status()) return;
     if (!this.state.mapLoaded) return;
     var starttime = performance.now();
     this.ws.socket.emit('request_map_update', {"cells": this.mapCells}, (response) => {

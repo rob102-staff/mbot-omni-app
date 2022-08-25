@@ -6,7 +6,7 @@ import {
   faArrowLeft,
   faArrowRight,
   faArrowRotateLeft,
-  faArrowRotateRight 
+  faArrowRotateRight
 } from '@fortawesome/free-solid-svg-icons'
 
 /********************
@@ -20,12 +20,12 @@ class DriveControlPanel extends React.Component {
     this.state = {
       speed: 50
     }
-    
+
     this.controlMap = {
-      s: {pressed: false, fn: "back"},    
+      s: {pressed: false, fn: "back"},
       w: {pressed: false, fn: "forward"},
       a: {pressed: false, fn: "left"},
-      d: {pressed: false, fn: "right"},  
+      d: {pressed: false, fn: "right"},
       e: {pressed: false, fn: "tright"},
       q: {pressed: false, fn: "tleft"}
     };
@@ -50,12 +50,12 @@ class DriveControlPanel extends React.Component {
     {
       if(this.controlMap[evt.key]){
         this.controlMap[evt.key].pressed = true
-        if(this.controlMap[evt.key].fn == "back" && this.x > -1) this.x--; 
+        if(this.controlMap[evt.key].fn == "back" && this.x > -1) this.x--;
         if(this.controlMap[evt.key].fn == "forward" && this.x < 1) this.x++;
         if(this.controlMap[evt.key].fn == "left" && this.y > -1) this.y--;
-        if(this.controlMap[evt.key].fn == "right" && this.y < 1) this.y++; 
-        if(this.controlMap[evt.key].fn == "tleft" && this.t > -1) this.t--; 
-        if(this.controlMap[evt.key].fn == "tright" && this.t < 1) this.t++; 
+        if(this.controlMap[evt.key].fn == "right" && this.y < 1) this.y++;
+        if(this.controlMap[evt.key].fn == "tleft" && this.t > -1) this.t--;
+        if(this.controlMap[evt.key].fn == "tright" && this.t < 1) this.t++;
       }
 
       // Update drive speeds.
