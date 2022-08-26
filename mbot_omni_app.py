@@ -1,30 +1,25 @@
-import sys
-import signal
-from app import app, socket, lcm_manager
+from app import app, socket, lcm_manager, connection_manager
 
 EMIT_PERIOD = 0.1
+HANDLE_PERIOD = 1e-3
 
 
-def run():
+def run_lcm():
     while True:
-        try:
-            # TODO: Use the non-blocking handle? Might help with killing the thread.
-            lcm_manager.run()
-        except:
-            break
-        socket.sleep(1e-3)
+        lcm_manager.handleOnce()
+        socket.sleep(HANDLE_PERIOD)  # Not sure if needed.
 
 
 def emit_msgs():
     while True:
-        lcm_manager.emit_msgs()
+        if connection_manager.connected:
+            lcm_manager.emit_msgs()
         socket.sleep(EMIT_PERIOD)
 
 
 if __name__ == '__main__':
-    # This script is called when you do `flask run`. In order to listen to
-    # LCM, you will need to run a thread (or a scheduler) in the background
-    # before calling run.
+    # Start the LCM handler and message emitter. Note these threads should not block.
+    socket.start_background_task(run_lcm)
     socket.start_background_task(emit_msgs)
-    socket.start_background_task(run)
+    # Start the Flask app.
     socket.run(app, host="0.0.0.0", port=5000)

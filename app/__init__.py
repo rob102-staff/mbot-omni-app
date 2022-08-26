@@ -1,15 +1,22 @@
 from flask import Flask
 from flask_socketio import SocketIO
 from flask_cors import CORS
-from app import lcm_settings
-from app.lcm_manager import LcmCommunicationManager
-from app.lcm_callbacks import LidarEmitter, CostmapEmitter, OccupancyGridEmitter, PoseEmitter, PathEmitter, ParticleEmitter
+from app.src import lcm_settings
+from app.src.lcm_manager import LcmCommunicationManager
+from app.src.lcm_callbacks import LidarEmitter, CostmapEmitter, OccupancyGridEmitter, PoseEmitter, PathEmitter, ParticleEmitter
+
+
+class ConnectionManager(object):
+    def __init__(self, connected=False):
+        self.connected = connected
+
 
 # The Flask app gets created here. Other Python functions and classes should be
 # stored in the "src" folder.
 app = Flask(__name__)
 app.config['SECRET_KEY'] = 'development key'
-socket = SocketIO(app , cors_allowed_origins='*')  #, max_http_buffer_size = 10000000000)
+# Note: For debugging, add logger=True, engineio_logger=True.
+socket = SocketIO(app, cors_allowed_origins='*')  #, max_http_buffer_size = 10000000000)
 CORS(app)
 
 lcm_callback_dict = {
@@ -22,6 +29,7 @@ lcm_callback_dict = {
 }
 
 lcm_manager = LcmCommunicationManager(lcm_callback_dict)
+connection_manager = ConnectionManager()
 
 from app import routes
 

@@ -79,7 +79,7 @@ This will start a development server and display the page `index.html`.
 The style file is in `css/main.css`, and the JavaScript being run is in
 `src/main.jsx`.
 
-If you go to `http://localhost:8000` in your browser, you should see the
+If you go to `http://[SERVER_IP]:8000` in your browser, you should see the
 webapp.
 
 ### Back end
@@ -125,10 +125,10 @@ sudo make install
 
 To run the Flask app, do:
 ```bash
-python3.7 mbot_omni_app.py
+npm run start-api
 ```
 
-Traffic on `http://localhost:8000` will be forwarded to `http://localhost:5000`,
+Traffic on `http://[SERVER_IP]:8000` will be forwarded to `http://[SERVER_IP]:5000`,
 where the Flask server is running.
 
 Now, when you press the "Test me" button in the webapp, you should see a log

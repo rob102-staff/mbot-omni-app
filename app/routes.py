@@ -1,15 +1,18 @@
 import flask
-from app import app, socket, lcm_manager
+from app import app, socket, lcm_manager, connection_manager
 import json
 import time
 
 @socket.on('connect')
 def setup_connection():
+    connection_manager.connected = True
     app.logger.info("Successfully connected!")
+    return True
 
 
 @socket.on('disconnect')
 def setup_connection():
+    connection_manager.connected = False
     app.logger.info("Disconnected!")
 
 

@@ -16,7 +16,7 @@ from app import lcm_settings
 
 import time
 import sys
-import threading
+import select
 
 
 class LcmCommunicationManager:
@@ -58,8 +58,13 @@ class LcmCommunicationManager:
     def __subscribe(self, channel, handler):
         self.subscriptions.append(self._lcm.subscribe(channel, handler))
 
-    def run(self):
+    def handle(self):
         self._lcm.handle()
+
+    def handleOnce(self):
+        rfds, wfds, efds = select.select([self._lcm.fileno()], [], [], 0)
+        if rfds:
+            self._lcm.handle()
 
     def emit_msgs(self):
         for channel in self._callback_dict.keys():
