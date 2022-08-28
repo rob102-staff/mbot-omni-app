@@ -10,7 +10,7 @@ import { normalizeAngle } from "./util";
 import { WSHelper } from "./web.js";
 import { DrawRobot } from "./robot";
 import { DrawCells, DrawLasers, DrawPaths, DrawParticles, DrawCostmap } from "./canvas";
-import { parseMapFromLcm, downloadObjectAsJson } from "./map.js";
+import { downloadObjectAsJson } from "./map.js";
 import { getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControlPanel } from "./driveControls";
 
@@ -135,9 +135,8 @@ class MBotApp extends React.Component {
     this.mapGrid = new GridCellCanvas();
     this.mapCanvas = React.createRef();
 
+    // Map request interval.
     this.requestInterval = null;
-
-    // this.last_time = performance.now();
   }
 
   /********************
@@ -157,9 +156,8 @@ class MBotApp extends React.Component {
     // Try to connect to the websocket backend.
     this.ws.attemptConnection();
 
-    this.requestInterval = setInterval(() => {
-      this.requestMap();
-    }, config.MAP_UPDATE_PERIOD);
+    // Start requesting map.
+    this.startRequestInterval()
   }
 
   onFileChange(event) {
@@ -190,8 +188,7 @@ class MBotApp extends React.Component {
       this.ws.socket.emit('reset', {'mode' : 2});
 
       // Stop asking for map.
-      clearInterval(this.requestInterval);
-      this.requestInterval = null;
+      this.stopRequestInterval()
 
       this.setState({mappingMode: false});
     }
@@ -201,9 +198,7 @@ class MBotApp extends React.Component {
       this.ws.socket.emit('reset', {'mode' : 3});
 
       // Start asking for map.
-      this.requestInterval = setInterval(() => {
-        this.requestMap();
-      }, config.MAP_UPDATE_PERIOD);
+      this.startRequestInterval()
 
       this.setState({mappingMode: true});
     }
@@ -263,15 +258,10 @@ class MBotApp extends React.Component {
     this.requestMap();
   }
 
-  handleMap(mapmsg) {
-    console.log("got map, skipping")
-    // TODO: Cleanup
-    // var starttime = performance.now();
-    // var map = parseMapFromLcm(mapmsg)
-    // this.updateMap(map);
-    // var endtime = performance.now();
-    // console.log("since last update", endtime - this.last_time, "process time", endtime - starttime);
-    // this.last_time = endtime;
+  handleMap(map) {
+    console.log("Got map from websocket.");
+    // Only update if we are not requesting the map already.
+    if (this.requestInterval !== null) this.updateMap(map);
   }
 
   updateSocketStatus(status) {
@@ -350,28 +340,30 @@ class MBotApp extends React.Component {
   updateMap(result) {
     this.visitGrid.clear();
     var mappingMode = result.slam_mode != 2;  // We are in mapping mode if the state is not localization_only (=2).
-    var loaded = result.cells.length > 0;
 
+    // Check if the new cells are in byte form, and if so, convert them.
+    var new_cells;
+    if (result.cells instanceof ArrayBuffer) new_cells = new Int8Array(result.cells);
+    else new_cells = result.cells;
 
-    if (this.requestInterval !== null && !mappingMode) {
-      // If we are not in mapping mode, stop asking for map.
-      clearInterval(this.requestInterval);
-      this.requestInterval = null;
-    }
-    else if (this.requestInterval === null && mappingMode) {
-      // If we are in mapping mode, start asking for map.
-      this.requestInterval = setInterval(() => {
-        this.requestMap();
-      }, config.MAP_UPDATE_PERIOD);
-    }
+    var loaded = new_cells.length > 0;
 
     if (loaded) {
       // Update the map grid.
       this.mapGrid.setSize(result.width, result.height);
-      this.mapGrid.updateCells(result.cells, this.mapCells, config.MAP_COLOUR_LOW, config.MAP_COLOUR_HIGH);
+      this.mapGrid.updateCells(new_cells, this.mapCells, config.MAP_COLOUR_LOW, config.MAP_COLOUR_HIGH);
     }
 
-    this.mapCells = result.cells;
+    this.mapCells = new_cells;
+
+    if (!mappingMode) {
+      // If we are not in mapping mode, stop asking for map.
+      this.stopRequestInterval();
+    }
+    else if (mappingMode) {
+      // If we are in mapping mode, start asking for map.
+      this.startRequestInterval();
+    }
 
     this.setState({width: result.width,
                    height: result.height,
@@ -465,20 +457,31 @@ class MBotApp extends React.Component {
     this.ws.socket.emit("plan", {goal: [row, col], plan: plan})
   }
 
+  startRequestInterval() {
+    if (this.requestInterval !== null)  return;
+    this.requestInterval = setInterval(() => {
+      this.requestMap();
+    }, config.MAP_UPDATE_PERIOD);
+  }
+
+  stopRequestInterval() {
+    if (this.requestInterval === null)  return;
+    clearInterval(this.requestInterval);
+    this.requestInterval = null;
+  }
+
   requestMap() {
     if (!this.ws.status()) return;
     var starttime = performance.now();
     this.ws.socket.emit('request_map', (response) => {
+      // If we got an empty dictionary, there was no map to send.
       if (Object.keys(response).length === 0) {
         console.log("Map not yet available.");
         this.resetMapData();
-        console.log("request map DONE", performance.now() - starttime);
         return;
       }
-      // TODO: If there is no map yet, add a timer that continues to ask for it.
-      var map = parseMapFromLcm(response);
-      this.updateMap(map);
-
+      // Update the map data.
+      this.updateMap(response);
       console.log("request map DONE", performance.now() - starttime);
     });
   }

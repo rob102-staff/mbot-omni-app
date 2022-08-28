@@ -62,6 +62,7 @@ class LcmCommunicationManager:
         self._lcm.handle()
 
     def handleOnce(self):
+        # This is a non-blocking handle, which only calls handle if a message is ready.
         rfds, wfds, efds = select.select([self._lcm.fileno()], [], [], 0)
         if rfds:
             self._lcm.handle()
@@ -124,8 +125,9 @@ class LcmCommunicationManager:
 
     def _occupancy_grid_listener(self, channel, data):
         decoded_data = occupancy_grid_t.decode(data)
+        cell_bytes = data[-decoded_data.num_cells:]
         if channel in self._callback_dict.keys():
-            self._callback_dict[channel](decoded_data)
+            self._callback_dict[channel](decoded_data, cell_bytes)
 
     # Temporarily remove. Unclear if this is published by botlab.
     # def obstacle_listener(self, channel, data):

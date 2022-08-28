@@ -11,12 +11,14 @@ class OccupancyGridEmitter():
         self.__period           = period
         self.__map_available    = False
         self.__map              = None
+        self.__cells_b          = None
         # To turn off sending the map message, so it can be requested at a different frequency.
         self.__emit             = emit
 
         self.__lock = threading.Lock()
 
     def __lcm_map_to_dict(self):
+        cells = self.__map.cells if self.__cells_b is None else self.__cells_b
         return {
             "utime" : self.__map.utime,
             "origin" : [self.__map.origin_x , self.__map.origin_y],
@@ -24,7 +26,7 @@ class OccupancyGridEmitter():
             "width" : self.__map.width,
             "height" : self.__map.height,
             "num_cells" : self.__map.num_cells,
-            "cells" : self.__map.cells,
+            "cells" : cells,
             "slam_mode" : self.__map.slam_mode,
             "slam_map_location" : self.__map.slam_map_location
         }
@@ -52,9 +54,12 @@ class OccupancyGridEmitter():
             self.__map_available = False
             self.__lock.release()
 
-    def __call__(self, data):
+    def __call__(self, data, cell_bytes=None):
+
         self.__lock.acquire()
         self.__map = data
+        if cell_bytes is not None:
+            self.__cells_b = cell_bytes
         self.__map_available = True
         self.__lock.release()
 
