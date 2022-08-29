@@ -137,6 +137,7 @@ class MBotApp extends React.Component {
 
     // Map request interval.
     this.requestInterval = null;
+    this.staleMapCount = 0;
   }
 
   /********************
@@ -185,10 +186,10 @@ class MBotApp extends React.Component {
   onMappingMode() {
     if (this.state.mappingMode) {
       // If we're mapping, we need to reset the robot to localization only mode.
-      this.ws.socket.emit('reset', {'mode' : 2});
+      this.ws.socket.emit('reset', {'mode' : 2, 'retain_pose' : true});
 
       // Stop asking for map.
-      this.stopRequestInterval()
+      this.stopRequestInterval();
 
       this.setState({mappingMode: false});
     }
@@ -198,7 +199,7 @@ class MBotApp extends React.Component {
       this.ws.socket.emit('reset', {'mode' : 3});
 
       // Start asking for map.
-      this.startRequestInterval()
+      this.startRequestInterval();
 
       this.setState({mappingMode: true});
     }
@@ -222,6 +223,7 @@ class MBotApp extends React.Component {
       if (!confirm("This will clear the current map. Are you sure?")) return;
       // Reset in full SLAM mode, if in mapping mode.
       this.ws.socket.emit('reset', {'mode' : 3});
+      this.resetMapData();
     }
   }
 
@@ -259,7 +261,6 @@ class MBotApp extends React.Component {
   }
 
   handleMap(map) {
-    console.log("Got map from websocket.");
     // Only update if we are not requesting the map already.
     if (this.requestInterval !== null) this.updateMap(map);
   }
@@ -393,6 +394,7 @@ class MBotApp extends React.Component {
       goalCell: [],
       goalValid: true,
       localMapFileLocation: "current.map",
+      mappingMode: false
     });
   }
 
@@ -472,17 +474,19 @@ class MBotApp extends React.Component {
 
   requestMap() {
     if (!this.ws.status()) return;
-    var starttime = performance.now();
     this.ws.socket.emit('request_map', (response) => {
       // If we got an empty dictionary, there was no map to send.
       if (Object.keys(response).length === 0) {
-        console.log("Map not yet available.");
-        this.resetMapData();
+        this.staleMapCount++;
+        if (this.staleMapCount > config.STALE_MAP_COUNT) {
+          console.log("Map is stale!");
+          this.resetMapData();
+        }
         return;
       }
       // Update the map data.
       this.updateMap(response);
-      console.log("request map DONE", performance.now() - starttime);
+      this.staleMapCount = 0;
     });
   }
 

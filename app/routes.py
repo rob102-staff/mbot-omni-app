@@ -41,9 +41,10 @@ def plan_cb(data):
 @socket.on('reset')
 def reset_slam(data):
     map_file = None
+    retain_pose = False if "retain_pose" not in data.keys() else data["retain_pose"]
     if "map_file" in data.keys():
         map_file = data["map_file"]
-    lcm_manager.publish_slam_reset(data["mode"], map_file)
+    lcm_manager.publish_slam_reset(data["mode"], map_file, retain_pose)
 
 
 @socket.on('move')

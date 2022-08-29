@@ -91,10 +91,14 @@ class LcmCommunicationManager:
 
         self._lcm.publish(lcm_settings.PATH_REQUEST, total_pose.encode())
 
-    def publish_slam_reset(self, mode, map_file=None):
+    def publish_slam_reset(self, mode, map_file=None, retain_pose=False):
+        # Reset the map manager so it does not continue to send old maps.
+        self._callback_dict[lcm_settings.SLAM_MAP_CHANNEL].reset()
+
         slam_reset = mbot_system_reset_t()
         slam_reset.utime = int(time.time() * 1000)
         slam_reset.slam_mode = int(mode)
+        slam_reset.retain_pose = retain_pose
         if map_file is not None:
             slam_reset.slam_map_location = map_file
 

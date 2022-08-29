@@ -45,6 +45,13 @@ class OccupancyGridEmitter():
             "values" : values.tolist()
         }
 
+    def reset(self):
+        self.__lock.acquire()
+        self.__map = None
+        self.__cells_b = None
+        self.__map_available = False
+        self.__lock.release()
+
     def emit(self):
         if not self.__emit:
             return
@@ -55,7 +62,6 @@ class OccupancyGridEmitter():
             self.__lock.release()
 
     def __call__(self, data, cell_bytes=None):
-
         self.__lock.acquire()
         self.__map = data
         if cell_bytes is not None:
@@ -64,12 +70,13 @@ class OccupancyGridEmitter():
         self.__lock.release()
 
     def request_current_map(self):
-        # Return an empty map if we have not received one yet.
-        if self.__map is None:
+        # Return an empty map if we have not received one yet or there is no new map to send.
+        if self.__map is None or not self.__map_available:
             return {}
 
         self.__lock.acquire()
         map_data = self.__lcm_map_to_dict()
+        self.__map_available = False
         self.__lock.release()
         return map_data
 
