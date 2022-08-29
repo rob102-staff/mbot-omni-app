@@ -553,8 +553,8 @@ class MBotApp extends React.Component {
                   <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
                   </canvas>
                   <DrawPaths xPos = {this.state.x} yPos = {this.state.y} path =  {this.state.displayPaths}/>
-                  {this.state.costmapDisplay &&
-                    <DrawCostmap cells = {this.state.drawCostmap} state = {this.state.costmapDisplay}/>}
+                  {/* {this.state.costmapDisplay &&
+                    <DrawCostmap cells = {this.state.drawCostmap} state = {this.state.costmapDisplay}/>} */}
                   {this.state.particleDisplay &&
                     <DrawParticles particles = {this.state.drawParticles}/>}
                   {this.state.laserDisplay &&
@@ -594,13 +594,16 @@ class MBotApp extends React.Component {
 
                 <div className="button-wrapper-col">
                   {/* TODO: Implement intial pose branch into code*/}
-                  <button className="button start-color2" onClick={() => this.onSetPose()}>Set Inital Pose</button>
-                  <button className="button" onClick={() => this.onResetMap()}>Reset Map</button>
-                  <label htmlFor="file-upload" className="button upload-color mb-3">
+                  {/* {<button className="button start-color2" onClick={() => this.onSetPose()}>Set Inital Pose</button>} */}
+                  {this.state.mappingMode &&
+                    <button className="button" onClick={() => this.onResetMap()}>Reset Map</button>
+                  }
+
+                  {/* {<label htmlFor="file-upload" className="button upload-color mb-3">
                     Upload a Map
                   </label>
-                  <input id="file-upload" type="file" onChange = {(event) => this.onFileChange(event)}/>
-                  <button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>
+                  <input id="file-upload" type="file" onChange = {(event) => this.onFileChange(event)}/>} */}
+                  {/* {<button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>} */}
                 </div>
 
                 { /* Checkboxes for map visualization. */}
