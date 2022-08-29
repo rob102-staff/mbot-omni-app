@@ -1,8 +1,0 @@
-package mbot_lcm_msgs;
-
-struct reset_odometry_t
-{
-    float x;
-    float y;
-    float theta;
-}

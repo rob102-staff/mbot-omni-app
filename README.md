@@ -39,13 +39,13 @@ This will grab all the packages needed to run the React app.
 
 ### Installation on the Raspberry Pi
 
-Download the binaries for the ARM v71 processor. 
+Download the binaries for the ARM v71 processor.
 
 ```bash
 wget https://nodejs.org/dist/v16.14.2/node-v16.14.2-linux-armv7l.tar.xz
 ```
 
-Decompress the binaries. 
+Decompress the binaries.
 
 ```bash
 tar -xsf node-v16.14.2-linux-armv7l.tar.xz node-v16.14.2-linux-armv7l/
@@ -57,7 +57,7 @@ Navigate to the files.
 cd node-v16.14.2-linux-armv7l/
 ```
 
-Copy the files to the proper directory. 
+Copy the files to the proper directory.
 
 ```bash
 sudo cp -R * /usr/local
@@ -79,7 +79,7 @@ This will start a development server and display the page `index.html`.
 The style file is in `css/main.css`, and the JavaScript being run is in
 `src/main.jsx`.
 
-If you go to `http://localhost:8000` in your browser, you should see the
+If you go to `http://[SERVER_IP]:8000` in your browser, you should see the
 webapp.
 
 ### Back end
@@ -115,13 +115,11 @@ cd lcm-1.4.0/lcm-pythoninst
 python setup.py install
 ```
 
-Install the LCM messages by running:
+Install the LCM messages by building the `botlab-soln` repo, and then installing with:
 ```bash
-cd mbot-omni-app
-./install_lcm.sh
+cd build
+sudo make install
 ```
-If you want to install the LCM message package as root (only recommended on the
-RPi), run the script with `sudo`.
 
 #### Running
 
@@ -130,7 +128,7 @@ To run the Flask app, do:
 npm run start-api
 ```
 
-Traffic on `http://localhost:8000` will be forwarded to `http://localhost:5000`,
+Traffic on `http://[SERVER_IP]:8000` will be forwarded to `http://[SERVER_IP]:5000`,
 where the Flask server is running.
 
 Now, when you press the "Test me" button in the webapp, you should see a log

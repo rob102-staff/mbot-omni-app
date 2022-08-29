@@ -1,29 +1,18 @@
 import React from "react";
-import ReactDOM from "react-dom";
+
 import { TransformWrapper, TransformComponent } from "react-zoom-pan-pinch";
 
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome'
-import { faBars,
-         faArrowUp,
-         faArrowDown,
-         faArrowLeft,
-         faArrowRight,
-         faArrowRotateLeft,
-         faArrowRotateRight } from '@fortawesome/free-solid-svg-icons'
-
-import InputLabel from '@mui/material/InputLabel';
-import MenuItem from '@mui/material/MenuItem';
-import FormControl from '@mui/material/FormControl';
-import Select from '@mui/material/Select';
+import { faBars } from '@fortawesome/free-solid-svg-icons'
 
 import config from "./config.js";
 import { normalizeAngle } from "./util";
 import { WSHelper } from "./web.js";
 import { DrawRobot } from "./robot";
-import { DrawMap, DrawCells, DrawLasers, DrawPaths, DrawParticles, DrawCostmap } from "./canvas";
-import { parseMapFromSocket, parseMapFromLcm, normalizeList, downloadObjectAsJson } from "./map.js";
-import { colourStringToRGB, getColor, GridCellCanvas } from "./drawing.js"
-import { DriveControls } from "./driveControls.js";
+import { DrawCells, DrawLasers, DrawPaths, DrawParticles, DrawCostmap } from "./canvas";
+import { downloadObjectAsJson } from "./map.js";
+import { getColor, GridCellCanvas } from "./drawing.js"
+import { DriveControlPanel } from "./driveControls";
 
 
 /*******************
@@ -35,9 +24,6 @@ function StatusMessage(props) {
   msg.push("Robot Cell: (" + props.robotCell + ")");
   if (props.clickedCell.length > 0) {
     msg.push("Clicked Cell: (" + props.clickedCell + ")");
-  }
-  if (props.showField) {
-    msg.push("Field: " + props.fieldVal.toFixed(4));
   }
 
   return (
@@ -66,50 +52,18 @@ function ConnectionStatus(connection) {
   );
 }
 
-/*******************
- *  CONTROL PANELS
- *******************/
-
-function DriveControlPanel(props) {
+function ToggleSelect(props) {
   return (
-    <div className="row px-5 text-center pt-3">
-      <div className="col-lg-12">
-        <span>Speed: {props.speed}</span>
-        <input type="range" min="1" max="100" value={props.speed}
-               onChange={(evt) => props.onSpeedChange(evt)}></input>
+    <div className="row my-4 text-left">
+      <div className="col-8">
+        <span>{props.label}</span>
       </div>
-      <div className="button-wrapper-row top-spacing col-lg-12">
-        <button className="button start-color col-lg-4" id="drive-start"
-                onClick={() => props.driveControls.start()}>Start</button>
-        <button className="button stop-color col-lg-4" id="drive-stop"
-                onClick={() => props.driveControls.stop()}>Stop</button>
-      </div>
-      <div className="drive-buttons">
-        <button className="button drive-turn" id="turn-left"
-                onClick={() => props.driveControls.drive(0, 0, -1, props.speed)}>
-          <FontAwesomeIcon icon={faArrowRotateLeft} />
-        </button>
-        <button className="button drive-move" id="move-str"
-                onClick={() => props.driveControls.drive(1, 0, 0, props.speed)}>
-          <FontAwesomeIcon icon={faArrowUp} />
-        </button>
-        <button className="button drive-turn" id="turn-right"
-                onClick={() => props.driveControls.drive(0, 0, 1, props.speed)}>
-          <FontAwesomeIcon icon={faArrowRotateRight} />
-        </button>
-
-        <button className="button drive-move" id="move-left"
-                onClick={() => props.driveControls.drive(0, -1, 0, props.speed)}>
-          <FontAwesomeIcon icon={faArrowLeft} />
-        </button>
-        <button className="button drive-move" id="move-right"
-                onClick={() => props.driveControls.drive(0, 1, 0, props.speed)}>
-          <FontAwesomeIcon icon={faArrowRight} />
-        </button>
-        <button className="button drive-move" id="move-back"
-                onClick={() => props.driveControls.drive(-1, 0, 0, props.speed)}>
-          <FontAwesomeIcon icon={faArrowDown} />
-        </button>
+      <div className="col-4">
+        <label className="switch">
+          <input type="checkbox" className="mx-2" checked={props.checked}
+                 onChange={() => props.onChange()}/>
+          <span className="slider round"></span>
+        </label>
       </div>
     </div>
   );
@@ -126,58 +80,64 @@ class MBotApp extends React.Component {
     // React state.
     this.state = {
       connection: false,
-      cells: [],
-      prev_cells: [],
+      // Map parameters.
       width: 0,
       height: 0,
-      num_cells: 0,
       origin: [0, 0],
       metersPerCell: 0,
       pixelsPerMeter: 0,
       cellSize: 0,
       mapLoaded: false,
       mapfile: null,
-      path: [],
-      clickedCell: [],
       goalCell: [],
       goalValid: true,
-      speed: 50,
+      localMapFileLocation: "current.map",
+      // Mode variables.
       mappingMode: false,
       drivingMode: false,
       sideBarMode: true,
-      sideBarWidth: 0,
       omni: false,
       diff: false,
       // Robot parameters.
       x: config.MAP_DISPLAY_WIDTH / 2,
       y: config.MAP_DISPLAY_WIDTH / 2,
       theta: 0,
+      // Visualization elements.
+      path: [],
+      clickedCell: [],
       drawLasers: [],
       drawPaths: [],
       drawCostmap: [],
       drawParticles: [],
-      isRobotClicked: false,
-      laserDisplay:false, 
+      // Flags to display elements.
+      laserDisplay: false,
       robotDisplay: true,
-      particleDisplay: true,
-      costmapDisplay: false, 
-      newMap: null,
+      particleDisplay: false,
+      costmapDisplay: false,
     };
 
+    this.mapCells = [];
+
     this.ws = new WSHelper(config.HOST, config.PORT, config.ENDPOINT, config.CONNECT_PERIOD);
-    this.ws.userHandleMessage = (evt) => { this.handleMessage(evt); };
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
+    this.ws.userOnConnect = (evt) => { this.onWSConnect(evt); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
+    this.ws.handleMapUpdate = (evt) => { this.handleMapUpdate(evt); };
     this.ws.handleLaser = (evt) => { this.handleLasers(evt)};
     this.ws.handlePose = (evt) => { this.handlePoses(evt)};
     this.ws.handlePath = (evt) => { this.handlePaths(evt)}
     this.ws.handleParticle = (evt) => { this.handleParticles(evt)};
     this.ws.handleObstacle = (evt) => { this.handleObstacles(evt)};
 
-    this.driveControls = new DriveControls(this.ws);
     this.visitGrid = new GridCellCanvas();
     this.visitCellsCanvas = React.createRef();
     this.clickCanvas = React.createRef();
+    this.mapGrid = new GridCellCanvas();
+    this.mapCanvas = React.createRef();
+
+    // Map request interval.
+    this.requestInterval = null;
+    this.staleMapCount = 0;
   }
 
   /********************
@@ -186,6 +146,7 @@ class MBotApp extends React.Component {
 
   componentDidMount() {
     this.visitGrid.init(this.visitCellsCanvas.current);
+    this.mapGrid.init(this.mapCanvas.current);
     this.handleWindowChange(null);
 
     // Get the window size and watch for resize events.
@@ -193,76 +154,12 @@ class MBotApp extends React.Component {
     window.addEventListener('resize', (evt) => this.handleWindowChange(evt));
     window.addEventListener('scroll', (evt) => this.handleWindowChange(evt));
 
-    // TODO: Discuss what other modes will enable drive control. Currently the
-    // key presses active only when the drive toggle is toggled on.
-    const controller =  {
-      s: {pressed: false, fn: "back"},    
-      w: {pressed: false, fn: "forward"},
-      a: {pressed: false, fn: "left"},
-      d: {pressed: false, fn: "right"},  
-      e: {pressed: false, fn: "tright"},
-      q: {pressed: false, fn: "tleft"}
-    }
-
-    let x = 0;
-    let y = 0;
-    let t = 0;
-
-    document.addEventListener('keydown', (evt) => {
-      //handles a couple of shortcut keys
-      this.handleKeyPressDown(evt)
-
-      //First checks if the drive State is active, then adds speed values in rx, ry, and theta
-      if(this.state.drivingMode)
-      {
-        if(controller[evt.key]){
-          controller[evt.key].pressed = true
-          if(controller[evt.key].fn == "back" && x > -1) x--; 
-          if(controller[evt.key].fn == "forward" && x < 1) x++;
-          if(controller[evt.key].fn == "left" && y > -1) y--;
-          if(controller[evt.key].fn == "right" && y < 1) y++; 
-          if(controller[evt.key].fn == "tleft" && t > -1) t--; 
-          if(controller[evt.key].fn == "tright" && t < 1) t++; 
-          this.driveControls.goKeyDown(evt.key);
-        }
-
-        //Updates drive commands to robot
-        this.driveControls.drive(x, y, t, this.state.speed)
-      }
-
-    }, false);
-
-    document.addEventListener('keyup', (evt) => {
-      //First checks if the drive State is active, then substracts speed values in rx, ry, and theta
-      if(this.state.drivingMode){
-        if(controller[evt.key]){
-          controller[evt.key].pressed = false
-          if(controller[evt.key].fn == "back") x++;
-          if(controller[evt.key].fn == "forward") x--;
-          if(controller[evt.key].fn == "left") y++;
-          if(controller[evt.key].fn == "right") y--;
-          if(controller[evt.key].fn == "tleft") t++;
-          if(controller[evt.key].fn == "tright") t--;
-        }
-
-        //animation for color change
-        this.driveControls.stopKeyUp(evt.key);
-        //Stops robot if it finds that all keys have been lifted up, acts as a failsafe to above logic
-        let reset = true;
-        for (const [key, value] of Object.entries(controller)) {
-          if(value.pressed) reset = false
-        }
-        if(reset) {x = 0; y = 0; t = 0;}
-
-        //code to update drive speeds
-        this.driveControls.drive(x, y, t, this.state.speed)
-      }
-
-    }, false);
     // Try to connect to the websocket backend.
     this.ws.attemptConnection();
-  }
 
+    // Start requesting map.
+    this.startRequestInterval()
+  }
 
   onFileChange(event) {
     this.setState({ mapfile: event.target.files[0] });
@@ -283,38 +180,58 @@ class MBotApp extends React.Component {
 
   saveMap() {
     var name = prompt("What do you want to name the map? (.json will automatically be added to the end)");
-    downloadObjectAsJson(this.state.newMap, name)
-  }
-
-  onFieldCheck() {
-    this.setState({showField: !this.state.showField});
-  }
-
-  onGrabMap() {
-    this.ws.socket.emit("map", {'test_key': "Need map. Please give."});
+    // downloadObjectAsJson(this.state.newMap, name)
   }
 
   onMappingMode() {
-    this.setState({mappingMode: !this.state.mappingMode});
+    if (this.state.mappingMode) {
+      // If we're mapping, we need to reset the robot to localization only mode.
+      this.ws.socket.emit('reset', {'mode' : 2, 'retain_pose' : true});
+
+      // Stop asking for map.
+      this.stopRequestInterval();
+
+      this.setState({mappingMode: false});
+    }
+    else {
+      // If we are not mapping, we need to tell the robot to start mapping.
+      if (!confirm("This will overwrite the current map. Are you sure?")) return;
+      this.ws.socket.emit('reset', {'mode' : 3});
+
+      // Start asking for map.
+      this.startRequestInterval();
+
+      this.setState({mappingMode: true});
+    }
   }
 
   onDrivingMode() {
     this.setState({drivingMode: !this.state.drivingMode});
   }
 
-  onSpeedChange(event) {
-    this.setState({speed: event.target.value});
-  }
-
   onSideBar(){
     this.setState({sideBarMode: !this.state.sideBarMode})
+  }
+
+  onSetPose(){
+    console.log("Set pose. Not implemented.");
+  }
+
+  onResetMap(){
+    if (this.state.mappingMode) {
+      // Get user confirmation that the map should be cleared.
+      if (!confirm("This will clear the current map. Are you sure?")) return;
+      // Reset in full SLAM mode, if in mapping mode.
+      this.ws.socket.emit('reset', {'mode' : 3});
+      this.resetMapData();
+    }
   }
 
   /***************************
    *  WINDOW EVENT HANDLERS
    ***************************/
 
-   handleWindowChange(evt) {
+  handleWindowChange(evt) {
     this.rect = this.clickCanvas.current.getBoundingClientRect();
   }
 
@@ -323,7 +240,7 @@ class MBotApp extends React.Component {
     let plan = true;
 
     this.rect = this.clickCanvas.current.getBoundingClientRect();
-    
+
     var x = event.clientX - this.rect.left;
     var y = this.rect.bottom - event.clientY;
     let cs = this.rect.width / this.state.width;
@@ -335,62 +252,17 @@ class MBotApp extends React.Component {
     this.onPlan(row, col, plan);
   }
 
-  handleMouseDown(event) {
-    var x = event.clientX - this.rect.left;
-    var y = this.rect.bottom - event.clientY;
-    var robotRadius = config.ROBOT_SIZE *this.state.pixelsPerMeter / 2;
-    // if click is near robot, set isDown as true
-    if (x < this.state.x + robotRadius && x > this.state.x - robotRadius &&
-        y < this.state.y + robotRadius && y > this.state.y - robotRadius) {
-      this.setState({ isRobotClicked: true });
-    }
-    else {
-      this.handleMapClick(event);
-    }
-  }
-
-  handleMouseMove(event) {
-    if (!this.state.showField && !this.state.isRobotClicked) return;
-
-    var x = event.clientX - this.rect.left;
-    var y = this.rect.bottom - event.clientY;
-
-    if (this.state.isRobotClicked) {
-      this.setState({ x: x, y: y });
-    }
-    if (this.state.showField && this.state.fieldRaw.length > 0) {
-      var cell = this.pixelsToCell(x, y);
-      var idx = Math.max(Math.min(cell[1] + cell[0] * this.state.width, this.state.num_cells - 1), 0);
-      this.setState({ fieldHoverVal: this.state.fieldRaw[idx] });
-    }
-  }
-
-  handleMouseUp() {
-    if (this.state.isRobotClicked == false) return;
-    // this moves the robot along the path
-    this.setState({isRobotClicked: false});
-  }
-
-  handleKeyPressDown(event) {
-    var name = event.key;
-    if (name == "p") this.onSideBar();
-    if (name == "m") this.setState({mappingMode: !this.state.mappingMode});
-    if (name == "n") this.setState({drivingMode: !this.state.drivingMode});
-  }
-
-
- /********************
+  /********************
    *   WS HANDLERS
    ********************/
 
-  handleMap(mapmsg) {
-    var map = parseMapFromLcm(mapmsg)
-    this.updateMap(map);
-    this.setState({newMap: map})
+  onWSConnect(evt) {
+    this.requestMap();
   }
 
-  handleMessage(msg) {
-    // TODO: Handle messages from the websocket.
+  handleMap(map) {
+    // Only update if we are not requesting the map already.
+    if (this.requestInterval !== null) this.updateMap(map);
   }
 
   updateSocketStatus(status) {
@@ -414,14 +286,18 @@ class MBotApp extends React.Component {
 
     let rays = [];
     for(let i = 0; i < lidarLength; i++) {
+
+      // Lasers come in lidar frame (origin same as robot frame but + theta is CW)
+      // First tranform into robot frame
+      var theta = -1 * evt.thetas[i];
       // Convert the ray into pixel coordinates.
-      let rayX = evt.ranges[i] * Math.cos(normalizeAngle(evt.thetas[i] + this.state.theta)) * this.state.pixelsPerMeter;
-      let rayY = evt.ranges[i] * Math.sin(normalizeAngle(evt.thetas[i] + this.state.theta)) * this.state.pixelsPerMeter;
+      let rayX = evt.ranges[i] * Math.cos(normalizeAngle(theta + this.state.theta)) * this.state.pixelsPerMeter;
+      let rayY = evt.ranges[i] * Math.sin(normalizeAngle(theta + this.state.theta)) * this.state.pixelsPerMeter;
       // Shift by the current robot position.
       rayX += this.state.x;
       rayY += this.state.y;
       rays.push([rayX, rayY]);
-    } 
+    }
 
     this.setState({drawLasers: rays, lidarLength: lidarLength})
   }
@@ -435,12 +311,12 @@ class MBotApp extends React.Component {
 
     this.setState({displayPaths: updated_path})
   }
-  
+
   handleParticles(evt){
     var updated_pixels = [];
     for (let i = 0; i < evt.num_particles; i++) {
       updated_pixels[i] = this.posToPixels(evt.particles[i][0], evt.particles[i][1]);
-      
+
     }
     this.setState({drawParticles: updated_pixels});
   }
@@ -454,7 +330,6 @@ class MBotApp extends React.Component {
     this.setState({drawCostmap: updated_path});
   }
 
-
   /**********************
    *   STATE SETTERS
    **********************/
@@ -463,27 +338,64 @@ class MBotApp extends React.Component {
     this.setState({x: x, y: y, theta: theta});
   }
 
-  /**********************
-   *   OTHER FUNCTIONS
-   **********************/
-
   updateMap(result) {
     this.visitGrid.clear();
-    var loaded = result.cells.length > 0;
-    this.setState({prev_cells: this.state.cells,
-                   cells: result.cells,
-                   width: result.width,
+    var mappingMode = result.slam_mode != 2;  // We are in mapping mode if the state is not localization_only (=2).
+
+    // Check if the new cells are in byte form, and if so, convert them.
+    var new_cells;
+    if (result.cells instanceof ArrayBuffer) new_cells = new Int8Array(result.cells);
+    else new_cells = result.cells;
+
+    var loaded = new_cells.length > 0;
+
+    if (loaded) {
+      // Update the map grid.
+      this.mapGrid.setSize(result.width, result.height);
+      this.mapGrid.updateCells(new_cells, this.mapCells, config.MAP_COLOUR_LOW, config.MAP_COLOUR_HIGH);
+    }
+
+    this.mapCells = new_cells;
+
+    if (!mappingMode) {
+      // If we are not in mapping mode, stop asking for map.
+      this.stopRequestInterval();
+    }
+    else if (mappingMode) {
+      // If we are in mapping mode, start asking for map.
+      this.startRequestInterval();
+    }
+
+    this.setState({width: result.width,
                    height: result.height,
-                   num_cells: result.num_cells,
                    origin: result.origin,
                    metersPerCell: result.meters_per_cell,
                    cellSize: config.MAP_DISPLAY_WIDTH / result.width,
                    pixelsPerMeter: config.MAP_DISPLAY_WIDTH / (result.width * result.meters_per_cell),
                    mapLoaded: loaded,
                    path: [],
-                   clickedCell: [],
                    goalCell: [],
-                   isRobotClicked: false});
+                   mappingMode: mappingMode,
+                   localMapFileLocation: result.slam_map_location});
+  }
+
+  resetMapData() {
+    this.mapCells = [];
+
+    this.setState({
+      width: 0,
+      height: 0,
+      origin: [0, 0],
+      metersPerCell: 0,
+      pixelsPerMeter: 0,
+      cellSize: 0,
+      mapLoaded: false,
+      mapfile: null,
+      goalCell: [],
+      goalValid: true,
+      localMapFileLocation: "current.map",
+      mappingMode: false
+    });
   }
 
   changeOmni() {
@@ -522,12 +434,16 @@ class MBotApp extends React.Component {
     if (goal.length === 0) return false;
 
     var idx = goal[1] + goal[0] * this.state.width;
-    var valid = this.state.cells[idx] < 0.5;
+    var valid = this.mapCells[idx] < 0;
 
     this.setState({goalCell: goal, goalValid: valid});
 
     return valid;
   }
+
+  /**********************
+   *   OTHER FUNCTIONS
+   **********************/
 
   onPlan(row, col, plan) {
     if (!this.setGoal([row, col])) return;
@@ -541,6 +457,62 @@ class MBotApp extends React.Component {
                      }
                    };
     this.ws.socket.emit("plan", {goal: [row, col], plan: plan})
+  }
+
+  startRequestInterval() {
+    if (this.requestInterval !== null)  return;
+    this.requestInterval = setInterval(() => {
+      this.requestMap();
+    }, config.MAP_UPDATE_PERIOD);
+  }
+
+  stopRequestInterval() {
+    if (this.requestInterval === null)  return;
+    clearInterval(this.requestInterval);
+    this.requestInterval = null;
+  }
+
+  requestMap() {
+    if (!this.ws.status()) return;
+    this.ws.socket.emit('request_map', (response) => {
+      // If we got an empty dictionary, there was no map to send.
+      if (Object.keys(response).length === 0) {
+        this.staleMapCount++;
+        if (this.staleMapCount > config.STALE_MAP_COUNT) {
+          console.log("Map is stale!");
+          this.resetMapData();
+        }
+        return;
+      }
+      // Update the map data.
+      this.updateMap(response);
+      this.staleMapCount = 0;
+    });
+  }
+
+  requestMapUpdate() {
+    if (!this.ws.status()) return;
+    if (!this.state.mapLoaded) return;
+    var starttime = performance.now();
+    this.ws.socket.emit('request_map_update', {"cells": this.mapCells}, (response) => {
+      console.log("Processing map update", response);
+      if (response.indices.length === 0) {
+        console.log("No updates to make.");
+        return;
+      }
+
+      // TODO: If there is no map yet, add a timer that continues to ask for it.
+      console.log("UPDATE", response.indices.length);
+      for (var i = 0; i < response.values.length; i++) {
+        var idx = response.indices[i];
+        var cell = this.mapGrid.idxToCell(idx);
+        this.mapCells[idx] = response.values[i];
+        var prob = (response.values[i] + 127.) / 255.;
+        var color = getColor(prob, config.MAP_COLOUR_LOW, config.MAP_COLOUR_HIGH);
+        this.mapGrid.drawCell(cell, color, this.mapGrid.cellSize);
+      }
+      console.log("request map update DONE", performance.now() - starttime);
+    });
   }
 
   posToPixels(x, y) {
@@ -562,20 +534,8 @@ class MBotApp extends React.Component {
     return [row, col];
   }
 
-  startmap(){
-    console.log("Starting to map")
-  }
-
-  stopmap(){
-    console.log("Stopping map")
-  }
-
-  restartmap(){
-    this.ws.socket.emit('reset', {'mode' : 3})
-  }
-
   render() {
-    let sidebarClasses = ""
+    let sidebarClasses = "";
     if (!this.state.sideBarMode) {
       sidebarClasses += "inactive";
     }
@@ -588,30 +548,28 @@ class MBotApp extends React.Component {
             <TransformWrapper>
               <TransformComponent>
                 <div id="canvas-wrapper">
-                  <DrawMap cells={this.state.cells} prev_cells={this.state.prev_cells} width={this.state.width} height={this.state.height}/>
+                  <canvas id="mapCanvas" ref={this.mapCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
+                  </canvas>
                   <canvas ref={this.visitCellsCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}>
                   </canvas>
                   <DrawPaths xPos = {this.state.x} yPos = {this.state.y} path =  {this.state.displayPaths}/>
-                  {this.state.costmapDisplay && 
-                    <DrawCostmap cells = {this.state.drawCostmap} state = {this.state.costmapDisplay}/>}
-                  {this.state.particleDisplay && 
+                  {/* {this.state.costmapDisplay &&
+                    <DrawCostmap cells = {this.state.drawCostmap} state = {this.state.costmapDisplay}/>} */}
+                  {this.state.particleDisplay &&
                     <DrawParticles particles = {this.state.drawParticles}/>}
-                  {this.state.laserDisplay && 
+                  {this.state.laserDisplay &&
                     <DrawLasers mappingMode={this.state.mappingMode} width={this.state.width} height={this.state.height}
                               drawLasers={this.state.drawLasers} origin={[this.state.x, this.state.y]}/>}
                   {this.state.robotDisplay &&
                     <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
                                pixelsPerMeter={this.state.pixelsPerMeter} />}
-                  
+
                   <DrawCells loaded={this.state.mapLoaded} path={this.state.path} clickedCell={this.state.clickedCell}
                              goalCell={this.state.goalCell} goalValid={this.state.goalValid}
                              cellSize={this.state.cellSize} />
 
                   <canvas ref={this.clickCanvas} width={config.MAP_DISPLAY_WIDTH} height={config.MAP_DISPLAY_HEIGHT}
-                          onMouseDown={(e) => this.handleMouseDown(e)}
-                          onContextMenu={(e) => this.handleMouseDown(e)}
-                          onMouseMove={(e) => this.handleMouseMove(e)}
-                          onMouseUp={() => this.handleMouseUp()}
+                          onClick={(e) => this.handleMapClick(e)}
                           onScroll={() => this.handleZoom()}>
                   </canvas>
                 </div>
@@ -626,80 +584,45 @@ class MBotApp extends React.Component {
           <div className="inner">
             <div className="status-wrapper">
               <ConnectionStatus status={this.state.connection}/>
-              <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} clickedCell={this.state.clickedCell}
-                             showField={this.state.showField} fieldVal={this.state.fieldHoverVal}/>
+              <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} clickedCell={this.state.clickedCell} />
             </div>
 
-            <div className="row field-toggle-wrapper">
+            <div className="row">
               <div className="col">
-                <div className="row my-4">
-                  <div className="col-8">
-                    <span className = "">Mapping Mode</span>
-                  </div>
-                  <div className="col-4">
-                    <label className="switch">
-                      <input type="checkbox" id="myCheck" onClick={() => this.onMappingMode()}/>
-                      <span className="slider round"></span>
-                    </label>
-                  </div>
-                </div>
-                {this.state.mappingMode &&
-                <>
+                <ToggleSelect label={"Mapping Mode"} checked={this.state.mappingMode}
+                              onChange={ () => this.onMappingMode() }/>
 
-                <div className="button-wrapper-col justify-content-center">
+                <div className="button-wrapper-col">
                   {/* TODO: Implement intial pose branch into code*/}
-                  <button className="button start-color2" onClick={() => this.startmap()}>Set Inital Pose</button>
-                  <button className="button" onClick={() => this.restartmap()}>Reset Mapping</button>
-                  {/* TODO: Fix this button as it is not as wide as the other buttons*/}
-                  <label htmlFor="file-upload" className="button upload-color mb-3">
+                  {/* {<button className="button start-color2" onClick={() => this.onSetPose()}>Set Inital Pose</button>} */}
+                  {this.state.mappingMode &&
+                    <button className="button" onClick={() => this.onResetMap()}>Reset Map</button>
+                  }
+
+                  {/* {<label htmlFor="file-upload" className="button upload-color mb-3">
                     Upload a Map
                   </label>
-                  <input id="file-upload" type="file" onChange = {(event) => this.onFileChange(event)}/>
-                  <button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>
-                  <button className="button stop-color2" onClick={() => this.stopmap()}>Stop Mapping</button>
+                  <input id="file-upload" type="file" onChange = {(event) => this.onFileChange(event)}/>} */}
+                  {/* {<button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>} */}
                 </div>
 
-                <div className="row mt-4 mb-5 text-left mx-2">
-                  <div className="col-6 text-small"> Draw Particles
-                    <input type="checkbox" className="mx-2" checked={this.state.particleDisplay}
-                           onChange={() => this.changeParticles()}/>
-                  </div>
-                  <div className="col-6"> Draw Robot
-                    <input type="checkbox" className="mx-2" checked={this.state.robotDisplay}
-                           onChange={() => this.changeRobot()} />
-                  </div>
-                </div>
-                <div className="row mt-4 mb-5 text-left mx-2">
-                  <div className="col-6 text-small"> Draw Costmap
-                  <input type="checkbox" className="mx-2" checked = {this.state.costmapDisplay}
-                    onChange={() => this.changeCostMap()}/>
-                  </div>
-                  <div className="col-6"> Draw Lasers
-                    <input type="checkbox" className="mx-2" checked = {this.state.laserDisplay}
-                    onChange={() => this.changeLasers()} />
-                  </div>
-                </div>
-                </>
-                }
+                { /* Checkboxes for map visualization. */}
+                <ToggleSelect label={"Draw Particles"} checked={this.state.particleDisplay}
+                              onChange={ () => this.changeParticles() }/>
+                <ToggleSelect label={"Draw Robot"} checked={this.state.robotDisplay}
+                              onChange={ () => this.changeRobot() }/>
+                {// Remove temporarily since backend doesn't publish this.
+                /* <ToggleSelect label={"Draw Costmap"} checked={this.state.costmapDisplay}
+                                 onChange={ () => this.changeCostMap() }/> */ }
+                <ToggleSelect label={"Draw Lasers"} checked={this.state.laserDisplay}
+                              onChange={ () => this.changeLasers() }/>
 
-                <div className="row">
-                  <div className="col-8">
-                    <span>Drive Mode</span>
-                  </div>
-                  <div className="col-4">
-                    <label className="switch">
-                      <input type="checkbox" id="myDrive" onClick={() => this.onDrivingMode()}/>
-                      <span className="slider round"></span>
-                    </label>
-                  </div>
-                  {this.state.drivingMode &&
-                    <div className="drive-panel-wrapper">
-                      <DriveControlPanel driveControls={this.driveControls}
-                                         speed={this.state.speed}
-                                         onSpeedChange={(evt) => this.onSpeedChange(evt)} />
-                    </div>
+                { /* Drive mode and control panel. */}
+                <ToggleSelect label={"Drive Mode"} checked={this.state.drivingMode}
+                              onChange={ () => this.onDrivingMode() }/>
+                {this.state.drivingMode &&
+                  <DriveControlPanel ws={this.ws} drivingMode={this.state.drivingMode} />
                 }
-                </div>
 
               </div>
             </div>

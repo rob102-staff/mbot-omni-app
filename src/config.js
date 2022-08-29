@@ -22,6 +22,8 @@ var config = {
     CANVAS_DISPLAY_HEIGHT: 800, // px
     ROBOT_SIZE: 0.274,         // m, diameter
     ROBOT_DEFAULT_SIZE: 100,  // px
+    MAP_UPDATE_PERIOD: 250,   // ms
+    STALE_MAP_COUNT: 40,      // If we haven't gotten a map this many times, map is stale.
 
     // Display info
     MAP_COLOUR_HIGH: "#000000",      // Black

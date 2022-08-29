@@ -31,13 +31,15 @@ function parseMapFromSocket(data) {
 
 function parseMapFromLcm(msg){
   var map = {};
-  map.origin = msg["origin"]
-  map.width = msg["width"]
-  map.height = msg["height"]
-  map.meters_per_cell = msg["meters_per_cell"]
-  map.num_cells = msg["num_cells"]
-  map.cells = normalizeList(msg["cells"])
-  return map
+  map.origin = msg["origin"];
+  map.width = msg["width"];
+  map.height = msg["height"];
+  map.meters_per_cell = msg["meters_per_cell"];
+  map.num_cells = msg["num_cells"];
+  map.cells = msg["cells"];
+  map.slam_mode = msg["slam_mode"];
+  map.slam_map_location = msg["slam_map_location"];
+  return map;
 }
 
 
@@ -45,23 +47,25 @@ function normalizeList(list) {
   if (list.length < 1) return list;
   if (list.length === 1) return [1];
 
+  var normalizedList = [...list]
+
   // Find min and max values.
   // Note: Using JavaScript's Math.min(...) and Math.min(...) causes issues if
   // the array is too big to unpack.
-  var min_val = list[0];
-  var max_val = list[0];
+  var min_val = normalizedList[0];
+  var max_val = normalizedList[0];
 
-  for (var i = 1; i < list.length; i++) {
-    min_val =  list[i] < min_val ? list[i] : min_val;
-    max_val =  list[i] > max_val ? list[i] : max_val;
+  for (var i = 1; i < normalizedList.length; i++) {
+    min_val =  normalizedList[i] < min_val ? normalizedList[i] : min_val;
+    max_val =  normalizedList[i] > max_val ? normalizedList[i] : max_val;
   }
 
   // Normalize the values.
-  for (var i = 0; i < list.length; i++) {
-    list[i] = (list[i] - min_val) / (max_val - min_val);
+  for (var i = 0; i < normalizedList.length; i++) {
+    normalizedList[i] = (normalizedList[i] - min_val) / (max_val - min_val);
   }
 
-  return list;
+  return normalizedList;
 }
 
 function downloadObjectAsJson(exportObj, exportName){

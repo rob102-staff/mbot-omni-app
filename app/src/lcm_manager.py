@@ -11,22 +11,20 @@ from mbot_lcm_msgs import lidar_t
 from mbot_lcm_msgs import planner_request_t
 from mbot_lcm_msgs import robot_path_t
 from mbot_lcm_msgs import mbot_system_reset_t
-from mbot_lcm_msgs import costmap_t
+# from mbot_lcm_msgs import costmap_t
 from app import lcm_settings
 
 import time
 import sys
-import threading
-from copy import deepcopy
-
+import select
 
 
 class LcmCommunicationManager:
     def __init__(self, callback_dict={}):
         '''
         Runs the lcm handler thread
-        
-        :param callback_dict: contains lcm channel names as keys and 
+
+        :param callback_dict: contains lcm channel names as keys and
             callback functions as values. The functions are called when
             a message on their corresponding channel is handled. The decoded
             data will be passed to the callback function.
@@ -34,7 +32,7 @@ class LcmCommunicationManager:
         self._lcm = lcm.LCM(lcm_settings.LCM_ADDRESS)
         self.subscriptions = []
         self._callback_dict = callback_dict
-        
+
         ###################################
         # TODO: VERIFY AND FIX - ENSURE DATA IS SAVED
         self.__subscribe(lcm_settings.SLAM_MAP_CHANNEL, self._occupancy_grid_listener)
@@ -44,27 +42,38 @@ class LcmCommunicationManager:
         self.__subscribe(lcm_settings.LIDAR_CHANNEL, self.lidar_listener)
         self.__subscribe(lcm_settings.SLAM_POSE_CHANNEL, self.pose_listener)
         self.__subscribe(lcm_settings.CONTROLLER_PATH_CHANNEL, self.path_listener)
-        self.__subscribe(lcm_settings.SLAM_PARTICLES_CHANNEL, self.particle_listener)        
-        self.__subscribe(lcm_settings.COSTMAP_CHANNEL, self.obstacle_listener)        
+        self.__subscribe(lcm_settings.SLAM_PARTICLES_CHANNEL, self.particle_listener)
+        # self.__subscribe(lcm_settings.COSTMAP_CHANNEL, self.obstacle_listener)
         ###################################
 
-        self.__lcm_thread = threading.Thread(target=self.__run_handle_loop)
-        self.__lcm_thread.start()
+    def request_current_map(self):
+        return self._callback_dict[lcm_settings.SLAM_MAP_CHANNEL].request_current_map()
 
+    def request_map_update(self, cells):
+        return self._callback_dict[lcm_settings.SLAM_MAP_CHANNEL].request_map_update(cells)
 
     def update_callback(self, channel, function):
         self._callback_dict[channel] = function
-    
+
     def __subscribe(self, channel, handler):
         self.subscriptions.append(self._lcm.subscribe(channel, handler))
 
-    def __run_handle_loop(self): 
-        while True: 
+    def handle(self):
+        self._lcm.handle()
+
+    def handleOnce(self):
+        # This is a non-blocking handle, which only calls handle if a message is ready.
+        rfds, wfds, efds = select.select([self._lcm.fileno()], [], [], 0)
+        if rfds:
             self._lcm.handle()
-    
+
+    def emit_msgs(self):
+        for channel in self._callback_dict.keys():
+            self._callback_dict[channel].emit()
+
     def publish_motor_commands(self, vx, vy, wz):
         cmd = omni_motor_command_t()
-        cmd.vx = vx; cmd.vy = vy; cmd.wz = wz 
+        cmd.vx = vx; cmd.vy = vy; cmd.wz = wz
         cmd.utime = int(time.time() * 1000)
         self._lcm.publish(lcm_settings.MBOT_MOTOR_COMMAND_CHANNEL, cmd.encode())
 
@@ -82,27 +91,16 @@ class LcmCommunicationManager:
 
         self._lcm.publish(lcm_settings.PATH_REQUEST, total_pose.encode())
 
-    def publish_slam_reset(self, mode, mapdata = None):
+    def publish_slam_reset(self, mode, map_file=None, retain_pose=False):
+        # Reset the map manager so it does not continue to send old maps.
+        self._callback_dict[lcm_settings.SLAM_MAP_CHANNEL].reset()
+
         slam_reset = mbot_system_reset_t()
         slam_reset.utime = int(time.time() * 1000)
         slam_reset.slam_mode = int(mode)
-
-        if mapdata is not None:
-            map_obj = occupancy_grid_t()
-            map_obj.origin_x = float(mapdata['origin'][0])
-            map_obj.origin_y = float(mapdata['origin'][1])
-            map_obj.meters_per_cell = float(mapdata['meters_per_cell'])
-            map_obj.width = int(mapdata['width'])
-            map_obj.height = int(mapdata['height'])
-            map_obj.num_cells = int(mapdata['num_cells'])
-            for i in range(map_obj.num_cells):
-                val = mapdata['cells'][i]
-                if val==0.5:
-                    updated_val = 0
-                else:
-                    updated_val = min(int((val*256)-128), 127)
-                map_obj.cells.append(updated_val)
-            slam_reset.map_obj = map_obj
+        slam_reset.retain_pose = retain_pose
+        if map_file is not None:
+            slam_reset.slam_map_location = map_file
 
         self._lcm.publish(lcm_settings.MBOT_SYSTEM_RESET, slam_reset.encode())
 
@@ -114,55 +112,49 @@ class LcmCommunicationManager:
 
         self._lcm.publish(lcm_settings.RESET_ODOMETRY_CHANNEL, cmd.encode())
 
-    # TODO: Implement start mapping publisher. 
-    def start_mapping_publisher(self): 
-        raise(Exception("Not Yet Implemented!"))
-
-    def _position_listener(self, channel, data): 
+    def _position_listener(self, channel, data):
         decoded_data = pose_xyt_t.decode(data)
-        if channel in self._callback_dict.keys(): 
+        if channel in self._callback_dict.keys():
             self._callback_dict[channel](decoded_data)
 
-    def _exploration_status_listener(self, channel, data): 
+    def _exploration_status_listener(self, channel, data):
         decoded_data = exploration_status_t.decode(data)
-        if channel in self._callback_dict.keys(): 
+        if channel in self._callback_dict.keys():
             self._callback_dict[channel](decoded_data)
 
-    def mbot_state_listener(self, channel, data): 
+    def mbot_state_listener(self, channel, data):
         decoded_data = mbot_state_t.decode(data)
-        if channel in self._callback_dict.keys(): 
+        if channel in self._callback_dict.keys():
             self._callback_dict[channel](decoded_data)
 
     def _occupancy_grid_listener(self, channel, data):
         decoded_data = occupancy_grid_t.decode(data)
-        if channel in self._callback_dict.keys(): 
-            self._callback_dict[channel](decoded_data)
+        cell_bytes = data[-decoded_data.num_cells:]
+        if channel in self._callback_dict.keys():
+            self._callback_dict[channel](decoded_data, cell_bytes)
 
-    def obstacle_listener(self, channel, data):
-        decoded_data = costmap_t.decode(data)
-        if channel in self._callback_dict.keys(): 
-            self._callback_dict[channel](decoded_data)
+    # Temporarily remove. Unclear if this is published by botlab.
+    # def obstacle_listener(self, channel, data):
+    #     decoded_data = costmap_t.decode(data)
+    #     if channel in self._callback_dict.keys():
+    #         self._callback_dict[channel](decoded_data)
 
     def lidar_listener(self, channel, data):
         decoded_data = lidar_t.decode(data)
-        if channel in self._callback_dict.keys(): 
+        if channel in self._callback_dict.keys():
             self._callback_dict[channel](decoded_data)
-        
+
     def pose_listener(self, channel, data):
         decoded_data = pose_xyt_t.decode(data)
-        if channel in self._callback_dict.keys(): 
+        if channel in self._callback_dict.keys():
             self._callback_dict[channel](decoded_data)
-        
+
     def path_listener(self, channel, data):
         decoded_data = robot_path_t.decode(data)
-        if channel in self._callback_dict.keys(): 
+        if channel in self._callback_dict.keys():
             self._callback_dict[channel](decoded_data)
 
     def particle_listener(self, channel, data):
         decoded_data = particles_t.decode(data)
-        if channel in self._callback_dict.keys(): 
+        if channel in self._callback_dict.keys():
             self._callback_dict[channel](decoded_data)
-
-    def __del__(self): 
-        self.__lcm_thread.join()
-        for s in self.subscriptions: self._lcm.unsubscribe(s)
