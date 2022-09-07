@@ -107,8 +107,9 @@ class LidarEmitter():
             "num_ranges" : self.__lidar.num_ranges,
             "ranges" : self.__lidar.ranges,
             "thetas" : self.__lidar.thetas,
-            "times" : self.__lidar.times,
-            "intensities" : self.__lidar.intensities,
+            # The following are unused by the front end. Commented to save bandwidth.
+            # "times" : self.__lidar.times,
+            # "intensities" : self.__lidar.intensities,
         }
 
     def emit(self):
