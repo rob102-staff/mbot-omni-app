@@ -79,6 +79,7 @@ class MBotApp extends React.Component {
 
     // React state.
     this.state = {
+      robotName: "MBOT-OMNI-???",
       connection: false,
       // Map parameters.
       width: 0,
@@ -122,6 +123,7 @@ class MBotApp extends React.Component {
     this.ws.statusCallback = (status) => { this.updateSocketStatus(status); };
     this.ws.userOnConnect = (evt) => { this.onWSConnect(evt); };
     this.ws.userHandleMap = (evt) => { this.handleMap(evt); };
+    this.ws.handleName = (evt) => { this.handleName(evt); };
     this.ws.handleMapUpdate = (evt) => { this.handleMapUpdate(evt); };
     this.ws.handleLaser = (evt) => { this.handleLasers(evt)};
     this.ws.handlePose = (evt) => { this.handlePoses(evt)};
@@ -269,6 +271,10 @@ class MBotApp extends React.Component {
     if (this.state.connection !== status) {
       this.setState({connection: status});
     }
+  }
+
+  handleName(msg) {
+    this.setState({robotName: msg["name"]});
   }
 
   handlePoses(evt){
@@ -582,6 +588,9 @@ class MBotApp extends React.Component {
         <div id="sidenav" className={sidebarClasses}>
           <div id="toggle-nav" onClick={() => this.onSideBar()}><FontAwesomeIcon icon={faBars} /></div>
           <div className="inner">
+          <div className="title">
+            {this.state.robotName}
+          </div>
             <div className="status-wrapper">
               <ConnectionStatus status={this.state.connection}/>
               <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} clickedCell={this.state.clickedCell} />

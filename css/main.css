@@ -70,6 +70,12 @@ a:hover {
   color: #606060;
 }
 
+.title {
+  font-size: 22pt;
+  font-weight: bold;
+  padding-bottom: 10px;
+}
+
 #sidenav.inactive {
   margin-left: -400px;  /* Move over the width of the sidebar. */
   transition: left 0.3s, margin-left 0.3s;

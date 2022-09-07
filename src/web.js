@@ -16,6 +16,7 @@ class WSHelper {
     this.userOnConnect = (evt) => {};
     this.userHandleMap = (evt) => {console.warn("userHandleMap is not yet set up.")};
     this.handleMapUpdate = (evt) => {console.warn("handleMapUpdate is not yet set up.")};
+    this.handleName = (evt) => {console.warn("handleName is not yet set up.")};
     this.handleLaser = (evt) => {console.warn("handleLaser is not yet set up.")};
     this.handlePose = (evt) => {console.warn("handlePose is not yet set up.")};
     this.handlePath = (evt) => {console.warn("handlePath is not yet set up.")};
@@ -35,6 +36,7 @@ class WSHelper {
     this.socket.on('connect', (evt) => this.handleOpen(evt));
     this.socket.on('disconnect', (evt) => this.statusCallback(false));
     this.socket.on('error', (evt) => { this.statusCallback(this.status()); });
+    this.socket.on('hostname', (evt) => this.handleName(evt));
     this.socket.on('map', (evt) => this.userHandleMap(evt));
     this.socket.on('map_update', (evt) => this.handleMapUpdate(evt));
     this.socket.on('lidar', (evt) => this.handleLaser(evt));

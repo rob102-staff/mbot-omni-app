@@ -3,10 +3,21 @@ from app import app, socket, lcm_manager, connection_manager
 import json
 import time
 
+HOSTFILE = "/etc/hostname"
+
+
 @socket.on('connect')
 def setup_connection():
     connection_manager.connected = True
     app.logger.info("Successfully connected!")
+    # Read the robot's host name.
+    with open(HOSTFILE, 'r') as f:
+        name = f.read()
+
+    # Send the name to the front end.
+    name = name.strip().upper()
+    if len(name) > 0:
+        socket.emit("hostname", {"name": name})
     return True
 
 
