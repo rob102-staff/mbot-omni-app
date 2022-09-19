@@ -9,6 +9,8 @@ import {
   faArrowRotateRight
 } from '@fortawesome/free-solid-svg-icons'
 
+import config from "./config.js";
+
 /********************
  * MOVE PANEL
  ********************/
@@ -52,10 +54,10 @@ class DriveControlPanel extends React.Component {
         this.controlMap[evt.key].pressed = true
         if(this.controlMap[evt.key].fn == "back" && this.x > -1) this.x--;
         if(this.controlMap[evt.key].fn == "forward" && this.x < 1) this.x++;
-        if(this.controlMap[evt.key].fn == "left" && this.y > -1) this.y--;
-        if(this.controlMap[evt.key].fn == "right" && this.y < 1) this.y++;
-        if(this.controlMap[evt.key].fn == "tleft" && this.t > -1) this.t--;
-        if(this.controlMap[evt.key].fn == "tright" && this.t < 1) this.t++;
+        if(this.controlMap[evt.key].fn == "right" && this.y > -1) this.y--;
+        if(this.controlMap[evt.key].fn == "left" && this.y < 1) this.y++;
+        if(this.controlMap[evt.key].fn == "tright" && this.t > -1) this.t--;
+        if(this.controlMap[evt.key].fn == "tleft" && this.t < 1) this.t++;
       }
 
       // Update drive speeds.
@@ -70,10 +72,10 @@ class DriveControlPanel extends React.Component {
         this.controlMap[evt.key].pressed = false
         if(this.controlMap[evt.key].fn == "back") this.x++;
         if(this.controlMap[evt.key].fn == "forward") this.x--;
-        if(this.controlMap[evt.key].fn == "left") this.y++;
-        if(this.controlMap[evt.key].fn == "right") this.y--;
-        if(this.controlMap[evt.key].fn == "tleft") this.t++;
-        if(this.controlMap[evt.key].fn == "tright") this.t--;
+        if(this.controlMap[evt.key].fn == "right") this.y++;
+        if(this.controlMap[evt.key].fn == "left") this.y--;
+        if(this.controlMap[evt.key].fn == "tright") this.t++;
+        if(this.controlMap[evt.key].fn == "tleft") this.t--;
       }
 
       // Stops robot if it finds that all keys have been lifted up, acts as a failsafe to above logic
@@ -94,7 +96,9 @@ class DriveControlPanel extends React.Component {
   }
 
   drive(x, y, t, spd){
-    this.props.ws.socket.emit("move", {'rx' : x, 'ry' : y, 'theta': t, 'speed' : spd})
+    this.props.ws.socket.emit("move", {'vx' : spd * x / 100.,
+                                       'vy' : spd * y / 100.,
+                                       'wz' : config.ANG_VEL_MULTIPLIER * spd * t / 100.})
   }
 
   render() {
@@ -102,7 +106,7 @@ class DriveControlPanel extends React.Component {
       <div className="drive-panel-wrapper">
         <div className="drive-buttons">
           <button className="button drive-turn" id="turn-left"
-                  onClick={() => this.drive(0, 0, -1, this.state.speed)}>
+                  onClick={() => this.drive(0, 0, 1, this.state.speed)}>
             <FontAwesomeIcon icon={faArrowRotateLeft} />
           </button>
           <button className="button drive-move" id="move-str"
@@ -110,16 +114,16 @@ class DriveControlPanel extends React.Component {
             <FontAwesomeIcon icon={faArrowUp} />
           </button>
           <button className="button drive-turn" id="turn-right"
-                  onClick={() => this.drive(0, 0, 1, this.state.speed)}>
+                  onClick={() => this.drive(0, 0, -1, this.state.speed)}>
             <FontAwesomeIcon icon={faArrowRotateRight} />
           </button>
 
           <button className="button drive-move" id="move-left"
-                  onClick={() => this.drive(0, -1, 0, this.state.speed)}>
+                  onClick={() => this.drive(0, 1, 0, this.state.speed)}>
             <FontAwesomeIcon icon={faArrowLeft} />
           </button>
           <button className="button drive-move" id="move-right"
-                  onClick={() => this.drive(0, 1, 0, this.state.speed)}>
+                  onClick={() => this.drive(0, -1, 0, this.state.speed)}>
             <FontAwesomeIcon icon={faArrowRight} />
           </button>
           <button className="button drive-move" id="move-back"

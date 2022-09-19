@@ -25,6 +25,9 @@ var config = {
     MAP_UPDATE_PERIOD: 250,   // ms
     STALE_MAP_COUNT: 40,      // If we haven't gotten a map this many times, map is stale.
 
+    // Driving info
+    ANG_VEL_MULTIPLIER: 5.0,  // Scale to multiply values [0-1] for angular velocity.
+
     // Display info
     MAP_COLOUR_HIGH: "#000000",      // Black
     MAP_COLOUR_LOW: "#ffffff",        // White
