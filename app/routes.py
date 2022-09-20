@@ -60,13 +60,7 @@ def reset_slam(data):
 
 @socket.on('move')
 def move_robot(data):
-    spd = int(data["speed"])/100
-
-    x = data["rx"]
-    y = data["ry"]
-    theta = data["theta"]
-
-    lcm_manager.publish_motor_commands((x * spd), -(y * spd), -(2.5 * theta * spd))
+    lcm_manager.publish_motor_commands(data["vx"], data["vy"], data["wz"])
 
     app.logger.info(data)
 
