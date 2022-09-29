@@ -3,6 +3,8 @@ from app import app, socket, lcm_manager, connection_manager
 import json
 import time
 
+from flask import Flask, send_file, render_template
+
 HOSTFILE = "/etc/hostname"
 
 
@@ -20,6 +22,25 @@ def setup_connection():
         socket.emit("hostname", {"name": name})
     return True
 
+# @socket.on('hello')
+# def hello():
+#     print("djfl")
+
+# @app.route('/mbot-bin/maps/current.map', methods=['GET', 'POST'])
+# @app.route('/download')
+# def download():
+#     path = "/mbot-bin/maps/current.map"
+#     return send_file(path, as_attachment=True)
+#     # uploads = os.path.join(current_app.root_path, app.config['UPLOAD_FOLDER'])
+#     # return send_from_directory(directory=uploads, filename=filename)
+
+# @app.route('/mbot-bin/maps/current.map', methods=['GET', 'POST'])
+# def download():
+#     filename = "hello.map"
+#     # Appending app path to upload folder path within app root folder
+#     uploads = os.path.join(current_app.root_path, app.config['../../mbot-bin/maps/current.map'])
+#     # Returning file from appended path
+#     return send_from_directory(directory=uploads, filename=filename)
 
 @socket.on('disconnect')
 def setup_connection():

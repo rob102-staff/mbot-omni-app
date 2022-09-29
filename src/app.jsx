@@ -608,6 +608,11 @@ class MBotApp extends React.Component {
                     <button className="button" onClick={() => this.onResetMap()}>Reset Map</button>
                   }
 
+                  {/* <a href="{{ url_for('.download_file') }}">Download</a> */}
+                  {/* <a href="{{ url_for('download', filename="downloadFiletxt">")}}File</a> */}
+                  
+                  {/* <a href="{{ url_for('download')}}"> File </a> */}
+
                   {/* {<label htmlFor="file-upload" className="button upload-color mb-3">
                     Upload a Map
                   </label>
