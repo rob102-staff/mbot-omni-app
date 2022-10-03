@@ -295,7 +295,7 @@ class MBotApp extends React.Component {
 
       // Lasers come in lidar frame (origin same as robot frame but + theta is CW)
       // First tranform into robot frame
-      var theta = -1 * evt.thetas[i];
+      var theta = evt.thetas[i];
       // Convert the ray into pixel coordinates.
       let rayX = evt.ranges[i] * Math.cos(normalizeAngle(theta + this.state.theta)) * this.state.pixelsPerMeter;
       let rayY = evt.ranges[i] * Math.sin(normalizeAngle(theta + this.state.theta)) * this.state.pixelsPerMeter;
@@ -527,16 +527,16 @@ class MBotApp extends React.Component {
     return [u, v];
   }
 
-  cellToPixels(x, y) {
-    var u = (x * this.state.cellSize);
-    var v = (y * this.state.cellSize);
+  cellToPixels(r, c) {
+    var u = (r * this.state.cellSize);
+    var v = (c * this.state.cellSize);
 
     return [u, v];
   }
 
   pixelsToCell(u, v) {
-    var row = Math.floor(v / this.state.cellSize);
-    var col = Math.floor(u / this.state.cellSize);
+    var row = Math.floor(u / this.state.cellSize);
+    var col = Math.floor(v / this.state.cellSize);
     return [row, col];
   }
 
