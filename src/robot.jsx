@@ -65,7 +65,7 @@ class DrawRobot extends React.Component {
     // Robot should begin in center of map
     this.lastRobotPos = [config.MAP_DISPLAY_WIDTH * 0.5, config.MAP_DISPLAY_HEIGHT * .5];
     this.lastRobotSize = config.ROBOT_DEFAULT_SIZE;
-    this.lastRobotAngle = 0;
+    this.lastRobotAngle = 0.0;
 
     this.robotImage = new Image(config.ROBOT_DEFAULT_SIZE, config.ROBOT_DEFAULT_SIZE);
     const imgUrl = new URL('./images/mbot.png', import.meta.url).href;
@@ -75,7 +75,7 @@ class DrawRobot extends React.Component {
   componentDidMount() {
     this.robotCtx = this.robotCanvas.current.getContext('2d');
     this.robotCtx.transform(1, 0, 0, -1, 0, 0);
-    this.robotCtx.transform(1, 0, 0, 1, 0, -this.robotCanvas.current.width);
+    this.robotCtx.transform(1, 0, 0, 1, 0, -this.robotCanvas.current.height);
 
     // Apply the last transform since it will be cleared when first drawn.
     this.robotCtx.translate(this.lastRobotPos[0], this.lastRobotPos[1]);
@@ -97,7 +97,7 @@ class DrawRobot extends React.Component {
 
   drawRobot() {
     var robotSize = this.robotSize();
-    
+
     if(robotSize === config.ROBOT_DEFAULT_SIZE){
       return;
     }
