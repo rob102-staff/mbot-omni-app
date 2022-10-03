@@ -68,7 +68,8 @@ class DrawRobot extends React.Component {
     this.lastRobotAngle = 0;
 
     this.robotImage = new Image(config.ROBOT_DEFAULT_SIZE, config.ROBOT_DEFAULT_SIZE);
-    this.robotImage.src = '/assets/mbot.png';
+    const imgUrl = new URL('./images/mbot.png', import.meta.url).href;
+    this.robotImage.src = imgUrl;
   }
 
   componentDidMount() {
