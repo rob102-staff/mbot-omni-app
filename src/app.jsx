@@ -10,7 +10,7 @@ import { normalizeAngle } from "./util";
 import { WSHelper } from "./web.js";
 import { DrawRobot } from "./robot";
 import { DrawCells, DrawLasers, DrawPaths, DrawParticles, DrawCostmap } from "./canvas";
-import { downloadObjectAsJson } from "./map.js";
+import { downloadMapFile } from "./map.js";
 import { getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControlPanel } from "./driveControls";
 
@@ -181,8 +181,11 @@ class MBotApp extends React.Component {
   }
 
   saveMap() {
-    var name = prompt("What do you want to name the map? (.json will automatically be added to the end)");
-    // downloadObjectAsJson(this.state.newMap, name)
+    let mapData = {"cells": this.mapCells};
+    // TODO: All the necessary data should be included. It's possible that
+    // updateMap() will need to be modified if some of the header data is not
+    // being saved.
+    downloadMapFile(mapData);
   }
 
   onMappingMode() {
@@ -612,7 +615,7 @@ class MBotApp extends React.Component {
                     Upload a Map
                   </label>
                   <input id="file-upload" type="file" onChange = {(event) => this.onFileChange(event)}/>} */}
-                  {/* {<button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>} */}
+                  {<button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>}
                 </div>
 
                 { /* Checkboxes for map visualization. */}

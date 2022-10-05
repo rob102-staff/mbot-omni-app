@@ -43,6 +43,14 @@ function parseMapFromLcm(msg){
 }
 
 
+function mapDataToString(data){
+  var res = data["cells"].join(" ");
+  // TODO: Format this string correctly! Header should be the first line and
+  // each row of cells should be on its own line.
+  return res;
+}
+
+
 function normalizeList(list) {
   if (list.length < 1) return list;
   if (list.length === 1) return [1];
@@ -68,14 +76,14 @@ function normalizeList(list) {
   return normalizedList;
 }
 
-function downloadObjectAsJson(exportObj, exportName){
-  var dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+function downloadMapFile(mapData){
+  var dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(mapDataToString(mapData));
   var downloadAnchorNode = document.createElement('a');
-  downloadAnchorNode.setAttribute("href",     dataStr);
-  downloadAnchorNode.setAttribute("download", exportName + ".json");
+  downloadAnchorNode.setAttribute("href", dataStr);
+  downloadAnchorNode.setAttribute("download", "current.map");
   document.body.appendChild(downloadAnchorNode); // required for firefox
   downloadAnchorNode.click();
   downloadAnchorNode.remove();
 }
 
-export { parseMapFromSocket, parseMapFromLcm, normalizeList, downloadObjectAsJson };
+export { parseMapFromSocket, parseMapFromLcm, normalizeList, downloadMapFile };
