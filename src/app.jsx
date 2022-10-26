@@ -625,7 +625,8 @@ class MBotApp extends React.Component {
                       <ToggleSelect label={"Mapping Mode"} checked={this.state.slamMode === config.slam_mode.FULL_SLAM}
                                     onChange={ () => this.onMappingMode() } small={true} />
                       <div className="button-wrapper-col">
-                        <button className="button" onClick={() => this.onResetMap()}>Reset Map</button>
+                        <button className={"button" + (this.state.slamMode !== config.slam_mode.FULL_SLAM ? " inactive" : "")}
+                                onClick={() => this.onResetMap()}>Reset Map</button>
                       </div>
                     </div>
                   }

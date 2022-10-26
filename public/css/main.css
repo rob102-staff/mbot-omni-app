@@ -166,12 +166,20 @@ input[type="file"] {
   transition: background-color 0.5s;
 }
 
-.map-color{
-  background-color: #a4a02d;
-}
-
 .button:hover {
   background-color: #D86018;
+}
+
+.button.inactive {
+  background-color: #888;
+}
+
+.button.inactive:hover {
+  background-color: #888;
+}
+
+.map-color{
+  background-color: #a4a02d;
 }
 
 .button-wrapper-col {
