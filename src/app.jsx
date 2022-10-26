@@ -53,16 +53,19 @@ function ConnectionStatus(connection) {
 }
 
 function ToggleSelect(props) {
+  let sizeCls = "";
+  if (props.small) sizeCls = " small";
+
   return (
     <div className="row my-4 text-left">
       <div className="col-8">
         <span>{props.label}</span>
       </div>
       <div className="col-4">
-        <label className="switch">
+        <label className={"switch" + sizeCls}>
           <input type="checkbox" className="mx-2" checked={props.checked}
                  onChange={() => props.onChange()}/>
-          <span className="slider round"></span>
+          <span className={"slider round" + sizeCls}></span>
         </label>
       </div>
     </div>
@@ -94,7 +97,7 @@ class MBotApp extends React.Component {
       goalValid: true,
       localMapFileLocation: "current.map",
       // Mode variables.
-      mappingMode: false,
+      slamMode: config.slam_mode.IDLE,
       drivingMode: false,
       sideBarMode: true,
       omni: false,
@@ -186,24 +189,58 @@ class MBotApp extends React.Component {
   }
 
   onMappingMode() {
-    if (this.state.mappingMode) {
-      // If we're mapping, we need to reset the robot to localization only mode.
-      this.ws.socket.emit('reset', {'mode' : 2, 'retain_pose' : true});
+    if (this.state.slamMode === config.slam_mode.FULL_SLAM) {
+      // If we're in full slam, we need to reset the robot to localization only mode.
+      this.ws.socket.emit('reset', {'mode' : config.slam_mode.LOCALIZATION_ONLY, 'retain_pose' : true});
 
       // Stop asking for map.
       this.stopRequestInterval();
 
-      this.setState({mappingMode: false});
+      this.setState({slamMode: config.slam_mode.LOCALIZATION_ONLY});
     }
-    else {
+    else if (this.state.slamMode === config.slam_mode.LOCALIZATION_ONLY) {
       // If we are not mapping, we need to tell the robot to start mapping.
       if (!confirm("This will overwrite the current map. Are you sure?")) return;
-      this.ws.socket.emit('reset', {'mode' : 3});
+
+      this.resetMapData();
+      this.ws.socket.emit('reset', {'mode' : config.slam_mode.FULL_SLAM});
 
       // Start asking for map.
       this.startRequestInterval();
 
-      this.setState({mappingMode: true});
+      this.setState({slamMode: config.slam_mode.FULL_SLAM});
+    }
+  }
+
+  onLocalizationMode() {
+    if (this.state.slamMode === config.slam_mode.IDLE) {
+      // State is idle. Change to localization only.
+      this.ws.socket.emit('reset', {'mode' : config.slam_mode.LOCALIZATION_ONLY, 'retain_pose' : false});
+
+      // Make sure we are asking for the map. This will stop once we are in IDLE mode.
+      this.startRequestInterval();
+
+      this.setState({slamMode: config.slam_mode.LOCALIZATION_ONLY});
+    }
+    else {
+      // We are in some other state. Turn back to idle.
+      this.ws.socket.emit('reset', {'mode' : config.slam_mode.IDLE});
+
+      // Stop asking for map.
+      this.stopRequestInterval();
+
+      this.setState({slamMode: config.slam_mode.IDLE});
+    }
+  }
+
+  onResetMap(){
+    if (this.state.slamMode === config.slam_mode.FULL_SLAM) {
+      // Get user confirmation that the map should be cleared.
+      if (!confirm("This will clear the current map. Are you sure?")) return;
+
+      this.resetMapData();
+      // Reset in full SLAM mode.
+      this.ws.socket.emit('reset', {'mode' : config.slam_mode.FULL_SLAM});
     }
   }
 
@@ -217,16 +254,6 @@ class MBotApp extends React.Component {
 
   onSetPose(){
     console.log("Set pose. Not implemented.");
-  }
-
-  onResetMap(){
-    if (this.state.mappingMode) {
-      // Get user confirmation that the map should be cleared.
-      if (!confirm("This will clear the current map. Are you sure?")) return;
-      // Reset in full SLAM mode, if in mapping mode.
-      this.ws.socket.emit('reset', {'mode' : 3});
-      this.resetMapData();
-    }
   }
 
   /***************************
@@ -288,6 +315,9 @@ class MBotApp extends React.Component {
   }
 
   handleLasers(evt) {
+    // Don't process this laser scan if display is disabled.
+    if (!this.state.laserDisplay) return;
+
     let lidarLength = evt.ranges.length
 
     let rays = [];
@@ -319,6 +349,9 @@ class MBotApp extends React.Component {
   }
 
   handleParticles(evt){
+    // Don't process particles if display is disabled.
+    if (!this.state.particleDisplay) return;
+
     var updated_pixels = [];
     for (let i = 0; i < evt.num_particles; i++) {
       updated_pixels[i] = this.posToPixels(evt.particles[i][0], evt.particles[i][1]);
@@ -346,7 +379,6 @@ class MBotApp extends React.Component {
 
   updateMap(result) {
     this.visitGrid.clear();
-    var mappingMode = result.slam_mode != 2;  // We are in mapping mode if the state is not localization_only (=2).
 
     // Check if the new cells are in byte form, and if so, convert them.
     var new_cells;
@@ -363,11 +395,11 @@ class MBotApp extends React.Component {
 
     this.mapCells = new_cells;
 
-    if (!mappingMode) {
+    if (result.slam_mode !== config.slam_mode.FULL_SLAM) {
       // If we are not in mapping mode, stop asking for map.
       this.stopRequestInterval();
     }
-    else if (mappingMode) {
+    else {
       // If we are in mapping mode, start asking for map.
       this.startRequestInterval();
     }
@@ -381,11 +413,12 @@ class MBotApp extends React.Component {
                    mapLoaded: loaded,
                    path: [],
                    goalCell: [],
-                   mappingMode: mappingMode,
+                   slamMode: result.slam_mode,
                    localMapFileLocation: result.slam_map_location});
   }
 
   resetMapData() {
+    this.mapGrid.clear();
     this.mapCells = [];
 
     this.setState({
@@ -398,9 +431,7 @@ class MBotApp extends React.Component {
       mapLoaded: false,
       mapfile: null,
       goalCell: [],
-      goalValid: true,
-      localMapFileLocation: "current.map",
-      mappingMode: false
+      goalValid: true
     });
   }
 
@@ -467,6 +498,7 @@ class MBotApp extends React.Component {
 
   startRequestInterval() {
     if (this.requestInterval !== null)  return;
+    this.staleMapCount = 0;
     this.requestInterval = setInterval(() => {
       this.requestMap();
     }, config.MAP_UPDATE_PERIOD);
@@ -476,6 +508,7 @@ class MBotApp extends React.Component {
     if (this.requestInterval === null)  return;
     clearInterval(this.requestInterval);
     this.requestInterval = null;
+    this.staleMapCount = 0;
   }
 
   requestMap() {
@@ -487,37 +520,20 @@ class MBotApp extends React.Component {
         if (this.staleMapCount > config.STALE_MAP_COUNT) {
           console.log("Map is stale!");
           this.resetMapData();
+          // Set back to idle mode since data is not being received.
+          this.setState({slamMode: config.slam_mode.IDLE});
         }
         return;
       }
       // Update the map data.
       this.updateMap(response);
       this.staleMapCount = 0;
-    });
-  }
 
-  requestMapUpdate() {
-    if (!this.ws.status()) return;
-    if (!this.state.mapLoaded) return;
-    var starttime = performance.now();
-    this.ws.socket.emit('request_map_update', {"cells": this.mapCells}, (response) => {
-      console.log("Processing map update", response);
-      if (response.indices.length === 0) {
-        console.log("No updates to make.");
-        return;
+      if (this.state.slamMode === config.slam_mode.LOCALIZATION_ONLY)
+      {
+        // If we are in localization only mode, the first map is all we need.
+        this.stopRequestInterval();
       }
-
-      // TODO: If there is no map yet, add a timer that continues to ask for it.
-      console.log("UPDATE", response.indices.length);
-      for (var i = 0; i < response.values.length; i++) {
-        var idx = response.indices[i];
-        var cell = this.mapGrid.idxToCell(idx);
-        this.mapCells[idx] = response.values[i];
-        var prob = (response.values[i] + 127.) / 255.;
-        var color = getColor(prob, config.MAP_COLOUR_LOW, config.MAP_COLOUR_HIGH);
-        this.mapGrid.drawCell(cell, color, this.mapGrid.cellSize);
-      }
-      console.log("request map update DONE", performance.now() - starttime);
     });
   }
 
@@ -564,8 +580,8 @@ class MBotApp extends React.Component {
                   {this.state.particleDisplay &&
                     <DrawParticles particles = {this.state.drawParticles}/>}
                   {this.state.laserDisplay &&
-                    <DrawLasers mappingMode={this.state.mappingMode} width={this.state.width} height={this.state.height}
-                              drawLasers={this.state.drawLasers} origin={[this.state.x, this.state.y]}/>}
+                    <DrawLasers width={this.state.width} height={this.state.height}
+                                drawLasers={this.state.drawLasers} origin={[this.state.x, this.state.y]}/>}
                   {this.state.robotDisplay &&
                     <DrawRobot x={this.state.x} y={this.state.y} theta={this.state.theta}
                                pixelsPerMeter={this.state.pixelsPerMeter} />}
@@ -598,14 +614,19 @@ class MBotApp extends React.Component {
 
             <div className="row">
               <div className="col">
-                <ToggleSelect label={"Mapping Mode"} checked={this.state.mappingMode}
-                              onChange={ () => this.onMappingMode() }/>
+                <ToggleSelect label={"Localization Mode"} checked={this.state.slamMode !== config.slam_mode.IDLE}
+                              onChange={ () => this.onLocalizationMode() }/>
 
-                <div className="button-wrapper-col">
                   {/* TODO: Implement intial pose branch into code*/}
                   {/* {<button className="button start-color2" onClick={() => this.onSetPose()}>Set Inital Pose</button>} */}
-                  {this.state.mappingMode &&
-                    <button className="button" onClick={() => this.onResetMap()}>Reset Map</button>
+                  {this.state.slamMode !== config.slam_mode.IDLE &&
+                    <div className="subpanel">
+                      <ToggleSelect label={"Mapping Mode"} checked={this.state.slamMode === config.slam_mode.FULL_SLAM}
+                                    onChange={ () => this.onMappingMode() } small={true} />
+                      <div className="button-wrapper-col">
+                        <button className="button" onClick={() => this.onResetMap()}>Reset Map</button>
+                      </div>
+                    </div>
                   }
 
                   {/* {<label htmlFor="file-upload" className="button upload-color mb-3">
@@ -613,7 +634,6 @@ class MBotApp extends React.Component {
                   </label>
                   <input id="file-upload" type="file" onChange = {(event) => this.onFileChange(event)}/>} */}
                   {/* {<button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>} */}
-                </div>
 
                 { /* Checkboxes for map visualization. */}
                 <ToggleSelect label={"Draw Particles"} checked={this.state.particleDisplay}

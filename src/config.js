@@ -40,7 +40,17 @@ var config = {
     GOAL_CELL_COLOUR: "#00ff00",
     BAD_GOAL_COLOUR: "#ff0000",
     SMALL_CELL_SCALE: 0.8,
-    CELL_SIZE: 4
+    CELL_SIZE: 4,
+
+    // Modes for SLAM.
+    slam_mode: {
+        INVALID: -1,
+        MAPPING_ONLY: 0,
+        ACTION_ONLY: 1,
+        LOCALIZATION_ONLY: 2,
+        FULL_SLAM: 3,
+        IDLE: 99,
+    }
 };
 
 export default config;
