@@ -44,9 +44,14 @@ function parseMapFromLcm(msg){
 
 
 function mapDataToString(data){
-  var res = data["cells"].join(" ");
-  // TODO: Format this string correctly! Header should be the first line and
-  // each row of cells should be on its own line.
+  // Add the header to the string.
+  let header = [...data.origin, data.width, data.height, data.metersPerCell];
+  let res = header.join(" ") + "\n";
+
+  // Add cell data.
+  for (let i = 0; i < data.height; i++) {
+    res += data.cells.slice(data.width * i, data.width * (i + 1)).join(" ") + "\n";
+  }
   return res;
 }
 

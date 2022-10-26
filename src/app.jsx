@@ -184,10 +184,17 @@ class MBotApp extends React.Component {
   }
 
   saveMap() {
-    let mapData = {"cells": this.mapCells};
-    // TODO: All the necessary data should be included. It's possible that
-    // updateMap() will need to be modified if some of the header data is not
-    // being saved.
+    if (this.mapCells.length !== this.state.width * this.state.height) {
+      console.log("Error saving map: Invalid map data");
+      return;
+    }
+
+    let mapData = {"cells": this.mapCells,
+                   "width": this.state.width,
+                   "height": this.state.height,
+                   "origin": this.state.origin,
+                   "metersPerCell": this.state.metersPerCell};
+
     downloadMapFile(mapData);
   }
 
@@ -630,7 +637,7 @@ class MBotApp extends React.Component {
                       <div className="button-wrapper-col">
                         <button className={"button" + (this.state.slamMode !== config.slam_mode.FULL_SLAM ? " inactive" : "")}
                                 onClick={() => this.onResetMap()}>Reset Map</button>
-                        <button className="button map-color" onClick={() => this.saveMap()}>Save Map</button>
+                        <button className="button" onClick={() => this.saveMap()}>Download Map</button>
                       </div>
                     </div>
                   }

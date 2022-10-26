@@ -1,5 +1,3 @@
-let width_modifier = 0.95
-let height_modifier = 0.85
 
 var config = {
     // Connection info.
@@ -14,13 +12,11 @@ var config = {
     CELL_START_SIZE: 0.025,
 
     // Sim info
-    MAP_DISPLAY_WIDTH: 2000,      // px
-    MAP_DISPLAY_HEIGHT: 2000,    // px
-    CANVAS_WIDTH_MODIFIER: width_modifier, // %
-    CANVAS_HEIGHT_MODIFIER: height_modifier, // %
+    MAP_DISPLAY_WIDTH: 3000,      // px
+    MAP_DISPLAY_HEIGHT: 3000,    // px
     CANVAS_DISPLAY_WIDTH: 800,  // px
     CANVAS_DISPLAY_HEIGHT: 800, // px
-    ROBOT_SIZE: 0.274,         // m, diameter
+    ROBOT_SIZE: 0.205,         // m, diameter
     ROBOT_DEFAULT_SIZE: 100,  // px
     MAP_UPDATE_PERIOD: 250,   // ms
     STALE_MAP_COUNT: 40,      // If we haven't gotten a map this many times, map is stale.
