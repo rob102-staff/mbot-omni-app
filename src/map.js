@@ -43,6 +43,19 @@ function parseMapFromLcm(msg){
 }
 
 
+function mapDataToString(data){
+  // Add the header to the string.
+  let header = [...data.origin, data.width, data.height, data.metersPerCell];
+  let res = header.join(" ") + "\n";
+
+  // Add cell data.
+  for (let i = 0; i < data.height; i++) {
+    res += data.cells.slice(data.width * i, data.width * (i + 1)).join(" ") + "\n";
+  }
+  return res;
+}
+
+
 function normalizeList(list) {
   if (list.length < 1) return list;
   if (list.length === 1) return [1];
@@ -68,14 +81,14 @@ function normalizeList(list) {
   return normalizedList;
 }
 
-function downloadObjectAsJson(exportObj, exportName){
-  var dataStr = "data:application/json;charset=utf-8," + encodeURIComponent(JSON.stringify(exportObj));
+function downloadMapFile(mapData){
+  var dataStr = "data:text/plain;charset=utf-8," + encodeURIComponent(mapDataToString(mapData));
   var downloadAnchorNode = document.createElement('a');
-  downloadAnchorNode.setAttribute("href",     dataStr);
-  downloadAnchorNode.setAttribute("download", exportName + ".json");
+  downloadAnchorNode.setAttribute("href", dataStr);
+  downloadAnchorNode.setAttribute("download", "current.map");
   document.body.appendChild(downloadAnchorNode); // required for firefox
   downloadAnchorNode.click();
   downloadAnchorNode.remove();
 }
 
-export { parseMapFromSocket, parseMapFromLcm, normalizeList, downloadObjectAsJson };
+export { parseMapFromSocket, parseMapFromLcm, normalizeList, downloadMapFile };
