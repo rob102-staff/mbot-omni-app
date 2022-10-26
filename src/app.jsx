@@ -61,7 +61,7 @@ function ToggleSelect(props) {
       <div className="col-8">
         <span>{props.label}</span>
       </div>
-      <div className="col-4">
+      <div className="col-4 text-right">
         <label className={"switch" + sizeCls}>
           <input type="checkbox" className="mx-2" checked={props.checked}
                  onChange={() => props.onChange()}/>
@@ -520,6 +520,7 @@ class MBotApp extends React.Component {
         if (this.staleMapCount > config.STALE_MAP_COUNT) {
           console.log("Map is stale!");
           this.resetMapData();
+          this.staleMapCount = 0;
           // Set back to idle mode since data is not being received.
           this.setState({slamMode: config.slam_mode.IDLE});
         }
