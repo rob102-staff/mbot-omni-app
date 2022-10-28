@@ -21,6 +21,7 @@ import { DriveControlPanel } from "./driveControls";
 
 function StatusMessage(props) {
   var msg = [];
+  msg.push("Robot Pose: (" + props.robotPose + ")");
   msg.push("Robot Cell: (" + props.robotCell + ")");
   if (props.clickedCell.length > 0) {
     msg.push("Clicked Cell: (" + props.clickedCell + ")");
@@ -103,6 +104,8 @@ class MBotApp extends React.Component {
       omni: false,
       diff: false,
       // Robot parameters.
+      xPose: 0,
+      yPose: 0,
       x: config.MAP_DISPLAY_WIDTH / 2,
       y: config.MAP_DISPLAY_WIDTH / 2,
       theta: 0,
@@ -319,6 +322,7 @@ class MBotApp extends React.Component {
     if (this.state.mapLoaded > 0) {
       // Convert the robot position in meters in the map coordinates to pixels
       // in the canvas coordinates.
+      this.setState({poseX: evt.x, poseY: evt.y});
       var pix = this.posToPixels(evt.x, evt.y);
       this.setRobotPos(pix[0], pix[1], evt.theta);
     }
@@ -620,7 +624,7 @@ class MBotApp extends React.Component {
           </div>
             <div className="status-wrapper">
               <ConnectionStatus status={this.state.connection}/>
-              <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} clickedCell={this.state.clickedCell} />
+              <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} robotPose = {this.state.poseX, this.state.poseY} clickedCell={this.state.clickedCell} />
             </div>
 
             <div className="row">
