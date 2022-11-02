@@ -21,7 +21,7 @@ import { DriveControlPanel } from "./driveControls";
 
 function StatusMessage(props) {
   var msg = [];
-  msg.push("Robot Pose: (" + props.robotPose + ")");
+  msg.push("Robot Pose: (" + props.robotPose[0] + ", " + props.robotPose[1] + ")");
   msg.push("Robot Cell: (" + props.robotCell + ")");
   if (props.clickedCell.length > 0) {
     msg.push("Clicked Cell: (" + props.clickedCell + ")");
@@ -624,7 +624,7 @@ class MBotApp extends React.Component {
           </div>
             <div className="status-wrapper">
               <ConnectionStatus status={this.state.connection}/>
-              <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} robotPose = {this.state.poseX, this.state.poseY} clickedCell={this.state.clickedCell} />
+              <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} robotPose = {[this.state.poseX, this.state.poseY]} clickedCell={this.state.clickedCell} />
             </div>
 
             <div className="row">
