@@ -642,7 +642,9 @@ class MBotApp extends React.Component {
           </div>
             <div className="status-wrapper">
               <ConnectionStatus status={this.state.connection}/>
-              <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} robotPose = {[this.state.poseX, this.state.poseY, this.state.poseTheta]} posClickedCell={this.state.posClickedCell} clickedCell={this.state.clickedCell} />
+              <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} 
+                             robotPose={[this.state.poseX, this.state.poseY, this.state.poseTheta]} 
+                             posClickedCell={this.state.posClickedCell} clickedCell={this.state.clickedCell} />
             </div>
 
             <div className="row">
