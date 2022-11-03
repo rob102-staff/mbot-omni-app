@@ -22,7 +22,7 @@ import { DriveControlPanel } from "./driveControls";
 function StatusMessage(props) {
   var msg = [];
   if(props.robotPose[0] != null){
-    msg.push(<p className="robot-info"><i>Robot Pose:</i> ({props.robotPose[0]}, {props.robotPose[1]}, {props.robotPose[2]})</p>);
+    msg.push(<p className="robot-info"><i>Robot Pose:</i> (<b>x:</b> {props.robotPose[0]}, <b>y:</b>  {props.robotPose[1]}, <b>t:</b>  {props.robotPose[2]})</p>);
     msg.push(<p className="robot-info"><i>Robot Cell:</i> ({props.robotCell[0]}, {props.robotCell[1]})</p>);
   }
   if (props.clickedCell.length > 0) {
