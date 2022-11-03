@@ -21,15 +21,17 @@ import { DriveControlPanel } from "./driveControls";
 
 function StatusMessage(props) {
   var msg = [];
-  msg.push("Robot Pose: (" + props.robotPose[0] + ", " + props.robotPose[1] + ")");
-  msg.push("Robot Cell: (" + props.robotCell + ")");
+  if(props.robotPose[0] != null){
+    msg.push(<p className="robot-info"><i>Robot Pose:</i> ({props.robotPose[0]}, {props.robotPose[1]}, {props.robotPose[2]})</p>);
+    msg.push(<p className="robot-info"><i>Robot Cell:</i> ({props.robotCell[0]}, {props.robotCell[1]})</p>);
+  }
   if (props.clickedCell.length > 0) {
-    msg.push("Clicked Cell: (" + props.clickedCell + ")");
+    msg.push(<p className="robot-info"><i>Clicked:</i> Meters [{props.posClickedCell[0]}, {props.posClickedCell[1]}], Cell: [{props.clickedCell[0]}, {props.clickedCell[1]}]</p>);
   }
 
   return (
     <div className="status-msg">
-      {msg.join('\xa0\xa0\xa0')}
+      {msg}
     </div>
   );
 }
@@ -106,12 +108,15 @@ class MBotApp extends React.Component {
       // Robot parameters.
       xPose: 0,
       yPose: 0,
+      evtPose: 0,
+      posUpdateCount: 0,
       x: config.MAP_DISPLAY_WIDTH / 2,
       y: config.MAP_DISPLAY_WIDTH / 2,
       theta: 0,
       // Visualization elements.
       path: [],
       clickedCell: [],
+      posClickedCell: [],
       drawLasers: [],
       drawPaths: [],
       drawCostmap: [],
@@ -289,6 +294,10 @@ class MBotApp extends React.Component {
     let col = Math.floor(x / cs);
     let row = Math.floor(y / cs);
     this.setState({clickedCell: [col, row] });
+    var cellArr = this.cellToPixels(col, row)
+    cellArr = this.pixelsToPos(cellArr[0], cellArr[1]);
+    cellArr = [cellArr[0].toPrecision(4), cellArr[1].toPrecision(4)]
+    this.setState({posClickedCell: cellArr});
     // Implement check for ctrl-click and whether an a* plan is required
     // if(event.type === "mousedown") plan = true;
     this.onPlan(row, col, plan);
@@ -322,7 +331,11 @@ class MBotApp extends React.Component {
     if (this.state.mapLoaded > 0) {
       // Convert the robot position in meters in the map coordinates to pixels
       // in the canvas coordinates.
-      this.setState({poseX: evt.x, poseY: evt.y});
+      this.setState({posUpdateCount: this.state.posUpdateCount+1})
+      if(this.state.posUpdateCount == 5){
+        this.setState({poseX: evt.x.toPrecision(4), poseY: evt.y.toPrecision(4), poseTheta: evt.theta.toPrecision(4)});
+        this.setState({posUpdateCount: 0})
+      }
       var pix = this.posToPixels(evt.x, evt.y);
       this.setRobotPos(pix[0], pix[1], evt.theta);
     }
@@ -558,10 +571,15 @@ class MBotApp extends React.Component {
     return [u, v];
   }
 
+  pixelsToPos(u, v){
+    var x = (u/this.state.pixelsPerMeter)+this.state.origin[0];
+    var y = (v/this.state.pixelsPerMeter)+this.state.origin[1];
+    return [x, y]
+  }
+
   cellToPixels(r, c) {
     var u = (r * this.state.cellSize);
     var v = (c * this.state.cellSize);
-
     return [u, v];
   }
 
@@ -624,7 +642,7 @@ class MBotApp extends React.Component {
           </div>
             <div className="status-wrapper">
               <ConnectionStatus status={this.state.connection}/>
-              <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} robotPose = {[this.state.poseX, this.state.poseY]} clickedCell={this.state.clickedCell} />
+              <StatusMessage robotCell={this.pixelsToCell(this.state.x, this.state.y)} robotPose = {[this.state.poseX, this.state.poseY, this.state.poseTheta]} posClickedCell={this.state.posClickedCell} clickedCell={this.state.clickedCell} />
             </div>
 
             <div className="row">
@@ -646,7 +664,7 @@ class MBotApp extends React.Component {
                     </div>
                   }
 
-                  {/* {<label htmlFor="file-upload" className="button upload-color mb-3">
+                {/* {<label htmlFor="file-upload" className="button upload-color mb-3">
                     Upload a Map
                   </label>
                   <input id="file-upload" type="file" onChange = {(event) => this.onFileChange(event)}/>} */}

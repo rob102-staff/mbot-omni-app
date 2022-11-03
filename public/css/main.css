@@ -215,6 +215,10 @@ input[type="file"] {
     margin-right: 0;
 }
 
+.robot-info{
+  margin-bottom: 2px;
+}
+
 .subpanel {
   font-size: 80%;
   padding-left: 1em;
