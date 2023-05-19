@@ -91,8 +91,7 @@ class DriveControlPanel extends React.Component {
   }
 
   stop(){
-    console.log("STOP robot it was about run into Popeye");
-    this.props.ws.socket.emit("stop", {'stop cmd': "stop"});
+     this.props.ws.socket.emit("stop", {'stop cmd': "stop"});
   }
 
   drive(x, y, t, spd){

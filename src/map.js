@@ -47,6 +47,8 @@ function mapDataToString(data){
   // Add the header to the string.
   let header = [...data.origin, data.width, data.height, data.metersPerCell];
   let res = header.join(" ") + "\n";
+  console.log(header, res)
+
 
   // Add cell data.
   for (let i = 0; i < data.height; i++) {
