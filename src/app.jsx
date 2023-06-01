@@ -14,6 +14,8 @@ import { downloadMapFile } from "./map.js";
 import { getColor, GridCellCanvas } from "./drawing.js"
 import { DriveControlPanel } from "./driveControls";
 
+let Joy1 = 0
+export const test = true;
 
 /*******************
  *     BUTTONS
@@ -151,6 +153,9 @@ class MBotApp extends React.Component {
     // Map request interval.
     this.requestInterval = null;
     this.staleMapCount = 0;
+
+    this.hello = 0
+
   }
 
   /********************
@@ -264,6 +269,14 @@ class MBotApp extends React.Component {
 
   onDrivingMode() {
     this.setState({drivingMode: !this.state.drivingMode});
+    // var element = document.getElementById("");
+
+    // if(!this.state.drivingMode){
+    //   element.classList.add("hidden");
+    // }
+    // else{
+    //   element.classList.remove("hidden");
+    // }
   }
 
   onSideBar(){
@@ -589,83 +602,14 @@ class MBotApp extends React.Component {
     return [row, col];
   }
 
-  joystickinit() {
-    // easal stuff goes hur
-    var xCenter = 150;
-    var yCenter = 150;
-    var stage = new createjs.Stage('joystick');
-  
-    var psp = new createjs.Shape();
-    psp.graphics.beginFill('#333333').drawCircle(xCenter, yCenter, 50);
-  
-    psp.alpha = 0.25;
-  
-    // var vertical = new createjs.Shape();
-    // var horizontal = new createjs.Shape();
-    // vertical.graphics.beginFill('#ff4d4d').drawRect(150, 0, 2, 300);
-    // horizontal.graphics.beginFill('#ff4d4d').drawRect(0, 150, 300, 2);
-  
-    stage.addChild(psp);
-    // stage.addChild(vertical);
-    // stage.addChild(horizontal);
-    createjs.Ticker.framerate = 60;
-    createjs.Ticker.addEventListener('tick', stage);
-    stage.update();
-  
-    var myElement = $('#joystick')[0];
-  
-    // create a simple instance
-    // by default, it only adds horizontal recognizers
-    var mc = new Hammer(myElement);
-  
-    mc.on("panstart", function(ev) {
-      var pos = $('#joystick').position();
-      xCenter = psp.x;
-      yCenter = psp.y;
-      psp.alpha = 0.0;
-
-      console.log(xCenter, ev.center.x, yCenter, ev.center.y)
-      
-      stage.update();
-    });
-    
-    // listen to events...
-    mc.on("panmove", function(ev) {
-      var pos = $('#joystick').position();
-  
-      var x = (ev.center.x - pos.left - 150);
-      var y = (ev.center.y - pos.top - 150);
-      $('#xVal').text('X: ' + x);
-      $('#yVal').text('Y: ' + (-1 * y));
-      
-      var coords = {};
-      ev.distance = Math.min(ev.distance, 100);  
-      var rads = (ev.angle * Math.PI) / 180.0;
-    
-      coords.x = ev.distance * Math.cos(rads);
-      coords.y = ev.distance * Math.sin(rads);
-            
-      psp.x = coords.x;
-      psp.y = coords.y;
-  
-      psp.alpha = 0.5;
-      
-      stage.update();
-    });
-    
-    mc.on("panend", function(ev) {
-      psp.alpha = 0.25;
-      createjs.Tween.get(psp).to({x:xCenter,y:yCenter},750,createjs.Ease.elasticOut);
-    });
-  }
-    
-
 
   render() {
     let sidebarClasses = "";
     if (!this.state.sideBarMode) {
       sidebarClasses += "inactive";
     }
+    const { drivingMode } = this.state;
+
 
     return (
       <div id="wrapper">
@@ -757,22 +701,19 @@ class MBotApp extends React.Component {
                 <ToggleSelect label={"Drive Mode"} checked={this.state.drivingMode}
                               onChange={ () => this.onDrivingMode() }/>
                 {this.state.drivingMode &&
-                  <DriveControlPanel ws={this.ws} drivingMode={this.state.drivingMode} />
-                }
-                <div className="container space-top">
-                  <h1 className="center blue-text thin">Canvas Joystick</h1>
-                  <div className="center-align">
-                    <canvas id="joystick" height="300" width="300"></canvas>
+                  <div className="">
+                      <DriveControlPanel ws={this.ws} drivingMode={this.state.drivingMode} />
                   </div>
-                  <p id="xVal" className="light">X: </p>
-                  <p id="yVal" className="light">Y: </p>
-                </div>
-                <button className="button" onClick={() => this.joystickinit()}>click</button>
+                }
 
-              </div>
+                {/* <div className={'hidden'}>  */}
+                {/* </div> */}
+
+
             </div>
           </div>
         </div>
+      </div>
     </div>
     );
   }

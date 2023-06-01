@@ -15,13 +15,27 @@ import config from "./config.js";
  * MOVE PANEL
  ********************/
 
+function XY(props){
+  var msg = []
+  msg.push(<p key="1" className="robot-info"> (X: {props.X}, Y: {props.Y})</p>)  
+  return(
+    <div className="">
+      {msg}
+    </div>
+  )
+}
+
 class DriveControlPanel extends React.Component {
   constructor(props) {
     super(props);
 
     this.state = {
-      speed: 50
+      speed: 50,
+      thing: 0,
+      joystickX: 0, 
+      joystickY: 0
     }
+
 
     this.controlMap = {
       s: {pressed: false, fn: "back"},
@@ -31,15 +45,35 @@ class DriveControlPanel extends React.Component {
       e: {pressed: false, fn: "tright"},
       q: {pressed: false, fn: "tleft"}
     };
+
+    //The x, y, and theta values updated by the keyboard buttons
     this.x = 0;
     this.y = 0;
     this.t = 0;
+
+    this.isThisMounted = false
   }
 
   componentDidMount() {
+    this.isThisMounted = true
     // TODO: The event listener should be in the main app in case anyone else uses keys.
     document.addEventListener('keydown', (evt) => { this.handleKeyDown(evt); }, false);
     document.addEventListener('keyup', (evt) => { this.handleKeyUp(evt); }, false);
+ 
+    setTimeout(() => {      
+      let Joy1 = new JoyStick('joy1Div', {}, (stickData) => {
+        if(this.isThisMounted){
+          this.setState({joystickX: stickData.x, joystickY: stickData.y})
+          this.drive(stickData.y/100, stickData.x/100)
+        }
+
+      });
+     }, 100);
+
+  }
+
+  componentWillUnmount(){
+    this.isThisMounted = false
   }
 
   onSpeedChange(event) {
@@ -94,10 +128,21 @@ class DriveControlPanel extends React.Component {
      this.props.ws.socket.emit("stop", {'stop cmd': "stop"});
   }
 
-  drive(x, y, t, spd){
-    this.props.ws.socket.emit("move", {'vx' : spd * x / 100.,
-                                       'vy' : spd * y / 100.,
-                                       'wz' : config.ANG_VEL_MULTIPLIER * spd * t / 100.})
+  drive(x, y, t=this.t, spd=this.state.speed){
+    console.log(spd * x / 100., spd * y / 100., config.ANG_VEL_MULTIPLIER * spd * t / 100.)
+    this.props.ws.socket.emit("move", {
+                              'vx' : spd * x / 100.,
+                              'vy' : spd * y / 100.,
+                              'wz' : config.ANG_VEL_MULTIPLIER * spd * t / 100.
+    })
+  }
+
+  driveClick(x, y, z){
+    //When the drive button is clicked with the mouse, the robot will drive for 2 seconds
+    this.drive(x, y, z, this.state.speed)
+    setTimeout(() =>{
+      this.drive(0, 0, 0)
+    }, 2500)
   }
 
   render() {
@@ -105,28 +150,28 @@ class DriveControlPanel extends React.Component {
       <div className="drive-panel-wrapper">
         <div className="drive-buttons">
           <button className="button drive-turn" id="turn-left"
-                  onClick={() => this.drive(0, 0, 1, this.state.speed)}>
+                  onClick={() => this.driveClick(0, 0, 1)}>
             <FontAwesomeIcon icon={faArrowRotateLeft} />
           </button>
           <button className="button drive-move" id="move-str"
-                  onClick={() => this.drive(1, 0, 0, this.state.speed)}>
+                  onClick={() => this.driveClick(1, 0, 0)}>
             <FontAwesomeIcon icon={faArrowUp} />
           </button>
           <button className="button drive-turn" id="turn-right"
-                  onClick={() => this.drive(0, 0, -1, this.state.speed)}>
+                  onClick={() => this.driveClick(0, 0, -1)}>
             <FontAwesomeIcon icon={faArrowRotateRight} />
           </button>
 
           <button className="button drive-move" id="move-left"
-                  onClick={() => this.drive(0, 1, 0, this.state.speed)}>
+                  onClick={() => this.driveClick(0, 1, 0)}>
             <FontAwesomeIcon icon={faArrowLeft} />
           </button>
           <button className="button drive-move" id="move-right"
-                  onClick={() => this.drive(0, -1, 0, this.state.speed)}>
+                  onClick={() => this.driveClick(0, -1, 0)}>
             <FontAwesomeIcon icon={faArrowRight} />
           </button>
           <button className="button drive-move" id="move-back"
-                  onClick={() => this.drive(-1, 0, 0, this.state.speed)}>
+                  onClick={() => this.driveClick(-1, 0, 0)}>
             <FontAwesomeIcon icon={faArrowDown} />
           </button>
         </div>
@@ -139,6 +184,9 @@ class DriveControlPanel extends React.Component {
           <input type="range" min="1" max="100" value={this.state.speed}
                  onChange={(evt) => this.onSpeedChange(evt)}></input>
         </div>
+        <div id="joy1Div" className={`temp`}> </div>
+        <XY X={this.state.joystickX} Y={this.state.joystickY}/>
+        {/* hello {this.joystickX} {this.joystickY} */}
       </div>
     );
   }
