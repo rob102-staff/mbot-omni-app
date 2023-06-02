@@ -63,8 +63,10 @@ class DriveControlPanel extends React.Component {
     setTimeout(() => {      
       let Joy1 = new JoyStick('joy1Div', {}, (stickData) => {
         if(this.isThisMounted){
+          this.x = stickData.y/100
+          this.y = -stickData.x/100
           this.setState({joystickX: stickData.x, joystickY: stickData.y})
-          this.drive(stickData.y/100, stickData.x/100)
+          this.drive()
         }
 
       });
@@ -95,7 +97,7 @@ class DriveControlPanel extends React.Component {
       }
 
       // Update drive speeds.
-      this.drive(this.x, this.y, this.t, this.state.speed);
+      this.drive();
     }
   }
 
@@ -120,7 +122,7 @@ class DriveControlPanel extends React.Component {
       if (reset) { this.x = 0; this.y = 0; this.t = 0; }
 
       // Update drive speeds.
-      this.drive(this.x, this.y, this.t, this.state.speed);
+      this.drive();
     }
   }
 
@@ -128,7 +130,7 @@ class DriveControlPanel extends React.Component {
      this.props.ws.socket.emit("stop", {'stop cmd': "stop"});
   }
 
-  drive(x, y, t=this.t, spd=this.state.speed){
+  drive(x=this.x, y=this.y, t=this.t, spd=this.state.speed){
     console.log(spd * x / 100., spd * y / 100., config.ANG_VEL_MULTIPLIER * spd * t / 100.)
     this.props.ws.socket.emit("move", {
                               'vx' : spd * x / 100.,
