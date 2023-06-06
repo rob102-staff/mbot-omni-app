@@ -389,6 +389,7 @@ class MBotApp extends React.Component {
 
   handleObstacles(evt){
     var updated_path = [];
+    console.log(evt)
     for(let i = 0; i < evt.distances.length; i++)
     {
       updated_path[i] = this.cellToPixels(evt.pairs[i][0], evt.pairs[i][1])
