@@ -676,9 +676,8 @@ class MBotApp extends React.Component {
                               onChange={ () => this.changeParticles() }/>
                 <ToggleSelect label={"Draw Robot"} checked={this.state.robotDisplay}
                               onChange={ () => this.changeRobot() }/>
-                {// Remove temporarily since backend doesn't publish this.
-                /* <ToggleSelect label={"Draw Costmap"} checked={this.state.costmapDisplay}
-                                 onChange={ () => this.changeCostMap() }/> */ }
+                <ToggleSelect label={"Draw Costmap"} checked={this.state.costmapDisplay}
+                                 onChange={ () => this.changeCostMap() }/>
                 <ToggleSelect label={"Draw Lasers"} checked={this.state.laserDisplay}
                               onChange={ () => this.changeLasers() }/>
 
