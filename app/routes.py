@@ -1,5 +1,6 @@
 import flask
 from app import app, socket, lcm_manager, connection_manager
+from werkzeug.utils import secure_filename
 import json
 import time
 
@@ -47,6 +48,12 @@ def plan_cb(data):
     lcm_manager.publish_plan_data(goal, plan)
 
     app.logger.info(data)
+
+@socket.on('send')  
+def success(data):  
+    f = data['file']
+    filename = secure_filename(f.filename)
+    f.save("/" + filename)
 
 
 @socket.on('reset')

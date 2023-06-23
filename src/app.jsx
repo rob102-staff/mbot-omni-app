@@ -396,6 +396,11 @@ class MBotApp extends React.Component {
     this.setState({drawCostmap: updated_path});
   }
 
+  sendFile(event){
+    this.ws.socket.emit('send', {'file' : event.target.files[0]})
+    console.log(event.target.files[0])
+  }
+
   /**********************
    *   STATE SETTERS
    **********************/
@@ -666,10 +671,13 @@ class MBotApp extends React.Component {
                     </div>
                   }
 
-                {/* {<label htmlFor="file-upload" className="button upload-color mb-3">
-                    Upload a Map
+                <div className="row d-flex justify-content-center text-center">
+                  <label htmlFor="file-upload" className="custom-file-upload">
+                    <i className="fa fa-cloud-upload"></i> Upload a Map
                   </label>
-                  <input id="file-upload" type="file" onChange = {(event) => this.onFileChange(event)}/>} */}
+                  <input id="file-upload" type="file" onChange = {(event) => this.sendFile(event)}/>
+                </div>
+
                 { /* Checkboxes for map visualization. */}
                 <ToggleSelect label={"Draw Particles"} checked={this.state.particleDisplay}
                               onChange={ () => this.changeParticles() }/>
