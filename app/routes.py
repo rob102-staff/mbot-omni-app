@@ -53,7 +53,9 @@ def plan_cb(data):
 def success(data):  
     f = data['file']
     filename = secure_filename(f.filename)
+    print("I have gotten here")
     f.save("/" + filename)
+    print("It has been saved?")
 
 
 @socket.on('reset')
